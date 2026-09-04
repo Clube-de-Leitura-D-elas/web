@@ -57,11 +57,11 @@ um arquivo — não precisa parar e rodar de novo.
 
 Para encerrar o servidor, aperte `Ctrl + C` no terminal.
 
-## 3. Como rodar o Storybook (`yarn docs`)
+## 3. Como rodar a documentação (`yarn docs`)
 
 O Storybook é um catálogo que mostra **cada componente isolado**, fora das telas do sistema. É
 onde você vai desenvolver os componentes de UI: dá para ver todas as variações lado a lado, mexer
-nas props por um painel e conferir o modo claro e o escuro sem precisar montar uma tela inteira.
+nas props por um painel e conferir o modo claro e o escuro sem precisar montar uma tela inteira. Rode no terminal:
 
 ```bash
 yarn docs
@@ -74,7 +74,6 @@ Dicas da interface:
 
 - **Ícone de pincel** (barra de cima) — alterna entre tema claro e escuro.
 - **Aba Controls** (barra de baixo) — muda as props do componente ao vivo.
-- **Aba Accessibility** — aponta problemas de acessibilidade, como contraste de cor insuficiente.
 
 O `yarn dev` e o `yarn docs` são independentes: dá para deixar os dois rodando ao mesmo tempo, em
 dois terminais.
