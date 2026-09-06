@@ -1,0 +1,115 @@
+/*Estrutura base*/
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/*Tamanhos*/
+.sm {
+  height: 32px;
+  padding: 4px 16px;
+  font-size: 14px;
+}
+.md {
+  height: 40px;
+  padding: 8px 32px;
+  font-size: 16px;
+}
+.lg {
+  height: 56px;
+  padding: 16px 32px;
+  font-size: 18px;
+}
+
+/* Primary */
+.primary {
+  background-color: var(--action-primary);
+  color: var(--text-on-brand);
+  border-color: var(--action-primary);
+}
+
+.primary:hover:not(:disabled) {
+  background-color: var(--action-primary-hover);
+  border-color: var(--action-primary-hover);
+}
+
+.primary:active:not(:disabled) {
+  background-color: var(--action-primary-pressed);
+  border-color: var(--action-primary-pressed);
+}
+
+/* Secondary */
+.secondary {
+  background-color: var(--text-on-brand);
+  color: var(--action-primary);
+  border-color: var(--action-primary);
+}
+
+.secondary:hover:not(:disabled) {
+  background-color: #fff1f6;
+}
+
+.secondary:active:not(:disabled) {
+  background-color: #fce7f0;
+}
+
+/* Ghost */
+.ghost {
+  background-color: transparent;
+  color: var(--text-brand);
+  border-color: transparent;
+}
+
+.ghost:hover:not(:disabled) {
+  background-color: rgba(169, 20, 75, 0.08);
+}
+
+.ghost:active:not(:disabled) {
+  background-color: rgba(169, 20, 75, 0.16);
+}
+
+/* Danger */
+.danger {
+  background-color: var(--action-danger);
+  border-color: var(--action-danger);
+}
+
+.danger:hover:not(:disabled) {
+  background-color: #b42318;
+  border-color: #b42318;
+}
+
+.danger:active:not(:disabled) {
+  background-color: #912018;
+  border-color: #b42318;
+}
+
+.button:focus-visible {
+  outline: 2px solid #e6256d;
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

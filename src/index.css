@@ -6,6 +6,14 @@
   color-scheme: light dark;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --action-primary: #e6256d;
+  --action-primary-hover: #a9144b;
+  --action-primary-pressed: #64102e;
+
+  --action-danger: #d92d20;
+  --text-on-brand: #ffffff;
+  --text-brand: #a9144b;
 }
 
 *,
