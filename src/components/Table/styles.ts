@@ -1,12 +1,18 @@
 /**
- * Componente Table.
+ * Estilos do Table.
  *
- * A implementar. Requisitos: card do Table no Kanban + frame do componente no Figma.
+ * Exporte um styled por elemento; o componente consome como `Styled.Container`.
+ * Veja `src/components/Tag/styles.ts` para um exemplo completo.
  *
- *  - (veja o componente Tag como exemplo pronto):
- *  - todo o estilo vai em `styles.ts` e é consumido como `<Styled.Container>`;
- *  - exporte como `export const Table = ...
- *  - exporte também um `export type TableProps = { ... }`;
- *  - sempre usar as cores do tema (`ex: theme.primary`)
- *  - delete esse texto quando for implementar o componente, ele é só um lembrete do que precisa ser feito.
+ * Exemplo:
+ *   export const Container = styled.div`
+ *     padding: 8px 16px;
+ *     border-radius: 8px;
+ *     background-color: ${({ theme }) => theme.primary};
+ *     color: ${({ theme }) => theme.textOnBrand};
+ *   `;
+ *
+ * Props usadas só para estilo levam cifrão (`$variant`), para não virarem atributo HTML.
  */
+
+// import styled from 'styled-components';

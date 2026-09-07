@@ -15,7 +15,14 @@ import type { ThemeMode } from './theme';
 import { THEME_MODE_STORAGE_KEY, ThemeModeContext } from './themeModeContext';
 
 function getInitialMode(): ThemeMode {
-  const saved = localStorage.getItem(THEME_MODE_STORAGE_KEY);
+  let saved: string | null = null;
+
+  try {
+    saved = localStorage.getItem(THEME_MODE_STORAGE_KEY);
+  } catch {
+    saved = null;
+  }
+
   if (saved === 'light' || saved === 'dark') {
     return saved;
   }
@@ -30,7 +37,11 @@ export function AppThemeProvider({ children }: AppThemeProviderProps) {
   const [mode, setMode] = useState<ThemeMode>(getInitialMode);
 
   useEffect(() => {
-    localStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
+    try {
+      localStorage.setItem(THEME_MODE_STORAGE_KEY, mode);
+    } catch {
+      return;
+    }
   }, [mode]);
 
   const toggleMode = useCallback(() => {

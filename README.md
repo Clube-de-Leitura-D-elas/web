@@ -74,6 +74,7 @@ Dicas da interface:
 
 - **Ícone de pincel** (barra de cima) — alterna entre tema claro e escuro.
 - **Aba Controls** (barra de baixo) — muda as props do componente ao vivo.
+- **Aba Accessibility** (barra de baixo) — verifica problemas de acessibilidade, como contraste insuficiente entre texto e fundo.
 
 O `yarn dev` e o `yarn docs` são independentes: dá para deixar os dois rodando ao mesmo tempo, em
 dois terminais.
@@ -241,7 +242,7 @@ export const Container = styled.span<{ $color: TagColor }>`
 4. Rode `yarn docs` e desenvolva olhando o Storybook.
 5. Em `X.stories.tsx`, apague a story `Placeholder` e crie uma story por variante.
 6. Confira o componente no tema claro **e** no escuro (ícone de pincel).
-7. Antes de abrir o MR: `yarn lint && yarn typecheck && yarn format`.
+7. Antes de abrir o PR: `yarn lint && yarn typecheck && yarn format`.
 
 ---
 
@@ -293,7 +294,7 @@ A escolha fica salva no `localStorage`; na primeira visita vale a preferência d
 operacional.
 
 No Storybook, use o **ícone de pincel** na barra de ferramentas. Todo componente deve ficar
-correto nos dois modos — é parte da revisão do MR.
+correto nos dois modos — é parte da revisão do PR.
 
 > **Atenção:** 13 tokens ainda não têm valor oficial no modo escuro no Figma. Eles estão
 > preenchidos com um valor derivado e marcados com `// TODO` no `src/theme/theme.ts`, aguardando
