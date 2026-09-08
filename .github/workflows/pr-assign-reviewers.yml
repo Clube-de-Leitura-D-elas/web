@@ -1,0 +1,64 @@
+name: PR - assignee e reviewers
+
+# Toda vez que um PR é aberto, quem abriu vira assignee e o time AGES III é
+# solicitado como reviewer, para ninguém precisar lembrar de fazer isso na mão.
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  assign:
+    name: Define autor como assignee e AGES III como reviewer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          # REVIEWERS_TOKEN é opcional: só é necessário se o GITHUB_TOKEN padrão
+          # não conseguir solicitar review de time (PAT com escopos repo e read:org).
+          github-token: ${{ secrets.REVIEWERS_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+
+            if (pr.user.type === 'Bot') {
+              core.info(`PR aberto por bot (${author}); nada a fazer.`);
+              return;
+            }
+
+            if (pr.assignees.length > 0) {
+              core.info('PR já possui assignee; mantido como está.');
+            } else {
+              await github.rest.issues.addAssignees({
+                owner,
+                repo,
+                issue_number: pr.number,
+                assignees: [author],
+              });
+              core.info(`Assignee definido: ${author}`);
+            }
+
+            if (pr.draft) {
+              core.info('PR em draft; review do time será solicitado ao marcar como pronto.');
+              return;
+            }
+
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner,
+                repo,
+                pull_number: pr.number,
+                team_reviewers: ['ages-iii'],
+              });
+              core.info('Review solicitado ao time AGES III.');
+            } catch (error) {
+              core.warning(
+                `Não foi possível solicitar review do time AGES III: ${error.message}. ` +
+                  'Se for erro de permissão, crie o secret REVIEWERS_TOKEN com um PAT ' +
+                  'que tenha os escopos repo e read:org.',
+              );
+            }

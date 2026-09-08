@@ -17,7 +17,17 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,jsx,json,css,md,html,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@fontsource/nunito": "^5.3.0",
@@ -41,6 +51,8 @@
     "eslint-plugin-react-refresh": "^0.5.5",
     "eslint-plugin-storybook": "^10.6.0",
     "globals": "^17.11.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.5.0",
     "prettier": "^3.9.6",
     "storybook": "^10.6.0",
     "typescript": "~6.0.2",

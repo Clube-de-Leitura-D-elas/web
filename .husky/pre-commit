@@ -1,0 +1,2 @@
+# Formata e corrige apenas os arquivos que estão no stage.
+yarn lint-staged
