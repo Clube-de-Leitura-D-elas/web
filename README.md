@@ -282,7 +282,7 @@ Nos tokens de feedback, `…Light` e `…Dark` são as tonalidades clara e escur
 
 ## 🌿 Branches e commits
 
-Branch padrão: **`main`**. Todo trabalho sai de uma branch nova e volta por Pull Request.
+Branch padrão: **`develop`**. Todo trabalho sai de uma branch nova e volta por Pull Request.
 
 Nomeie a branch com o identificador da issue do Linear — assim o Linear vincula branch, PR e issue
 automaticamente:
@@ -295,16 +295,16 @@ automaticamente:
 feat/CLU-24-button-component
 ```
 
-Commits começam com o identificador da issue entre colchetes, seguido do padrão
-[Conventional Commits](https://www.conventionalcommits.org/), em inglês e no imperativo:
+Commits seguem [Conventional Commits](https://www.conventionalcommits.org/), em inglês e no
+imperativo:
 
 ```
-[CLU-XX] <type>(<escopo>): <descrição>
+<type>(<escopo>): <descrição>
 ```
 
 ```
-[CLU-24] feat(button): add primary and secondary variants
-[CLU-31] fix(tag): correct text color on neutral variant
+feat(button): add primary and secondary variants
+fix(tag): correct text color on neutral variant
 ```
 
 Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`, `ci`.

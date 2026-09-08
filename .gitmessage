@@ -1,9 +1,7 @@
-# [CLU-XX] <type>(<escopo>): <descrição no imperativo, em inglês, sem ponto final>
+# <type>(<escopo>): <descrição no imperativo, em inglês, sem ponto final>
 #
-# Ex.: [CLU-24] feat(button): add primary and secondary variants
-#      [CLU-31] fix(tag): correct text color on neutral variant
-#
-# O identificador da issue do Linear vem sempre primeiro, entre colchetes.
+# Ex.: feat(button): add primary and secondary variants
+#      fix(tag): correct text color on neutral variant
 #
 # Types: feat, fix, refactor, test, chore, docs, ci
 #
