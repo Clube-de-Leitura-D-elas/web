@@ -307,7 +307,7 @@ feat(button): add primary and secondary variants
 fix(tag): correct text color on neutral variant
 ```
 
-Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`, `ci`.
+Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`, `ci`, `component`.
 
 O repositório traz um template de mensagem de commit em `.gitmessage`. Para o Git preenchê-lo
 sozinho toda vez que você rodar `git commit` (sem `-m`), configure uma vez:
