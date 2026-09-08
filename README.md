@@ -87,6 +87,11 @@ nada. Os hooks são instalados sozinhos quando você roda `yarn install`.
 já corrigem sozinhos o que der (`lint-staged`). Se sobrar algum erro que precisa de decisão
 humana, o commit é bloqueado.
 
+Logo depois, o commit é testado contra a `origin/main`: se a sua branch conflita com o que já
+está na main, o commit é **bloqueado** e a lista de arquivos em conflito aparece no terminal.
+Rode `git merge origin/main`, resolva os conflitos e commite de novo. Se você estiver sem
+internet, a checagem é pulada com um aviso — ela nunca trava o commit por falta de rede.
+
 **A cada `git push`**, o projeto inteiro passa por:
 
 | Comando             | O que confere                   |
