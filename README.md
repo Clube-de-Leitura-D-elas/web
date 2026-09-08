@@ -278,6 +278,47 @@ export const Container = styled.button`
 Nos tokens de feedback, `…Light` e `…Dark` são as tonalidades clara e escura da própria cor
 (ex.: fundo suave e texto), não têm relação com modo de tema.
 
+---
+
+## 🌿 Branches e commits
+
+Branch padrão: **`main`**. Todo trabalho sai de uma branch nova e volta por Pull Request.
+
+Nomeie a branch com o identificador da issue do Linear — assim o Linear vincula branch, PR e issue
+automaticamente:
+
+```
+<type>/CLU-<numero>-<descricao-curta>
+```
+
+```
+feat/CLU-24-button-component
+```
+
+Commits começam com o identificador da issue entre colchetes, seguido do padrão
+[Conventional Commits](https://www.conventionalcommits.org/), em inglês e no imperativo:
+
+```
+[CLU-XX] <type>(<escopo>): <descrição>
+```
+
+```
+[CLU-24] feat(button): add primary and secondary variants
+[CLU-31] fix(tag): correct text color on neutral variant
+```
+
+Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`, `ci`.
+
+O repositório traz um template de mensagem de commit em `.gitmessage`. Para o Git preenchê-lo
+sozinho toda vez que você rodar `git commit` (sem `-m`), configure uma vez:
+
+```bash
+git config commit.template .gitmessage
+```
+
+Ao abrir o PR, o `.github/pull_request_template.md` já preenche a descrição — é só completar os
+campos.
+
 ## Documentação
 
 Para acessar a documentação do projeto, [clique aqui](https://tools.ages.pucrs.br/clube-de-leitura-d-elas/wiki/-/wikis/home).
