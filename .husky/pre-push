@@ -1,0 +1,4 @@
+# Gate antes de subir a branch e abrir o PR: tipos, lint e formatação do projeto inteiro.
+yarn typecheck
+yarn lint
+yarn format:check

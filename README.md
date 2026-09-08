@@ -78,15 +78,36 @@ Dicas da interface:
 O `yarn dev` e o `yarn docs` são independentes: dá para deixar os dois rodando ao mesmo tempo, em
 dois terminais.
 
-## 4. Antes de abrir um Merge Request
+## 4. Antes de abrir um Pull Request
 
-Rode os três comandos abaixo. Se algum reclamar, corrija antes de pedir revisão:
+O projeto usa **Husky** para rodar as verificações automaticamente — você não precisa lembrar de
+nada. Os hooks são instalados sozinhos quando você roda `yarn install`.
 
-```bash
-yarn lint        # procura erros e más práticas
-yarn typecheck   # confere se os tipos do TypeScript batem
-yarn format      # formata o código no padrão do time
-```
+**A cada `git commit`**, o ESLint e o Prettier rodam **apenas nos arquivos que estão no stage** e
+já corrigem sozinhos o que der (`lint-staged`). Se sobrar algum erro que precisa de decisão
+humana, o commit é bloqueado.
+
+Logo depois, o commit é testado contra a `origin/main`: se a sua branch conflita com o que já
+está na main, o commit é **bloqueado** e a lista de arquivos em conflito aparece no terminal.
+Rode `git merge origin/main`, resolva os conflitos e commite de novo. Se você estiver sem
+internet, a checagem é pulada com um aviso — ela nunca trava o commit por falta de rede.
+
+**A cada `git push`**, o projeto inteiro passa por:
+
+| Comando             | O que confere                   |
+| ------------------- | ------------------------------- |
+| `yarn typecheck`    | se os tipos do TypeScript batem |
+| `yarn lint`         | erros e más práticas            |
+| `yarn format:check` | se a formatação está no padrão  |
+
+Se algum falhar, o push é bloqueado. Rode `yarn lint:fix` e `yarn format` — eles resolvem a maior
+parte dos casos —, faça um novo commit e tente de novo.
+
+Quando o PR é aberto, **quem abriu vira assignee** (GitHub Action) e o time **AGES III** é
+solicitado como reviewer (`.github/CODEOWNERS`) — tudo automático.
+
+> Em uma emergência dá para pular os hooks com `git commit --no-verify` ou `git push --no-verify`.
+> O problema não some, só aparece mais tarde na revisão — use apenas se souber o que está fazendo.
 
 ## Todos os scripts
 
