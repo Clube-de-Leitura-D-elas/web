@@ -4,7 +4,7 @@
  * Duas convenções importantes do projeto aparecem aqui:
  *
  * 1. COR SEMPRE DO TEMA. Nada de `#FCE8F0` solto — use `${({ theme }) => theme.surfaceBrandSoft}`.
- *    Assim o componente funciona no modo claro e no escuro sem nenhuma alteração.
+ *    Assim as cores ficam centralizadas no tema e mudam em um lugar só.
  *
  * 2. PARÂMETRO TRANSIENTE (`$color`, com cifrão). O cifrão avisa o styled-components que a prop é
  *    só para o estilo e NÃO deve virar atributo HTML. Sem ele, o React reclama no console

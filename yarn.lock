@@ -805,13 +805,6 @@
     ts-dedent "^2.0.0"
     unplugin "^2.3.5"
 
-"@storybook/addon-themes@^10.6.0":
-  version "10.6.0"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-themes/-/addon-themes-10.6.0.tgz#6c20a59e0aa07ddbc0a3a26aed4e28bdfabaf7d0"
-  integrity sha512-PJtRtaCzKCAcouEqkHevMwv0aeQNsYWab4K/qszNGuSyFXxdcPQguKwmbB6Ajd/FxW+Of/mLXjRgpjrGVSgm1g==
-  dependencies:
-    ts-dedent "^2.0.0"
-
 "@storybook/builder-vite@10.6.0":
   version "10.6.0"
   resolved "https://registry.yarnpkg.com/@storybook/builder-vite/-/builder-vite-10.6.0.tgz#c027124840b4078d55f59d86feb172430404a91a"

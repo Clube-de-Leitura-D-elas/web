@@ -60,8 +60,8 @@ Para encerrar o servidor, aperte `Ctrl + C` no terminal.
 ## 3. Como rodar a documentação (`yarn docs`)
 
 O Storybook é um catálogo que mostra **cada componente isolado**, fora das telas do sistema. É
-onde você vai desenvolver os componentes de UI: dá para ver todas as variações lado a lado, mexer
-nas props por um painel e conferir o modo claro e o escuro sem precisar montar uma tela inteira. Rode no terminal:
+onde você vai desenvolver os componentes de UI: dá para ver todas as variações lado a lado e mexer
+nas props por um painel, sem precisar montar uma tela inteira. Rode no terminal:
 
 ```bash
 yarn docs
@@ -72,7 +72,6 @@ um exemplo já pronto.
 
 Dicas da interface:
 
-- **Ícone de pincel** (barra de cima) — alterna entre tema claro e escuro.
 - **Aba Controls** (barra de baixo) — muda as props do componente ao vivo.
 - **Aba Accessibility** (barra de baixo) — verifica problemas de acessibilidade, como contraste insuficiente entre texto e fundo.
 
@@ -128,7 +127,7 @@ src/
 | ------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `components/` | Peças de UI reutilizáveis, que aparecem em mais de uma tela: botão, input, modal, tabela. Uma pasta por componente.   |
 | `pages/`      | Telas inteiras, ligadas a um endereço (`/login`, `/livros`). Uma página monta a tela combinando vários `components/`. |
-| `hooks/`      | Lógica em React reaproveitada entre componentes. Sempre começam com `use` (ex.: `useThemeMode`).                      |
+| `hooks/`      | Lógica em React reaproveitada entre componentes. Sempre começam com `use` (ex.: `useDebounce`).                       |
 | `services/`   | Funções que buscam e enviam dados para o backend. O componente chama o service; nunca faz `fetch` direto.             |
 | `types/`      | `type` e `interface` usados por vários arquivos (ex.: `Livro`, `Usuaria`). Tipo usado num arquivo só fica nele mesmo. |
 | `theme/`      | As cores do sistema e os estilos globais. Veja a seção **Tema** abaixo.                                               |
@@ -204,13 +203,14 @@ import { Tag } from '../components/Tag/Tag';
 <Tag color="neutral">Ficção</Tag>;
 ```
 
-**3. Cor sempre pelo tema, nunca hex fixo.** É isso que faz o modo escuro funcionar sozinho.
+**3. Cor sempre pelo tema, nunca hex fixo.** Centralizar as cores no tema mantém o sistema
+consistente e facilita trocar uma cor em um lugar só.
 
 ```ts
 // ✅ certo
 background-color: ${({ theme }) => theme.surfaceBrandSoft};
 
-// ❌ errado — quebra no modo escuro
+// ❌ errado — hex solto, fora do tema
 background-color: #fce8f0;
 ```
 
@@ -241,16 +241,14 @@ export const Container = styled.span<{ $color: TagColor }>`
    componente no `X.tsx` importando com `import * as Styled from './styles';`.
 4. Rode `yarn docs` e desenvolva olhando o Storybook.
 5. Em `X.stories.tsx`, apague a story `Placeholder` e crie uma story por variante.
-6. Confira o componente no tema claro **e** no escuro (ícone de pincel).
-7. Antes de abrir o PR: `yarn lint && yarn typecheck && yarn format`.
+6. Antes de abrir o PR: `yarn lint && yarn typecheck && yarn format`.
 
 ---
 
 ## Tema
 
-O tema fica em `src/theme/theme.ts` e tem **só cores** — 33 tokens, os mesmos do Figma, nos modos
-claro e escuro. Dentro de qualquer `styles.ts` o `theme` chega pronto e tipado (o autocomplete
-lista todas as cores):
+O tema fica em `src/theme/theme.ts` e tem **só cores** — 33 tokens, os mesmos do Figma. Dentro de
+qualquer `styles.ts` o `theme` chega pronto e tipado (o autocomplete lista todas as cores):
 
 ```ts
 import styled from 'styled-components';
@@ -277,29 +275,8 @@ export const Container = styled.button`
 | Ações        | `primary`, `primaryHover`, `primaryPressed`, `danger`, `disabledBg`, `disabledFg`, `focusRing` |
 | Feedback     | `success`, `warning`, `error`, `info` — cada um com `…Light` e `…Dark`                         |
 
-Há ainda `theme.mode` (`'light'` ou `'dark'`), para o caso raro de um componente precisar se
-comportar diferente no escuro.
-
-### Alternar claro/escuro
-
-Na aplicação, pelo hook:
-
-```tsx
-import { useThemeMode } from '../hooks/useThemeMode';
-
-const { mode, toggleMode } = useThemeMode();
-```
-
-A escolha fica salva no `localStorage`; na primeira visita vale a preferência do sistema
-operacional.
-
-No Storybook, use o **ícone de pincel** na barra de ferramentas. Todo componente deve ficar
-correto nos dois modos — é parte da revisão do PR.
-
-> **Atenção:** 13 tokens ainda não têm valor oficial no modo escuro no Figma. Eles estão
-> preenchidos com um valor derivado e marcados com `// TODO` no `src/theme/theme.ts`, aguardando
-> confirmação do design. Afetam principalmente os tokens de feedback (`…Light` / `…Dark`),
-> o `overlayScrim` e o `primaryPressed`.
+Nos tokens de feedback, `…Light` e `…Dark` são as tonalidades clara e escura da própria cor
+(ex.: fundo suave e texto), não têm relação com modo de tema.
 
 ## Documentação
 

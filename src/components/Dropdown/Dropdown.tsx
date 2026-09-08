@@ -7,8 +7,8 @@
  *  - todo o estilo vai em `styles.ts` e é consumido como `<Styled.Container>`;
  *  - exporte como `export const Dropdown = ...` (nunca `export default`);
  *  - exporte também um `export type DropdownProps = { ... }`;
- *  - cor sempre pelo tema (`theme.primary`), nunca hex fixo — é o que faz o
- *    modo escuro funcionar de graça.
+ *  - cor sempre pelo tema (`theme.primary`), nunca hex fixo — mantém o
+ *    sistema de cores consistente.
  */
 
 // import * as Styled from './styles';

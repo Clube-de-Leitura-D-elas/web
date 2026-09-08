@@ -12,7 +12,7 @@ export const GlobalStyle = createGlobalStyle`
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color-scheme: ${({ theme }) => theme.mode};
+    color-scheme: light;
   }
 
   *,
