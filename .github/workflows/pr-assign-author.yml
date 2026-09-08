@@ -1,0 +1,41 @@
+name: PR - assignee
+
+# Quem abre o PR vira assignee automaticamente, para ninguém precisar lembrar.
+# Os reviewers ficam por conta do .github/CODEOWNERS, que já pede review do
+# time AGES III sem precisar de token nenhum.
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  assign:
+    name: Define quem abriu o PR como assignee
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+
+            if (pr.user.type === 'Bot') {
+              core.info(`PR aberto por bot (${author}); nada a fazer.`);
+              return;
+            }
+
+            if (pr.assignees.length > 0) {
+              core.info('PR já possui assignee; mantido como está.');
+              return;
+            }
+
+            await github.rest.issues.addAssignees({
+              owner,
+              repo,
+              issue_number: pr.number,
+              assignees: [author],
+            });
+            core.info(`Assignee definido: ${author}`);

@@ -98,8 +98,8 @@ humana, o commit é bloqueado.
 Se algum falhar, o push é bloqueado. Rode `yarn lint:fix` e `yarn format` — eles resolvem a maior
 parte dos casos —, faça um novo commit e tente de novo.
 
-Quando o PR é aberto, uma GitHub Action coloca **quem abriu como assignee** e pede review do time
-**AGES III** automaticamente.
+Quando o PR é aberto, **quem abriu vira assignee** (GitHub Action) e o time **AGES III** é
+solicitado como reviewer (`.github/CODEOWNERS`) — tudo automático.
 
 > Em uma emergência dá para pular os hooks com `git commit --no-verify` ou `git push --no-verify`.
 > O problema não some, só aparece mais tarde na revisão — use apenas se souber o que está fazendo.
