@@ -1,14 +1,29 @@
-/**
- * Componente Button.
- *
- * A implementar. Requisitos: card do Button no Kanban + frame do componente no Figma.
- *
- * Convenções do projeto (veja `src/components/Tag` como exemplo pronto):
- *  - todo o estilo vai em `styles.ts` e é consumido como `<Styled.Container>`;
- *  - exporte como `export const Button = ...` (nunca `export default`);
- *  - exporte também um `export type ButtonProps = { ... }`;
- *  - cor sempre pelo tema (`theme.primary`), nunca hex fixo — mantém o
- *    sistema de cores consistente.
- */
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import * as Styled from './styles';
 
-// import * as Styled from './styles';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonSize = 'md' | 'sm' | 'lg';
+
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  children: ReactNode;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  icon?: ReactNode;
+};
+
+export const Button = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  icon,
+  type = 'button',
+  disabled = false,
+  ...props
+}: ButtonProps) => {
+  return (
+    <Styled.Container type={type} $variant={variant} $size={size} disabled={disabled} {...props}>
+      {icon}
+      {children}
+    </Styled.Container>
+  );
+};
