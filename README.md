@@ -134,7 +134,8 @@ src/
 ├── assets/          # imagens, ícones e fontes
 ├── components/      # componentes reutilizáveis (uma pasta por componente)
 ├── hooks/           # hooks customizados
-├── pages/           # uma pasta/arquivo por tela do sistema
+├── layouts/         # moldura das telas (ex.: menu lateral + conteúdo)
+├── pages/           # uma pasta por tela do sistema
 ├── services/        # conversa com o backend (chamadas de API)
 ├── theme/           # cores do tema, estilos globais e provider
 ├── types/           # tipos TypeScript usados em vários lugares
@@ -148,6 +149,7 @@ src/
 | ------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `components/` | Peças de UI reutilizáveis, que aparecem em mais de uma tela: botão, input, modal, tabela. Uma pasta por componente.   |
 | `pages/`      | Telas inteiras, ligadas a um endereço (`/login`, `/livros`). Uma página monta a tela combinando vários `components/`. |
+| `layouts/`    | A moldura em volta das páginas. O `DefaultLayout` desenha o menu lateral e mostra a página atual ao lado dele.        |
 | `hooks/`      | Lógica em React reaproveitada entre componentes. Sempre começam com `use` (ex.: `useDebounce`).                       |
 | `services/`   | Funções que buscam e enviam dados para o backend. O componente chama o service; nunca faz `fetch` direto.             |
 | `types/`      | `type` e `interface` usados por vários arquivos (ex.: `Livro`, `Usuaria`). Tipo usado num arquivo só fica nele mesmo. |
@@ -159,8 +161,20 @@ uma peça que a página usa por dentro, é componente.
 
 ### Criou uma tela nova?
 
-1. Crie o arquivo em `src/pages/`.
-2. Registre a rota em `src/App.tsx`.
+1. Crie uma pasta em `src/pages/` com o nome da tela, em inglês, e a página num `index.tsx`
+   dentro dela (veja `src/pages/Groups/`):
+
+   ```
+   src/pages/Groups/
+   └── index.tsx     # export const Groups = () => ...
+   ```
+
+   Quem importa usa só o nome da pasta: `import { Groups } from './pages/Groups';`.
+
+2. Registre a rota em `src/App.tsx`. Se a tela tem o menu lateral, coloque a rota **dentro** do
+   `<Route element={<DefaultLayout />}>` — o menu e a responsividade já vêm prontos, e a página
+   só cuida do próprio conteúdo (sem `<main>` nem padding de fora, que o layout já coloca).
+3. Se a tela aparece no menu lateral, inclua uma linha em `NAV_ITEMS`, no `Sidebar.tsx`.
 
 ---
 

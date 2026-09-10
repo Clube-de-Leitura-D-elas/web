@@ -1,14 +1,19 @@
 import { Route, Routes } from 'react-router';
-import Home from './pages/Home.tsx';
-import NotFound from './pages/NotFound.tsx';
+import { DefaultLayout } from './layouts/DefaultLayout';
+import { Calendar } from './pages/Calendar';
+import { Groups } from './pages/Groups';
+import { Home } from './pages/Home';
+import { Participants } from './pages/Participants';
+import { Settings } from './pages/Settings';
 
-function App() {
-  return (
-    <Routes>
+export const App = () => (
+  <Routes>
+    <Route element={<DefaultLayout />}>
       <Route path="/" element={<Home />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
-}
-
-export default App;
+      <Route path="/calendario" element={<Calendar />} />
+      <Route path="/grupos" element={<Groups />} />
+      <Route path="/participantes" element={<Participants />} />
+      <Route path="/configuracoes" element={<Settings />} />
+    </Route>
+  </Routes>
+);
