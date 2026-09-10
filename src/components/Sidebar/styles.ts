@@ -34,9 +34,12 @@ export const Container = styled.aside<{ $collapsed: boolean }>`
       ? `calc(${COLLAPSED_WIDTH} + ${BORDER_WIDTH})`
       : `calc(${OPEN_WIDTH} + ${BORDER_WIDTH})`};
   padding: 2rem 1.5rem 1.5rem;
-  background-color: ${({ theme }) => theme.background};
-  border-right: ${BORDER_WIDTH} solid ${({ theme }) => theme.border};
   transition: width ${WIDTH_TRANSITION};
+
+  ${({ theme }) => css`
+    background-color: ${theme.background};
+    border-right: ${BORDER_WIDTH} solid ${theme.border};
+  `}
 
   @media (prefers-reduced-motion: reduce) {
     transition: none;
@@ -54,21 +57,24 @@ export const ToggleButton = styled.button`
   width: 2rem;
   height: 2rem;
   padding: 0;
-  border: 1px solid ${({ theme }) => theme.border};
   border-radius: 50%;
-  background-color: ${({ theme }) => theme.surface};
-  color: ${({ theme }) => theme.textMuted};
   cursor: pointer;
   transition:
     color 0.2s ease,
     border-color 0.2s ease,
     background-color 0.2s ease;
 
-  &:hover {
-    border-color: ${({ theme }) => theme.borderBrand};
-    background-color: ${({ theme }) => theme.surfaceBrandSoft};
-    color: ${({ theme }) => theme.textBrand};
-  }
+  ${({ theme }) => css`
+    border: 1px solid ${theme.border};
+    background-color: ${theme.surface};
+    color: ${theme.textMuted};
+
+    &:hover {
+      border-color: ${theme.borderBrand};
+      background-color: ${theme.surfaceBrandSoft};
+      color: ${theme.textBrand};
+    }
+  `}
 
   svg {
     width: 1rem;
@@ -156,7 +162,6 @@ export const Item = styled(NavLink)`
   height: 3rem;
   padding: 1rem 0.75rem;
   border-radius: 0.75rem;
-  color: ${({ theme }) => theme.textMuted};
   line-height: 1.5rem;
   text-decoration: none;
   white-space: nowrap;
@@ -166,15 +171,19 @@ export const Item = styled(NavLink)`
     background-color 0.2s ease,
     color 0.2s ease;
 
-  &:hover {
-    background-color: ${({ theme }) => theme.surfaceSunken};
-    color: ${({ theme }) => theme.textBrand};
-  }
+  ${({ theme }) => css`
+    color: ${theme.textMuted};
 
-  &[aria-current='page'] {
-    background-color: ${({ theme }) => theme.primary};
-    color: ${({ theme }) => theme.textOnBrand};
-  }
+    &:hover {
+      background-color: ${theme.surfaceSunken};
+      color: ${theme.textBrand};
+    }
+
+    &[aria-current='page'] {
+      background-color: ${theme.primary};
+      color: ${theme.textOnBrand};
+    }
+  `}
 
   svg {
     flex-shrink: 0;
@@ -234,9 +243,7 @@ export const Popover = styled.div`
   gap: 0.5rem;
   min-width: 10rem;
   padding: 0.5rem 0.75rem;
-  border: ${BORDER_WIDTH} solid ${({ theme }) => theme.border};
   border-radius: 0.75rem;
-  background-color: ${({ theme }) => theme.surface};
   white-space: nowrap;
   opacity: 0;
   transform: scale(0.9);
@@ -245,6 +252,11 @@ export const Popover = styled.div`
   transition:
     opacity 0.18s ease,
     transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+
+  ${({ theme }) => css`
+    border: ${BORDER_WIDTH} solid ${theme.border};
+    background-color: ${theme.surface};
+  `}
 
   > * {
     opacity: 0;
