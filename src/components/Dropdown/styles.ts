@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import type { DropdownVariants } from './Dropdown';
+import type { DropdownVariants } from '.';
 
 export const Wrapper = styled.div`
   display: flex;
@@ -10,7 +10,12 @@ export const Wrapper = styled.div`
   position: relative;
 `;
 
-export const Label = styled.label``;
+export const Label = styled.label`
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${({ theme }) => theme.text};
+  user-select: none;
+`;
 
 export const Trigger = styled.button<{ $size?: DropdownVariants; $isOpen?: boolean }>`
   display: flex;
@@ -53,8 +58,28 @@ export const Menu = styled.ul`
   margin: 0;
   padding: 0;
   list-style: none;
+  background-color: ${({ theme }) => theme.surface};
+  border: 1px solid ${({ theme }) => theme.border};
+  border-radius: 0.5rem;
+  left: 0;
+  width: 100%;
+  overflow-y: auto;
 `;
 
-export const MenuItem = styled.li<{ $isSelected?: boolean }>``;
+export const MenuItem = styled.li<{ $isSelected?: boolean }>`
+  padding: 0.5rem 1rem;
+  color: ${({ theme, $isSelected }) => ($isSelected ? theme.textBrand : theme.text)};
+  background-color: ${({ theme, $isSelected }) => ($isSelected ? theme.surfaceBrandSoft : theme.background)};
+  cursor: pointer;
+  font-weight: 600;
+  z-index: 10;
 
-export const HelperText = styled.span``;
+  &:hover {
+    background-color: ${({ theme }) => theme.surfaceBrandSoft};
+  }
+`;
+
+export const HelperText = styled.span<{ $isError?: boolean }>`
+  font-size: 0.875rem;
+  color: ${({ theme, $isError }) => ($isError ? theme.error : theme.textMuted)};
+`;

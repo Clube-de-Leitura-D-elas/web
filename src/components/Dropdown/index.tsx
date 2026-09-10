@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { TbChevronDown, TbChevronUp } from 'react-icons/tb';
 import * as Styled from './styles';
 
 export type DropdownVariants = 'md' | 'lg';
@@ -15,6 +16,7 @@ export type DropdownProps = {
   label?: string;
   placeholder?: string;
   helperText?: string;
+  isError?: boolean;
   disabled?: boolean;
 };
 
@@ -25,6 +27,7 @@ export const Dropdown = ({
   label,
   placeholder = 'Selecione uma opção',
   helperText,
+  isError = false,
   disabled = false,
 }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,7 +56,7 @@ export const Dropdown = ({
         disabled={disabled}
       >
         <span>{selectedOption ? selectedOption.label : placeholder}</span>
-        <span>{isOpen ? '▲' : '▼'}</span>
+        <span>{isOpen ? <TbChevronUp /> : <TbChevronDown />}</span>
       </Styled.Trigger>
       {isOpen && (
         <Styled.Menu>
@@ -68,7 +71,7 @@ export const Dropdown = ({
           ))}
         </Styled.Menu>
       )}
-      {helperText && <Styled.HelperText>{helperText}</Styled.HelperText>}
+      {helperText && <Styled.HelperText $isError={isError}>{helperText}</Styled.HelperText>}
     </Styled.Wrapper>
   );
 };
