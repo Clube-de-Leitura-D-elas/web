@@ -7,7 +7,6 @@ import { useLocale } from '../../hooks/useLocale';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import * as Styled from './styles';
 
-// Provisório: trocar pela usuária logada quando a autenticação existir.
 const CURRENT_USER: SidebarUser = { name: 'Claudine' };
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop';

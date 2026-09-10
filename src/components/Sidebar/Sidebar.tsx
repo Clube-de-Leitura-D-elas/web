@@ -38,7 +38,6 @@ export type SidebarProps = {
   onToggleCollapse?: () => void;
   defaultCollapsed?: boolean;
   onLogout?: () => void;
-  /** Chamado ao clicar em um item do menu (ex.: para fechar o menu no celular). */
   onNavigate?: () => void;
 };
 
@@ -95,9 +94,6 @@ export const Sidebar = ({
         </Styled.Brand>
 
         <Styled.Nav>
-          {/* O NavLink marca o item da rota atual com aria-current="page", e o estilo
-              de ativo parte desse atributo. `end` no "/" evita que o Dashboard fique
-              ativo em todas as rotas. */}
           {NAV_ITEMS.map(({ path, labelKey, icon: Icon }) => {
             const label = text.nav[labelKey];
 

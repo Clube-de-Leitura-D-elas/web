@@ -171,7 +171,6 @@ export const Item = styled(NavLink)`
     color: ${({ theme }) => theme.textBrand};
   }
 
-  /* Item da rota atual — o NavLink coloca o aria-current sozinho. */
   &[aria-current='page'] {
     background-color: ${({ theme }) => theme.primary};
     color: ${({ theme }) => theme.textOnBrand};

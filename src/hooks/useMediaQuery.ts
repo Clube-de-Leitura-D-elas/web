@@ -1,10 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react';
 
-/**
- * Diz se a tela bate com uma media query e atualiza quando a janela muda de tamanho.
- *
- *   const isMobile = useMediaQuery('(max-width: 767px)');
- */
 export const useMediaQuery = (query: string): boolean => {
   const subscribe = useCallback(
     (onChange: () => void) => {

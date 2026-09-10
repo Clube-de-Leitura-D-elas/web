@@ -1,8 +1,6 @@
 import styled from 'styled-components';
 
-/** Celular: o menu lateral some e vira uma gaveta aberta pelo botão da barra do topo. */
 export const MOBILE_QUERY = '(max-width: 767px)';
-/** Tablet: o menu lateral começa fechado (só ícones) para sobrar espaço para o conteúdo. */
 export const TABLET_QUERY = '(max-width: 1023px)';
 
 const DRAWER_TRANSITION = '0.28s cubic-bezier(0.4, 0, 0.2, 1)';
@@ -28,7 +26,6 @@ export const SidebarSlot = styled.div<{ $open: boolean }>`
     position: fixed;
     inset: 0 auto 0 0;
     z-index: 4;
-    /* O 1rem a mais esconde o botão redondo que fica para fora do painel. */
     transform: ${({ $open }) => ($open ? 'none' : 'translateX(calc(-100% - 1rem))')};
     transition: transform ${DRAWER_TRANSITION};
   }
