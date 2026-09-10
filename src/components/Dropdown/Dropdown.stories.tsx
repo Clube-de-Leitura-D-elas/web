@@ -36,3 +36,15 @@ export const Desabilitado: Story = {
     disabled: true,
   },
 };
+export const WithError: Story = {
+  args: {
+    label: 'Livro favorito',
+    options: [
+      { label: 'Dom Casmurro', value: 'dom-casmurro' },
+      { label: 'Capitães da Areia', value: 'capitaes-da-areia' },
+    ],
+    placeholder: 'Selecione um livro',
+    isError: true,
+    helperText: 'Você precisa selecionar uma opção obrigatória.',
+  },
+};

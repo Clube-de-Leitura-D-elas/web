@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { TbChevronDown, TbChevronUp } from 'react-icons/tb';
 import * as Styled from './styles';
 
@@ -33,6 +33,8 @@ export const Dropdown = ({
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<DropdownItemList | null>(null);
 
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const handleToggle = () => {
     if (!disabled) {
       setIsOpen(!isOpen);
@@ -45,8 +47,24 @@ export const Dropdown = ({
     onSelect(option.value);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
-    <Styled.Wrapper>
+    <Styled.Wrapper ref={dropdownRef}>
       {label && <Styled.Label>{label}</Styled.Label>}
       <Styled.Trigger
         type="button"

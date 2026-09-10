@@ -76,6 +76,7 @@ export const MenuItem = styled.li<{ $isSelected?: boolean }>`
 
   &:hover {
     background-color: ${({ theme }) => theme.surfaceBrandSoft};
+    color: ${({ theme }) => theme.textBrand};
   }
 `;
 
