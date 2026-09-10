@@ -1,14 +1,74 @@
-/**
- * Componente Dropdown.
- *
- * A implementar. Requisitos: card do Dropdown no Kanban + frame do componente no Figma.
- *
- * Convenções do projeto (veja `src/components/Tag` como exemplo pronto):
- *  - todo o estilo vai em `styles.ts` e é consumido como `<Styled.Container>`;
- *  - exporte como `export const Dropdown = ...` (nunca `export default`);
- *  - exporte também um `export type DropdownProps = { ... }`;
- *  - cor sempre pelo tema (`theme.primary`), nunca hex fixo — mantém o
- *    sistema de cores consistente.
- */
+import React, { useState } from 'react';
+import * as Styled from './styles';
 
-// import * as Styled from './styles';
+export type DropdownVariants = 'md' | 'lg';
+
+export interface DropdownItemList {
+  label: string;
+  value: string;
+}
+
+export type DropdownProps = {
+  options: DropdownItemList[];
+  size?: DropdownVariants;
+  onSelect: (value: string) => void;
+  label?: string;
+  placeholder?: string;
+  helperText?: string;
+  disabled?: boolean;
+};
+
+export const Dropdown = ({
+  options,
+  onSelect,
+  size = 'md',
+  label,
+  placeholder = 'Selecione uma opção',
+  helperText,
+  disabled = false,
+}: DropdownProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<DropdownItemList | null>(null);
+
+  const handleToggle = () => {
+    if (!disabled) {
+      setIsOpen(!isOpen);
+    }
+  };
+
+  const handleSelectOption = (option: DropdownItemList) => {
+    setSelectedOption(option);
+    setIsOpen(false);
+    onSelect(option.value);
+  };
+
+  return (
+    <Styled.Wrapper>
+      {label && <Styled.Label>{label}</Styled.Label>}
+      <Styled.Trigger
+        type="button"
+        onClick={handleToggle}
+        $size={size}
+        $isOpen={isOpen}
+        disabled={disabled}
+      >
+        <span>{selectedOption ? selectedOption.label : placeholder}</span>
+        <span>{isOpen ? '▲' : '▼'}</span>
+      </Styled.Trigger>
+      {isOpen && (
+        <Styled.Menu>
+          {options.map((option) => (
+            <Styled.MenuItem
+              key={option.value}
+              $isSelected={selectedOption?.value === option.value}
+              onClick={() => handleSelectOption(option)}
+            >
+              {option.label}
+            </Styled.MenuItem>
+          ))}
+        </Styled.Menu>
+      )}
+      {helperText && <Styled.HelperText>{helperText}</Styled.HelperText>}
+    </Styled.Wrapper>
+  );
+};
