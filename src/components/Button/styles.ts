@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import type { ButtonSize, ButtonVariant } from './Button';
+import type { ButtonSize, ButtonVariant } from '.';
 
 export const Container = styled.button<{ $variant: ButtonVariant; $size: ButtonSize }>`
   display: inline-flex;
