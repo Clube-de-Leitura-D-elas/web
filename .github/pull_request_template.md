@@ -16,5 +16,5 @@ _Marque os itens que se aplicam ao seu PR antes de abrir._
 - [ ] Testes cobrindo a mudança foram adicionados ou atualizados
 - [ ] A pipeline de CI passou
 - [ ] Nenhum segredo, chave ou credencial foi commitado
-- [ ] Componente novo ou alterado tem story no Storybook *(se aplicável)*
+- [ ] Componente novo ou alterado tem story no Storybook _(se aplicável)_
 - [ ] Documentação atualizada, se mudei setup, arquitetura ou contrato
