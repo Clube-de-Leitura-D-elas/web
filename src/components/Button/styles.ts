@@ -5,15 +5,13 @@ export const Container = styled.button<{ $variant: ButtonVariant; $size: ButtonS
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 0.5rem;
   cursor: pointer;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
   white-space: nowrap;
-  height: 40px;
-  padding: 8px 32px;
 
   ${({ theme, $variant }) => {
     switch ($variant) {
@@ -36,10 +34,10 @@ export const Container = styled.button<{ $variant: ButtonVariant; $size: ButtonS
           border-color: ${theme.borderBrand};
 
           &:hover:not(:disabled) {
-            background-color: ${theme.surfaceBrandSoft};
+            background-color: ${theme.surfaceSunken};
           }
           &:active:not(:disabled) {
-            background-color: ${theme.surfaceSunken};
+            background-color: ${theme.surfaceBrandSoft};
             border-color: ${theme.primaryHover};
           }
         `;
@@ -51,6 +49,9 @@ export const Container = styled.button<{ $variant: ButtonVariant; $size: ButtonS
           &:hover:not(:disabled) {
             background-color: ${theme.surfaceSunken};
           }
+          &:active:not(:disabled) {
+            background-color: ${theme.surfaceBrandSoft};
+          }
         `;
       case 'danger':
         return css`
@@ -60,22 +61,32 @@ export const Container = styled.button<{ $variant: ButtonVariant; $size: ButtonS
           &:hover:not(:disabled) {
             background-color: ${theme.errorDark};
           }
+          &:active:not(:disabled) {
+            background-color: ${theme.primaryPressed};
+          }
         `;
     }
   }}
 
-  ${({ $size }) =>
-    $size === 'sm'
-      ? css`
-          height: 32px;
-          padding: 4px 16px;
-        `
-      : $size === 'lg'
-        ? css`
-            height: 56px;
-            padding: 16px 32px;
-          `
-        : null};
+  ${({ $size }) => {
+    switch ($size) {
+      case 'sm':
+        return css`
+          height: 2rem;
+          padding: 0.25rem 1rem;
+        `;
+      case 'md':
+        return css`
+          height: 2.5rem;
+          padding: 0.5rem 2rem;
+        `;
+      case 'lg':
+        return css`
+          height: 3.5rem;
+          padding: 1rem 2rem;
+        `;
+    }
+  }}
   &:disabled {
     cursor: not-allowed;
     background-color: ${({ theme }) => theme.disabledBg};
