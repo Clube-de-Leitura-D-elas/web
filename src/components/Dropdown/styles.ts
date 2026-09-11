@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
 import type { DropdownVariants } from '.';
+import { theme } from '../../theme/theme';
 
 export const Wrapper = styled.div`
   display: flex;
@@ -7,25 +8,34 @@ export const Wrapper = styled.div`
   gap: 0.25rem;
   width: 100%;
   max-width: 20rem;
-  position: relative;
 `;
 
 export const Label = styled.label`
   font-size: 1rem;
   font-weight: 600;
-  color: ${({ theme }) => theme.text};
+  color: ${theme.text};
   user-select: none;
 `;
 
-export const Trigger = styled.button<{ $size?: DropdownVariants; $isOpen?: boolean }>`
+export const Field = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+export const Trigger = styled.button<{
+  $size?: DropdownVariants;
+  $isOpen?: boolean;
+  $isError?: boolean;
+}>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background-color: ${({ theme }) => theme.surface};
-  color: ${({ theme }) => theme.text};
+  background-color: ${theme.surface};
+  color: ${theme.text};
   border-radius: 0.5rem;
-  border: 2px solid ${({ theme, $isOpen }) => ($isOpen ? theme.focusRing : theme.border)};
+  border: 2px solid
+    ${({ $isOpen, $isError }) => ($isError ? theme.error : $isOpen ? theme.focusRing : theme.border)};
   padding: 0.5rem 1rem;
   font-size: 1rem;
   cursor: pointer;
@@ -43,44 +53,47 @@ export const Trigger = styled.button<{ $size?: DropdownVariants; $isOpen?: boole
           height: 2.5rem;
         `}
   &:focus {
-    border-color: ${({ theme }) => theme.primary};
+    border-color: ${({ $isError }) => ($isError ? theme.error : theme.primary)};
   }
   &:disabled {
     cursor: not-allowed;
-    background-color: ${({ theme }) => theme.disabledBg ?? theme.surface};
-    color: ${({ theme }) => theme.disabledFg ?? theme.textMuted};
-    border-color: ${({ theme }) => theme.border};
+    background-color: ${theme.disabledBg ?? theme.surface};
+    color: ${theme.disabledFg ?? theme.textMuted};
+    border-color: ${theme.border};
     opacity: 0.6;
   }
 `;
 
 export const Menu = styled.ul`
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  width: 100%;
+  max-height: 15rem;
+  overflow-y: auto;
   margin: 0;
   padding: 0;
   list-style: none;
-  background-color: ${({ theme }) => theme.surface};
-  border: 1px solid ${({ theme }) => theme.border};
+  background-color: ${theme.surface};
+  border: 1px solid ${theme.border};
   border-radius: 0.5rem;
-  left: 0;
-  width: 100%;
-  overflow-y: auto;
+  z-index: 10;
 `;
 
 export const MenuItem = styled.li<{ $isSelected?: boolean }>`
   padding: 0.5rem 1rem;
-  color: ${({ theme, $isSelected }) => ($isSelected ? theme.textBrand : theme.text)};
-  background-color: ${({ theme, $isSelected }) => ($isSelected ? theme.surfaceBrandSoft : theme.background)};
+  color: ${({ $isSelected }) => ($isSelected ? theme.textBrand : theme.text)};
+  background-color: ${({ $isSelected }) => ($isSelected ? theme.surfaceBrandSoft : theme.background)};
   cursor: pointer;
   font-weight: 600;
-  z-index: 10;
 
   &:hover {
-    background-color: ${({ theme }) => theme.surfaceBrandSoft};
-    color: ${({ theme }) => theme.textBrand};
+    background-color: ${theme.surfaceBrandSoft};
+    color: ${theme.textBrand};
   }
 `;
 
 export const HelperText = styled.span<{ $isError?: boolean }>`
   font-size: 0.875rem;
-  color: ${({ theme, $isError }) => ($isError ? theme.error : theme.textMuted)};
+  color: ${({ $isError }) => ($isError ? theme.error : theme.textMuted)};
 `;

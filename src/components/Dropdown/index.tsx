@@ -66,29 +66,32 @@ export const Dropdown = ({
   return (
     <Styled.Wrapper ref={dropdownRef}>
       {label && <Styled.Label>{label}</Styled.Label>}
-      <Styled.Trigger
-        type="button"
-        onClick={handleToggle}
-        $size={size}
-        $isOpen={isOpen}
-        disabled={disabled}
-      >
-        <span>{selectedOption ? selectedOption.label : placeholder}</span>
-        <span>{isOpen ? <TbChevronUp /> : <TbChevronDown />}</span>
-      </Styled.Trigger>
-      {isOpen && (
-        <Styled.Menu>
-          {options.map((option) => (
-            <Styled.MenuItem
-              key={option.value}
-              $isSelected={selectedOption?.value === option.value}
-              onClick={() => handleSelectOption(option)}
-            >
-              {option.label}
-            </Styled.MenuItem>
-          ))}
-        </Styled.Menu>
-      )}
+      <Styled.Field>
+        <Styled.Trigger
+          type="button"
+          onClick={handleToggle}
+          $size={size}
+          $isOpen={isOpen}
+          $isError={isError}
+          disabled={disabled}
+        >
+          <span>{selectedOption ? selectedOption.label : placeholder}</span>
+          <span>{isOpen ? <TbChevronUp /> : <TbChevronDown />}</span>
+        </Styled.Trigger>
+        {isOpen && (
+          <Styled.Menu>
+            {options.map((option) => (
+              <Styled.MenuItem
+                key={option.value}
+                $isSelected={selectedOption?.value === option.value}
+                onClick={() => handleSelectOption(option)}
+              >
+                {option.label}
+              </Styled.MenuItem>
+            ))}
+          </Styled.Menu>
+        )}
+      </Styled.Field>
       {helperText && <Styled.HelperText $isError={isError}>{helperText}</Styled.HelperText>}
     </Styled.Wrapper>
   );

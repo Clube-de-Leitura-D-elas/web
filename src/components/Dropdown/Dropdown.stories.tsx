@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Dropdown } from '.';
+import { useState } from 'react';
 
 const mockOptions = [
   { label: 'Romance', value: 'romance' },
@@ -37,14 +38,24 @@ export const Desabilitado: Story = {
   },
 };
 export const WithError: Story = {
-  args: {
-    label: 'Livro favorito',
-    options: [
-      { label: 'Dom Casmurro', value: 'dom-casmurro' },
-      { label: 'Capitães da Areia', value: 'capitaes-da-areia' },
-    ],
-    placeholder: 'Selecione um livro',
-    isError: true,
-    helperText: 'Você precisa selecionar uma opção obrigatória.',
+  render: (args) => {
+    const [hasError, setHasError] = useState(true);
+
+    return (
+      <Dropdown
+        {...args}
+        label="Gênero"
+        placeholder="Selecione um gênero"
+        isError={hasError}
+        helperText={
+          hasError
+            ? 'Você precisa selecionar uma opção obrigatória.'
+            : 'Opção selecionada com sucesso!'
+        }
+        onSelect={(value) => {
+          setHasError(!value);
+        }}
+      />
+    );
   },
 };
