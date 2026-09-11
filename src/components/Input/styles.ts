@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
-
 import type { InputSize } from './index';
+import { theme } from '../../theme/theme';
 
 export const Container = styled.div`
   display: flex;
@@ -12,7 +12,7 @@ export const Container = styled.div`
 export const Label = styled.label`
   font-size: 0.875rem;
   font-weight: 700;
-  color: ${({ theme }) => theme.text};
+  color: ${theme.text};
 `;
 
 const sizeStyles = {
@@ -35,16 +35,16 @@ export const Field = styled.div<{
   align-items: center;
   gap: 0.5rem;
   border-radius: 0.5rem;
-  border: 0.0625rem solid ${({ theme }) => theme.border};
-  background-color: ${({ theme }) => theme.surface};
+  border: 0.0625rem solid ${theme.border};
+  background-color: ${theme.surface};
 
   ${({ $size }) => sizeStyles[$size]}
 
   &:focus-within {
-    border-color: ${({ theme }) => theme.focusRing};
+    border-color: ${theme.focusRing};
   }
 
-  ${({ $error, theme }) =>
+  ${({ $error }) =>
     $error &&
     css`
       border-color: ${theme.error};
@@ -54,7 +54,7 @@ export const Field = styled.div<{
       }
     `}
 
-  ${({ $disabled, theme }) =>
+  ${({ $disabled }) =>
     $disabled &&
     css`
       background-color: ${theme.disabledBg};
@@ -73,23 +73,23 @@ export const TextField = styled.input`
   outline: none;
   background: transparent;
   font-size: 0.875rem;
-  color: ${({ theme }) => theme.text};
+  color: ${theme.text};
 
   &::placeholder {
-    color: ${({ theme }) => theme.textMuted};
+    color: ${theme.textMuted};
   }
 
   &:disabled {
-    color: ${({ theme }) => theme.disabledFg};
+    color: ${theme.disabledFg};
     cursor: not-allowed;
   }
 
   &:disabled::placeholder {
-    color: ${({ theme }) => theme.disabledFg};
+    color: ${theme.disabledFg};
   }
 `;
 
 export const Helper = styled.span<{ $error: boolean }>`
   font-size: 0.75rem;
-  color: ${({ theme, $error }) => ($error ? theme.error : theme.textMuted)};
+  color: ${({ $error }) => ($error ? theme.error : theme.textMuted)};
 `;
