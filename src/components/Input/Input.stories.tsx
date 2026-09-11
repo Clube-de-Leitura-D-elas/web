@@ -14,7 +14,7 @@ const meta = {
           '### Como importar',
           '',
           'tsx',
-          "import { Input } from '../components/Input/Input';",
+          "import { Input } from '../components/Input/';",
           '',
           '',
           '### Como usar',
