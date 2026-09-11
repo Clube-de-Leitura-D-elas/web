@@ -17,7 +17,7 @@ const meta = {
           '### Como importar',
           '',
           '```tsx',
-          "import { Modal } from '../components/Modal/Modal';",
+          "import { Modal } from '../components/Modal';",
           '```',
           '',
           '### Como usar',
@@ -63,55 +63,23 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/**
- * Tamanho pequeno.
- *
- * ```tsx
- * <Modal size="sm" ... />
- * ```
- */
 export const Pequeno: Story = {
   args: { size: 'sm' },
 };
 
-/**
- * Tamanho médio (padrão).
- *
- * ```tsx
- * <Modal size="md" ... />
- * ```
- */
 export const Medio: Story = {
   args: { size: 'md' },
 };
 
-/**
- * Tamanho grande.
- *
- * ```tsx
- * <Modal size="lg" ... />
- * ```
- */
 export const Grande: Story = {
   args: { size: 'lg' },
 };
 
-/**
- * Com conteúdo arbitrário (`children`) abaixo da descrição.
- *
- * ```tsx
- * <Modal ...>
- *   <p>Conteúdo arbitrário aqui — um formulário, uma lista, etc.</p>
- * </Modal>
- * ```
- */
 export const ComConteudo: Story = {
   args: {
     children: <p>Conteúdo arbitrário vai aqui — um formulário, uma lista, etc.</p>,
   },
 };
-
-/** Story interativa: abre com um botão e fecha pelo Esc, overlay, Cancelar ou X. */
 export const Interativo: Story = {
   render: (args) => {
     const [isOpen, setIsOpen] = useState(false);
