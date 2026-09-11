@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes } from 'react';
+import { useState, type InputHTMLAttributes, type ChangeEvent } from 'react';
 import * as Styled from './styles';
 
 export type InputSize = 'md' | 'lg';
@@ -18,25 +18,41 @@ export const Input = ({
   helperText,
   error,
   disabled,
+  onChange,
   ...rest
 }: InputProps) => {
+  const [dismissed, setDismissed] = useState(false);
+  const [prevError, setPrevError] = useState(error);
+
+  if (error !== prevError) {
+    setPrevError(error);
+    setDismissed(false);
+  }
+
+  const visibleError = dismissed ? undefined : error;
   const message = error ?? helperText;
   const messageId = message ? `${id}-helper` : undefined;
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (visibleError) setDismissed(true);
+    onChange?.(e);
+  };
 
   return (
     <Styled.Container>
       <Styled.Label htmlFor={id}>{label}</Styled.Label>
-      <Styled.Field $size={size} $error={!!error} $disabled={!!disabled}>
+      <Styled.Field $size={size} $error={!!visibleError} $disabled={!!disabled}>
         <Styled.TextField
           id={id}
           disabled={disabled}
-          aria-invalid={!!error}
+          aria-invalid={!!visibleError}
           aria-describedby={messageId}
+          onChange={handleChange}
           {...rest}
         />
       </Styled.Field>
       {message && (
-        <Styled.Helper id={messageId} $error={!!error}>
+        <Styled.Helper id={messageId} $error={!!visibleError}>
           {message}
         </Styled.Helper>
       )}
