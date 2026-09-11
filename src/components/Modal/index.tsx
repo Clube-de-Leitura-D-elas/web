@@ -1,24 +1,17 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
-import { Button } from '../Button/index';
+import { Button } from '../Button';
 import * as Styled from './styles';
 
 export type ModalSize = 'sm' | 'md' | 'lg';
 
 export type ModalProps = {
   isOpen: boolean;
-
   onClose: () => void;
-
   title: string;
-
   description?: string;
-
   children?: ReactNode;
-
   onConfirm: () => void;
-
   confirmText: string;
-
   size?: ModalSize;
 };
 
@@ -81,7 +74,6 @@ export const Modal = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        // Impede que o clique dentro do card "vaze" pro overlay e feche o modal.
         onClick={(event) => event.stopPropagation()}
       >
         <Styled.Header>

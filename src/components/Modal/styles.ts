@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import type { ModalSize } from './index';
+import { theme } from '../../theme/theme';
 
 const MAX_WIDTH_BY_SIZE: Record<ModalSize, string> = {
   sm: '22.5rem',
@@ -15,7 +16,7 @@ export const Overlay = styled.div`
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background-color: ${({ theme }) => theme.overlayScrim};
+  background-color: ${theme.overlayScrim};
 `;
 
 export const Container = styled.div<{ $size: ModalSize }>`
@@ -27,7 +28,7 @@ export const Container = styled.div<{ $size: ModalSize }>`
   flex-direction: column;
   padding: 1.5rem;
   border-radius: 0.75rem;
-  background-color: ${({ theme }) => theme.surface};
+  background-color: ${theme.surface};
   box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.24); // a sombra tem essa cor pois não tem token de elevação
 `;
 
@@ -43,7 +44,7 @@ export const Title = styled.h2`
   font-size: 1.125rem;
   font-weight: 700;
   line-height: 1.5rem;
-  color: ${({ theme }) => theme.text};
+  color: ${theme.text};
 `;
 
 export const CloseButton = styled.button`
@@ -59,11 +60,11 @@ export const CloseButton = styled.button`
   background: transparent;
   font-size: 1.25rem;
   line-height: 1;
-  color: ${({ theme }) => theme.textMuted};
+  color: ${theme.textMuted};
   cursor: pointer;
 
   &:hover {
-    color: ${({ theme }) => theme.text};
+    color: ${theme.text};
   }
 `;
 
@@ -71,7 +72,7 @@ export const Description = styled.p`
   margin: 0.5rem 0 0;
   font-size: 0.875rem;
   line-height: 1.25rem;
-  color: ${({ theme }) => theme.textMuted};
+  color: ${theme.textMuted};
 `;
 
 export const Body = styled.div`
