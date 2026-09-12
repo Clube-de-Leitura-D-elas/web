@@ -64,8 +64,8 @@ const meta = {
   },
   args: { user: { name: 'Claudine' } },
   decorators: [
-    (Story) => (
-      <MemoryRouter initialEntries={['/grupos']}>
+    (Story, { parameters }) => (
+      <MemoryRouter initialEntries={[parameters.initialRoute ?? '/grupos']}>
         <Story />
       </MemoryRouter>
     ),
@@ -114,14 +114,8 @@ export const Estados: Story = {
 };
 
 export const ItemAtivo: Story = {
-  decorators: [
-    (Story) => (
-      <MemoryRouter initialEntries={['/participantes']}>
-        <Story />
-      </MemoryRouter>
-    ),
-  ],
   parameters: {
+    initialRoute: '/participantes',
     docs: {
       description: {
         story: 'O item ativo acompanha a rota. Aqui a story está em `/participantes`.',
