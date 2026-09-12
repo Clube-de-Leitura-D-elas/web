@@ -7,5 +7,17 @@
     "previousPage": "Página anterior",
     "nextPage": "Próxima página",
     "goToPage": "Ir para a página {{page}}"
+  },
+  "example_books": {
+    "title": "Livros",
+    "itemLabel": "livros",
+    "columns": {
+      "title": "Título",
+      "author": "Autora"
+    },
+    "submit": "Adicionar livro",
+    "loading": "Carregando livros...",
+    "loadError": "Não foi possível carregar os livros.",
+    "saveError": "Não foi possível salvar o livro."
   }
 }
