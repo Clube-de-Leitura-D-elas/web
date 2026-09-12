@@ -15,5 +15,7 @@ export const App = () => (
       <Route path="/participantes" element={<Participants />} />
       <Route path="/configuracoes" element={<Settings />} />
     </Route>
+
+    {/* para páginas sem sidebar coloque aqui abaixo  */}
   </Routes>
 );
