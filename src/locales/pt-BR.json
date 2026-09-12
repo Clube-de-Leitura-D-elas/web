@@ -1,4 +1,27 @@
 {
+  "sidebar": {
+    "label": "Painel de gestão",
+    "logoAlt": "Clube de Leitura D'Elas",
+    "brand": {
+      "name": "D'Elas",
+      "subtitle": "PAINEL DE GESTÃO"
+    },
+    "toggle": {
+      "expand": "Expandir menu lateral",
+      "collapse": "Recolher menu lateral"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "calendario": "Calendário",
+      "grupos": "Grupos",
+      "participantes": "Participantes",
+      "configuracoes": "Configurações"
+    },
+    "logout": "Sair"
+  },
+  "layout": {
+    "openMenu": "Abrir menu"
+  },
   "table": {
     "summary": "Mostrando {{start}}–{{end}} de {{total}} {{itemLabel}}",
     "defaultItemLabel": "registros",

@@ -6,7 +6,7 @@
  *  - cada `export const` vira uma story na barra lateral;
  */
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Tag } from './Tag';
+import { Tag } from '.';
 
 const meta = {
   title: 'Componentes/Tag',
