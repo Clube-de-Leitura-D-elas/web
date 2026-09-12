@@ -2,9 +2,18 @@
 
 _O que foi feito neste PR. Ex.: "Adicionado componente `Button` com as variantes primary, secondary e disabled."_
 
-## Screenshot
+## Resultado Visual
 
-_Print ou vídeo curto da mudança. Se for alteração visual, mostre antes e depois. Se não for visual, escreva "não se aplica"._
+<table>
+  <tr>
+    <th>Código</th>
+    <th>Figma</th>
+  </tr>
+  <tr>
+    <td><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJ4YDOSORy2THlyJF4oFMwPEfkZYzPmrdGenK3VNHTuw&s=10" width=300 /></td>
+    <td><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJ4YDOSORy2THlyJF4oFMwPEfkZYzPmrdGenK3VNHTuw&s=10" width=300 /></td>
+  </tr>
+</table>
 
 ## Checklist
 
