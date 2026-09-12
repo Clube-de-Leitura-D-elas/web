@@ -340,6 +340,45 @@ git config commit.template .gitmessage
 Ao abrir o PR, o `.github/pull_request_template.md` já preenche a descrição — é só completar os
 campos.
 
+## Supabase
+
+O projeto usa o [Supabase](https://supabase.com/) como backend. A conexão já está configurada em `src/services/supabaseClient.ts`.
+
+### Configuração do ambiente
+
+Copie o arquivo de exemplo e preencha com as suas credenciais:
+
+```bash
+cp .env.example .env.local
+```
+
+Você encontra os valores no painel do Supabase, em **Connect**:
+
+```
+VITE_SUPABASE_URL=<sua_supabase_url>
+VITE_SUPABASE_PUBLISHABLE_KEY=<sua_publishable_key>
+```
+
+> O `.env.local` **não vai para o Git**. Nunca commite credenciais.
+
+### Como usar nos services
+
+Sempre que precisar buscar ou enviar dados, importe o cliente no arquivo de service correspondente em `src/services/`:
+
+```ts
+import { supabase } from './supabaseClient';
+
+export async function getLivros() {
+  const { data, error } = await supabase.from('livros').select();
+  if (error) throw error;
+  return data;
+}
+```
+
+Os componentes e páginas **nunca** importam o `supabaseClient` diretamente — toda comunicação com o banco passa pelos `services/`.
+
+---
+
 ## Documentação
 
 Para acessar a documentação do projeto, [clique aqui](https://tools.ages.pucrs.br/clube-de-leitura-d-elas/wiki/-/wikis/home).
