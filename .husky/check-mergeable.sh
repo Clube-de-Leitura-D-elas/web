@@ -1,14 +1,14 @@
 #!/bin/sh
-# Bloqueia o commit se a branch não puder ser mesclada na main sem conflito.
+# Bloqueia o commit se a branch não puder ser mesclada na develop sem conflito.
 #
 # Roda depois do lint-staged, então o que é testado é exatamente o commit que
 # está prestes a nascer: a árvore do índice (já com as correções do Prettier e
-# do ESLint) sobre o HEAD atual, mesclada com a origin/main.
+# do ESLint) sobre o HEAD atual, mesclada com a origin/develop.
 #
 # A checagem é feita com `git merge-tree`, que resolve a mesclagem em memória:
 # nada é escrito no working tree e nenhuma branch é alterada.
 
-BASE_BRANCH='main'
+BASE_BRANCH='develop'
 REMOTE='origin'
 
 aviso() {
@@ -17,7 +17,7 @@ aviso() {
   exit 0
 }
 
-# Na própria main não há o que checar.
+# Na própria develop não há o que checar.
 if [ "$(git rev-parse --abbrev-ref HEAD)" = "$BASE_BRANCH" ]; then
   exit 0
 fi
@@ -29,7 +29,7 @@ git rev-parse --verify --quiet HEAD >/dev/null || exit 0
 git merge-tree --write-tree HEAD HEAD >/dev/null 2>&1 ||
   aviso "seu git não suporta 'merge-tree --write-tree' (precisa da versão 2.38 ou maior)"
 
-# Atualiza a referência local da main. Se estiver sem rede, seguimos com a
+# Atualiza a referência local da develop. Se estiver sem rede, seguimos com a
 # cópia que já existe: falta de internet não pode travar o commit de ninguém.
 if ! git fetch --quiet --no-tags "$REMOTE" "$BASE_BRANCH" 2>/dev/null; then
   echo "husky > aviso: não deu para buscar a $BASE_BRANCH em $REMOTE (sem rede?)." >&2
@@ -68,7 +68,7 @@ echo "" >&2
 echo "  Arquivos em conflito:" >&2
 printf '%s\n' "$conflitos" | sed 's/^/    - /' >&2
 echo "" >&2
-echo "  Traga a main para a sua branch e resolva os conflitos antes de commitar:" >&2
+echo "  Traga a develop para a sua branch e resolva os conflitos antes de commitar:" >&2
 echo "" >&2
 echo "    git merge $REMOTE/$BASE_BRANCH" >&2
 echo "" >&2

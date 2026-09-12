@@ -1,10 +1,16 @@
 /**
  * Tema do Clube de Leitura D'Elas.
  *
- * As cores vêm da coleção "Cores" do Figma. Cada token é uma chave direta do tema,
- * então dentro de qualquer `styles.ts` você escreve apenas:
+ * As cores vêm da coleção "Cores" do Figma. Cada token é uma chave direta do tema.
+ * Dentro de qualquer `styles.ts`, envolva o CSS do componente em uma única função que
+ * recebe o `theme` (e as props com `$`) e use `${theme.<cor>}` direto:
  *
- *   background-color: ${({ theme }) => theme.primary};
+ *   export const Container = styled.div<{ $active: boolean }>`
+ *     ${({ theme, $active }) => css`
+ *       background-color: ${theme.surface};
+ *       color: ${$active ? theme.primary : theme.text};
+ *     `}
+ *   `;
  *
  * Regra do projeto: NUNCA use hex fixo em componente. Sempre `theme.<cor>`.
  * Se a cor que você precisa não existe aqui, fale com a liderança técnica antes de inventar.

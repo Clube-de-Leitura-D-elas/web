@@ -21,5 +21,14 @@
   },
   "layout": {
     "openMenu": "Abrir menu"
+  },
+  "table": {
+    "summary": "Mostrando {{start}}–{{end}} de {{total}} {{itemLabel}}",
+    "defaultItemLabel": "registros",
+    "empty": "Nenhum registro encontrado.",
+    "paginationLabel": "Paginação da tabela",
+    "previousPage": "Página anterior",
+    "nextPage": "Próxima página",
+    "goToPage": "Ir para a página {{page}}"
   }
 }

@@ -1,5 +1,5 @@
 # Formata e corrige apenas os arquivos que estão no stage.
 yarn lint-staged
 
-# Bloqueia o commit se a branch conflitar com a origin/main.
+# Bloqueia o commit se a branch conflitar com a origin/develop.
 sh "$(dirname "$0")/check-mergeable.sh"
