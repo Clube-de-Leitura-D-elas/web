@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import styled, { css } from 'styled-components';
-import { Tag } from '../Tag/Tag';
+import { Tag } from '../Tag';
 import { Table, type TableColumn, type TableRow } from '.';
 
 const GroupName = styled.div`

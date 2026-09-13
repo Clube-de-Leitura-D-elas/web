@@ -42,7 +42,13 @@ base="$(git rev-parse --verify --quiet "$REMOTE/$BASE_BRANCH")"
 # Monta, sem commitar, o commit que o `git commit` vai criar.
 tree="$(git write-tree 2>/dev/null)" ||
   aviso "índice com arquivos não resolvidos (merge ou rebase em andamento?)"
-candidate="$(git commit-tree "$tree" -p HEAD -m 'husky: checagem de conflito' 2>/dev/null)" ||
+# Num commit de merge, o MERGE_HEAD também é pai; sem ele a checagem ignoraria
+# a mesclagem em andamento e acusaria o mesmo conflito que ela resolve.
+parents="-p HEAD"
+merge_head="$(git rev-parse --verify --quiet MERGE_HEAD)" && parents="$parents -p $merge_head"
+
+# shellcheck disable=SC2086
+candidate="$(git commit-tree "$tree" $parents -m 'husky: checagem de conflito' 2>/dev/null)" ||
   aviso "não foi possível montar o commit de teste"
 
 saida="$(git merge-tree --write-tree --name-only "$base" "$candidate" 2>/dev/null)"

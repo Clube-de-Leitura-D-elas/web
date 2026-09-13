@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import type { TagColor } from './Tag';
+import type { TagColor } from '.';
 
 export const Container = styled.span<{ $color: TagColor }>`
   display: inline-flex;

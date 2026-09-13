@@ -1,14 +1,10 @@
 import { Route, Routes } from 'react-router';
-import Home from './pages/Home.tsx';
-import NotFound from './pages/NotFound.tsx';
+import { DefaultLayout } from './layouts/DefaultLayout';
 
-function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  );
-}
+export const App = () => (
+  <Routes>
+    <Route element={<DefaultLayout />}>{/* para páginas com sidebar coloque aqui */}</Route>
 
-export default App;
+    {/* para páginas sem sidebar coloque aqui*/}
+  </Routes>
+);
