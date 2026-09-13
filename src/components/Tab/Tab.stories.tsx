@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { Tabs } from '.';
-import { Tag } from '../Tag/Tag';
+import { Tag } from '../Tag';
 
 const meta = {
   title: 'Componentes/Tab',
