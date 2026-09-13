@@ -106,7 +106,6 @@ const pulse = keyframes`
   }
 `;
 
-/** Barra do skeleton. Ocupa a mesma altura de uma linha de texto da célula (1.25rem). */
 export const Skeleton = styled.span<{ $width: string }>`
   ${({ theme, $width }) => css`
     display: block;

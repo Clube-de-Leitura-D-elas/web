@@ -118,7 +118,6 @@ const groups = [
   },
 ];
 
-/** 42 linhas (7 páginas), repetindo os 6 grupos do Figma. */
 const groupRows: TableRow[] = Array.from({ length: 42 }, (_, index) => {
   const group = groups[index % groups.length];
   return {
@@ -142,14 +141,12 @@ const groupRows: TableRow[] = Array.from({ length: 42 }, (_, index) => {
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Simula o backend: devolve só a página pedida, com atraso de rede. */
 const fetchGroupsPage: TableFetchPage = async ({ page, pageSize }) => {
   await wait(800);
   const start = (page - 1) * pageSize;
   return { rows: groupRows.slice(start, start + pageSize), total: groupRows.length };
 };
 
-/** Nunca responde: a tabela fica no skeleton. */
 const fetchForever: TableFetchPage = () => new Promise(() => {});
 
 const fetchWithError: TableFetchPage = async () => {
@@ -242,10 +239,8 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/** Padrão: colunas com a mesma largura e conteúdo centralizado. */
 export const Default: Story = {};
 
-/** Réplica do frame do Figma: alinhamento à esquerda e ações à direita. */
 export const RegisteredGroups: Story = {
   args: {
     columns: groupColumns,
@@ -254,15 +249,10 @@ export const RegisteredGroups: Story = {
   },
 };
 
-/** Sem linhas: mostra a mensagem de tabela vazia. */
 export const Empty: Story = {
   args: { rows: [] },
 };
 
-/**
- * Paginação no backend (simulada com 800 ms de atraso). Páginas novas mostram o skeleton;
- * ao voltar para uma página já vista, ela aparece na hora, sem nova requisição.
- */
 export const ServerPagination: Story = {
   args: {
     columns: groupColumns,
@@ -272,7 +262,6 @@ export const ServerPagination: Story = {
   },
 };
 
-/** Carregando: skeleton com `pageSize` linhas, no mesmo layout das linhas com dados. */
 export const Loading: Story = {
   args: {
     columns: groupColumns,
@@ -282,7 +271,6 @@ export const Loading: Story = {
   },
 };
 
-/** Falha ao buscar a página: mostra a mensagem de erro e o botão de tentar novamente. */
 export const ServerError: Story = {
   args: { rows: undefined, fetchPage: fetchWithError },
 };
