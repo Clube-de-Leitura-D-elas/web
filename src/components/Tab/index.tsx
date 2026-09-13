@@ -4,22 +4,16 @@ import * as Styled from './styles';
 export type TabSize = 'md' | 'lg';
 
 export type Tab = {
-  /** Identificador único da aba, usado para saber qual está ativa. */
   value: string;
-  /** Texto exibido no botão da aba (ex.: "Participantes (3)"). */
   label: string;
-  /** Conteúdo exibido quando essa aba está ativa. Pode ser qualquer coisa: texto, componente, tabela, lista etc. */
   children: ReactNode;
   disabled?: boolean;
 };
 
 export type TabsProps = {
   tabs: Tab[];
-  /** Aba ativa (uso controlado). Se informado, o componente para de controlar o próprio estado. */
   active?: string;
-  /** Aba ativa inicial (uso não controlado). Ignorado se `active` for informado. */
   defaultActive?: string;
-  /** Chamado sempre que o usuário troca de aba. */
   onChange?: (value: string) => void;
   size?: TabSize;
 };
