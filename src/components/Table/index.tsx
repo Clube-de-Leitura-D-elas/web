@@ -14,13 +14,11 @@ export type TableColumn = {
 
 export type TableRow = Record<string, ReactNode>;
 
-/** O que a tabela pede ao backend. `page` começa em 1. */
 export type TablePageRequest = {
   page: number;
   pageSize: number;
 };
 
-/** O que o backend devolve: as linhas da página e o total de registros. */
 export type TablePage = {
   rows: TableRow[];
   total: number;
@@ -37,12 +35,10 @@ type TableBaseProps = {
 export type TableProps = TableBaseProps &
   (
     | {
-        /** Todas as linhas de uma vez; a tabela pagina localmente. */
         rows: TableRow[];
         fetchPage?: never;
       }
     | {
-        /** Busca uma página no backend. Cada página é buscada uma vez e fica guardada. */
         fetchPage: TableFetchPage;
         rows?: never;
       }
@@ -52,14 +48,12 @@ type PageCache = {
   fetchPage?: TableFetchPage;
   pageSize: number;
   pages: Record<number, TableRow[]>;
-  /** `null` até a primeira resposta do backend. */
   total: number | null;
   failedPage: number | null;
 };
 
 const DEFAULT_PAGE_SIZE = 6;
 const MAX_VISIBLE_PAGES = 3;
-/** Larguras alternadas das barras do skeleton, para não parecer uma grade uniforme. */
 const SKELETON_WIDTHS = ['70%', '45%', '60%', '35%', '55%'];
 
 const createCache = (fetchPage: TableFetchPage | undefined, pageSize: number): PageCache => ({
@@ -86,7 +80,6 @@ export const Table = ({
   const [page, setPage] = useState(1);
   const [cache, setCache] = useState(() => createCache(fetchPage, pageSize));
 
-  // Outra fonte de dados (ex.: filtro novo) ou outro pageSize: as páginas guardadas não valem mais.
   if (cache.fetchPage !== fetchPage || cache.pageSize !== pageSize) {
     setCache(createCache(fetchPage, pageSize));
     setPage(1);
@@ -104,7 +97,6 @@ export const Table = ({
   const isCached = pageRows !== undefined;
   const hasError = isRemote && cache.failedPage === currentPage;
   const isLoading = isRemote && !isCached && !hasError;
-  // Enquanto carrega, mostra quantas linhas a página vai ter (a última pode ter menos).
   const skeletonRowCount = isTotalKnown
     ? Math.min(pageSize, Math.max(total - startIndex, 1))
     : pageSize;
@@ -112,7 +104,6 @@ export const Table = ({
   useEffect(() => {
     if (!fetchPage || isCached || hasError) return;
 
-    // Só grava a resposta se a fonte ainda for a mesma de quando a busca começou.
     const isSameSource = (current: PageCache) =>
       current.fetchPage === fetchPage && current.pageSize === pageSize;
 
@@ -152,7 +143,6 @@ export const Table = ({
     itemLabel,
   });
 
-  // Linhas de dados e do skeleton usam o mesmo markup; só o conteúdo da célula muda.
   const renderRow = (
     key: number,
     renderCell: (column: TableColumn, columnIndex: number) => ReactNode,
