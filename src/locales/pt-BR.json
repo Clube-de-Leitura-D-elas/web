@@ -26,6 +26,8 @@
     "summary": "Mostrando {{start}}–{{end}} de {{total}} {{itemLabel}}",
     "defaultItemLabel": "registros",
     "empty": "Nenhum registro encontrado.",
+    "error": "Não foi possível carregar os registros.",
+    "retry": "Tentar novamente",
     "paginationLabel": "Paginação da tabela",
     "previousPage": "Página anterior",
     "nextPage": "Próxima página",

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import styled, { css } from 'styled-components';
 import { Tag } from '../Tag';
-import { Table, type TableColumn, type TableRow } from '.';
+import { Table, type TableColumn, type TableFetchPage, type TableRow } from '.';
 
 const GroupName = styled.div`
   display: flex;
@@ -118,7 +118,6 @@ const groups = [
   },
 ];
 
-/** 42 linhas (7 páginas), repetindo os 6 grupos do Figma. */
 const groupRows: TableRow[] = Array.from({ length: 42 }, (_, index) => {
   const group = groups[index % groups.length];
   return {
@@ -140,6 +139,21 @@ const groupRows: TableRow[] = Array.from({ length: 42 }, (_, index) => {
   };
 });
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const fetchGroupsPage: TableFetchPage = async ({ page, pageSize }) => {
+  await wait(800);
+  const start = (page - 1) * pageSize;
+  return { rows: groupRows.slice(start, start + pageSize), total: groupRows.length };
+};
+
+const fetchForever: TableFetchPage = () => new Promise(() => {});
+
+const fetchWithError: TableFetchPage = async () => {
+  await wait(800);
+  throw new Error('Falha simulada');
+};
+
 const meta = {
   title: 'Componentes/Table',
   component: Table,
@@ -147,7 +161,12 @@ const meta = {
     docs: {
       description: {
         component: [
-          'Tabela paginada. Recebe todas as linhas e mostra `pageSize` por página.',
+          'Tabela paginada. Funciona de dois jeitos:',
+          '',
+          '- **`rows`**: recebe todas as linhas de uma vez e mostra `pageSize` por página.',
+          '- **`fetchPage`**: busca cada página no backend. Páginas já visitadas ficam guardadas,',
+          '  então voltar para uma página não faz outra requisição. Enquanto uma página carrega,',
+          '  a tabela mostra um skeleton com as mesmas linhas e colunas.',
           '',
           '### Como importar',
           '',
@@ -171,13 +190,45 @@ const meta = {
           '  itemLabel="membras"',
           '/>',
           '```',
+          '',
+          '### Paginação no backend',
+          '',
+          'Passe `fetchPage` no lugar de `rows`. A tabela chama `fetchPage({ page, pageSize })`',
+          '(`page` começa em 1) e espera `{ rows, total }`, onde `total` é o número de registros no banco.',
+          'Com o Supabase, use `.range()` e `count: "exact"` no service:',
+          '',
+          '```ts',
+          '// src/services/grupos.ts',
+          'export async function getGruposPage({ page, pageSize }: TablePageRequest) {',
+          '  const from = (page - 1) * pageSize;',
+          '  const { data, error, count } = await supabase',
+          "    .from('grupos')",
+          "    .select('*', { count: 'exact' })",
+          '    .range(from, from + pageSize - 1);',
+          '  if (error) throw error;',
+          '  return { rows: data, total: count ?? 0 };',
+          '}',
+          '```',
+          '',
+          '```tsx',
+          '<Table columns={columns} fetchPage={getGruposPage} itemLabel="grupos" />',
+          '```',
+          '',
+          'As páginas guardadas são descartadas quando `fetchPage` ou `pageSize` mudam, e a tabela volta',
+          'para a página 1. Por isso, se o `fetchPage` depende de um filtro, crie-o com `useCallback`',
+          '(dependendo do filtro); uma função nova a cada render apagaria o cache toda vez.',
         ].join('\n'),
       },
     },
   },
   argTypes: {
     columns: { description: 'Colunas: `key`, `label`, `width?` e `align?`.' },
-    rows: { description: 'Linhas: `{ [column.key]: ReactNode }`.' },
+    rows: { description: 'Linhas: `{ [column.key]: ReactNode }`. Use `rows` ou `fetchPage`.' },
+    fetchPage: {
+      control: false,
+      description:
+        '`({ page, pageSize }) => Promise<{ rows, total }>`. Busca a página no backend. Use `rows` ou `fetchPage`.',
+    },
     pageSize: { control: { type: 'number', min: 1 }, description: 'Linhas por página. Padrão: 6.' },
     itemLabel: { control: 'text', description: 'Nome dos itens no resumo do rodapé.' },
   },
@@ -188,10 +239,8 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/** Padrão: colunas com a mesma largura e conteúdo centralizado. */
 export const Default: Story = {};
 
-/** Réplica do frame do Figma: alinhamento à esquerda e ações à direita. */
 export const RegisteredGroups: Story = {
   args: {
     columns: groupColumns,
@@ -200,7 +249,28 @@ export const RegisteredGroups: Story = {
   },
 };
 
-/** Sem linhas: mostra a mensagem de tabela vazia. */
 export const Empty: Story = {
   args: { rows: [] },
+};
+
+export const ServerPagination: Story = {
+  args: {
+    columns: groupColumns,
+    rows: undefined,
+    fetchPage: fetchGroupsPage,
+    itemLabel: 'grupos cadastrados',
+  },
+};
+
+export const Loading: Story = {
+  args: {
+    columns: groupColumns,
+    rows: undefined,
+    fetchPage: fetchForever,
+    itemLabel: 'grupos cadastrados',
+  },
+};
+
+export const ServerError: Story = {
+  args: { rows: undefined, fetchPage: fetchWithError },
 };
