@@ -1,4 +1,5 @@
 import { Tag } from '../components/Tag/Tag';
+import LoginPage from './LoginPage';
 
 function Home() {
   return (
@@ -10,6 +11,10 @@ function Home() {
       <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
         <Tag>Gestora</Tag>
         <Tag color="neutral">Ficção</Tag>
+      </div>
+
+      <div>
+        <LoginPage />
       </div>
     </main>
   );
