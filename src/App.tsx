@@ -1,10 +1,15 @@
 import { Route, Routes } from 'react-router';
 import { DefaultLayout } from './layouts/DefaultLayout';
+import ParticipantDetails from './pages/Participant';
 
 export const App = () => (
   <Routes>
-    <Route element={<DefaultLayout />}>{/* para páginas com sidebar coloque aqui */}</Route>
+    <Route element={<DefaultLayout />}>
+      {/* outras páginas com sidebar */}
 
-    {/* para páginas sem sidebar coloque aqui*/}
+      <Route path="/participantes/:participantId" element={<ParticipantDetails />} />
+    </Route>
+
+    {/* páginas sem sidebar */}
   </Routes>
 );
