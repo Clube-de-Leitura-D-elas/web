@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { Button } from '../../components/Button';
 import { MOBILE_QUERY, TABLET_QUERY } from '../../layouts/DefaultLayout/styles';
 
-export const Container = styled.div`
+export const Container = styled.main`
   display: flex;
   min-height: 100vh;
   min-height: 100dvh;

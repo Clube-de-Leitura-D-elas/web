@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router';
 import { useAdminAccess } from '../../hooks/useAdminAccess';
 import { locale } from '../../locales';
 
-export default function ProtectedAdminRoute() {
+export const ProtectedAdminRoute = () => {
   const access = useAdminAccess();
 
   if (access === 'checking') {
@@ -14,4 +14,4 @@ export default function ProtectedAdminRoute() {
   }
 
   return <Outlet />;
-}
+};

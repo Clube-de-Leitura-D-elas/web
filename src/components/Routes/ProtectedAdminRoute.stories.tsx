@@ -4,11 +4,11 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 
 import { DefaultLayout } from '../../layouts/DefaultLayout';
 import { locale } from '../../locales';
-import LoginPage from '../../pages/Login';
+import { LoginPage } from '../../pages/Login';
 import { AuthServiceError } from '../../services/authErrors';
 import { getProfileByCurrentUser, signOut } from '../../services/authService';
 
-import ProtectedAdminRoute from './ProtectedAdminRoute';
+import { ProtectedAdminRoute } from './ProtectedAdminRoute';
 
 const PROTECTED_CONTENT = 'Conteúdo protegido';
 

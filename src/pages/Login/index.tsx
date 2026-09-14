@@ -21,7 +21,7 @@ const getErrorMessage = (error: unknown) =>
     ? text.errors.invalidCredentials
     : text.errors.generic;
 
-export default function LoginPage() {
+export const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,4 +111,4 @@ export default function LoginPage() {
       </Styled.FormPanel>
     </Styled.Container>
   );
-}
+};

@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router';
-import ProtectedAdminRoute from './components/Routes/ProtectedAdminRoute';
+import { ProtectedAdminRoute } from './components/Routes/ProtectedAdminRoute';
 import { DefaultLayout } from './layouts/DefaultLayout';
-import LoginPage from './pages/Login';
+import { LoginPage } from './pages/Login';
 
 export const App = () => (
   <Routes>

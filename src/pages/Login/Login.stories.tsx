@@ -8,7 +8,7 @@ import { AuthServiceError } from '../../services/authErrors';
 import { getProfileByCurrentUser, signInWithPassword, signOut } from '../../services/authService';
 import type { UserProfile } from '../../types/auth';
 
-import LoginPage from '.';
+import { LoginPage } from '.';
 
 const REQUEST_DELAY = 400;
 
