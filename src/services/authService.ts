@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import type { AppRole, UserProfile } from '../types/auth';
+import { ADMIN_ROLES, type AppRole, type UserProfile } from '../types/auth';
 
 export type LoginPayload = {
   email: string;
@@ -24,6 +24,17 @@ export async function signOut() {
   if (error) {
     throw error;
   }
+}
+
+/** Avisa quando a sessão termina: logout (nesta ou em outra aba) ou token que não pôde ser renovado. */
+export function onSignOut(callback: () => void) {
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_OUT') callback();
+  });
+
+  return () => subscription.unsubscribe();
 }
 
 export async function getCurrentSession() {
@@ -76,5 +87,5 @@ export async function getProfileByCurrentUser(): Promise<UserProfile | null> {
 }
 
 export function hasAdminRole(appRole?: AppRole) {
-  return appRole === 'FOUNDER';
+  return !!appRole && ADMIN_ROLES.has(appRole);
 }

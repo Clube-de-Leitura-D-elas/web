@@ -22,6 +22,33 @@
   "layout": {
     "openMenu": "Abrir menu"
   },
+  "auth": {
+    "loading": "Carregando..."
+  },
+  "login": {
+    "brand": {
+      "logoAlt": "Clube de Leitura D'Elas",
+      "name": "Clube de Leitura D'Elas",
+      "subtitle": "Painel de Gestão"
+    },
+    "title": "Seja bem-vinda",
+    "subtitle": "Acesse com suas credenciais de gestão.",
+    "email": {
+      "label": "E-mail",
+      "placeholder": "gestora@gmail.com"
+    },
+    "password": {
+      "label": "Senha",
+      "placeholder": "••••••••"
+    },
+    "submit": "Entrar no Painel",
+    "submitting": "Entrando...",
+    "errors": {
+      "invalidCredentials": "E-mail ou senha incorretos.",
+      "noAccess": "Seu perfil não tem acesso ao painel de gestão.",
+      "generic": "Não foi possível entrar. Tente novamente."
+    }
+  },
   "table": {
     "summary": "Mostrando {{start}}–{{end}} de {{total}} {{itemLabel}}",
     "defaultItemLabel": "registros",
