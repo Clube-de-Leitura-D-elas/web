@@ -39,7 +39,7 @@ const formatBirthDate = (birthDate: string | null) => {
     return locale.participant_details.notInformed;
   }
 
-  const [, month, day] = birthDate.split('-');
+  const [, month, day] = birthDate.slice(0, 10).split('-');
 
   if (!day || !month) {
     return birthDate;
@@ -48,20 +48,32 @@ const formatBirthDate = (birthDate: string | null) => {
   return `${day}/${month}`;
 };
 
-function ParticipantDetails() {
-  const navigate = useNavigate();
+const toTelHref = (phone: string) => {
+  const digits = phone.replace(/\D/g, '');
 
+  return phone.trim().startsWith('+') ? `tel:+${digits}` : `tel:+55${digits}`;
+};
+
+export const ParticipantDetails = () => {
   const { participantId } = useParams<{
     participantId: string;
   }>();
+
+  return <ParticipantProfile key={participantId} participantId={participantId} />;
+};
+
+const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
+  const navigate = useNavigate();
 
   const [participant, setParticipant] = useState<Participant | null>(null);
 
   const [presence, setPresence] = useState<ParticipantPresence[]>([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(participantId));
 
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(
+    participantId ? null : locale.participant_details.loadError,
+  );
 
   const [statusError, setStatusError] = useState<string | null>(null);
 
@@ -240,7 +252,7 @@ function ParticipantDetails() {
 
               {participant.phone && (
                 <Styled.ContactItem
-                  href={`tel:${participant.phone}`}
+                  href={toTelHref(participant.phone)}
                   aria-label={interpolate(locale.participant_details.contact.phoneAria, {
                     name: participant.name,
                   })}
@@ -267,6 +279,7 @@ function ParticipantDetails() {
               <Styled.DetailLabel>{locale.participant_details.details.presence}</Styled.DetailLabel>
 
               <Styled.Presence
+                role="img"
                 aria-label={interpolate(locale.participant_details.details.presenceAria, {
                   present: presenceCount,
                   total: presence.length,
@@ -314,6 +327,4 @@ function ParticipantDetails() {
       )}
     </Styled.Page>
   );
-}
-
-export default ParticipantDetails;
+};

@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router';
 import { DefaultLayout } from './layouts/DefaultLayout';
-import ParticipantDetails from './pages/Participant';
+import { ParticipantDetails } from './pages/Participant';
 
 export const App = () => (
   <Routes>

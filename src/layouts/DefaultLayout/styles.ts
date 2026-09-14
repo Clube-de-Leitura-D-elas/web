@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { theme } from '../../theme/theme';
 
 export const MOBILE_QUERY = '(max-width: 767px)';
 export const TABLET_QUERY = '(max-width: 1023px)';
@@ -115,4 +116,10 @@ export const TopBarBrand = styled.span`
 export const Content = styled.main`
   flex: 1;
   min-width: 0;
+  padding: 2rem;
+  background-color: ${theme.backgroundSubtle};
+
+  @media ${MOBILE_QUERY} {
+    padding: 1.5rem 1rem;
+  }
 `;

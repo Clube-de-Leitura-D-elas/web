@@ -1,13 +1,9 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import { theme } from '../../theme/theme';
 
-export const Page = styled.main`
-  ${({ theme }) => css`
-    width: 100%;
-    min-width: 0;
-    min-height: 100%;
-    padding: 2rem 4rem 4rem;
-    background-color: ${theme.backgroundSubtle};
-  `}
+export const Page = styled.div`
+  width: 100%;
+  min-width: 0;
 `;
 
 export const PageHeader = styled.div`
@@ -18,53 +14,47 @@ export const PageHeader = styled.div`
 `;
 
 export const BackButton = styled.button`
-  ${({ theme }) => css`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    border: none;
-    background: transparent;
-    color: ${theme.text};
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: ${theme.text};
+  cursor: pointer;
 
-    svg {
-      width: 1.5rem;
-      height: 1.5rem;
-    }
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
 
-    &:hover {
-      color: ${theme.textBrand};
-    }
+  &:hover {
+    color: ${theme.textBrand};
+  }
 
-    &:focus-visible {
-      outline: 2px solid ${theme.focusRing};
-      outline-offset: 0.25rem;
-      border-radius: 0.25rem;
-    }
-  `}
+  &:focus-visible {
+    outline: 2px solid ${theme.focusRing};
+    outline-offset: 0.25rem;
+    border-radius: 0.25rem;
+  }
 `;
 
 export const PageTitle = styled.h1`
-  ${({ theme }) => css`
-    margin: 0;
-    color: ${theme.text};
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 2.5rem;
-  `}
+  margin: 0;
+  color: ${theme.text};
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 2.5rem;
 `;
 
 export const Card = styled.section`
-  ${({ theme }) => css`
-    display: flex;
-    flex-direction: column;
-    gap: 3rem;
-    width: 100%;
-    padding: 3rem;
-    border-radius: 2rem;
-    background-color: ${theme.surface};
-  `}
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  width: 100%;
+  padding: 3rem;
+  border-radius: 2rem;
+  background-color: ${theme.surface};
 `;
 
 export const ProfileHeader = styled.div`
@@ -83,22 +73,20 @@ export const ProfileArea = styled.div`
 `;
 
 export const Avatar = styled.div`
-  ${({ theme }) => css`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: 50%;
-    background-color: ${theme.surfaceBrandSoft};
-    color: ${theme.textBrand};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  background-color: ${theme.surfaceBrandSoft};
+  color: ${theme.textBrand};
 
-    svg {
-      width: 3rem;
-      height: 3rem;
-    }
-  `}
+  svg {
+    width: 3rem;
+    height: 3rem;
+  }
 `;
 
 export const ProfileInfo = styled.div`
@@ -109,14 +97,12 @@ export const ProfileInfo = styled.div`
 `;
 
 export const ParticipantName = styled.h2`
-  ${({ theme }) => css`
-    margin: 0;
-    color: ${theme.text};
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.5rem;
-    text-transform: uppercase;
-  `}
+  margin: 0;
+  color: ${theme.text};
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5rem;
+  text-transform: uppercase;
 `;
 
 export const StatusArea = styled.div`
@@ -127,11 +113,9 @@ export const StatusArea = styled.div`
 `;
 
 export const StatusError = styled.span`
-  ${({ theme }) => css`
-    color: ${theme.error};
-    font-size: 0.75rem;
-    line-height: 1rem;
-  `}
+  color: ${theme.error};
+  font-size: 0.75rem;
+  line-height: 1rem;
 `;
 
 export const Contacts = styled.div`
@@ -142,36 +126,34 @@ export const Contacts = styled.div`
 `;
 
 export const ContactItem = styled.a`
-  ${({ theme }) => css`
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-width: 0;
-    color: ${theme.textMuted};
-    font-size: 0.75rem;
-    line-height: 1rem;
-    text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  color: ${theme.textMuted};
+  font-size: 0.75rem;
+  line-height: 1rem;
+  text-decoration: none;
 
-    svg {
-      flex-shrink: 0;
-      width: 1rem;
-      height: 1rem;
-    }
+  svg {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+  }
 
-    span {
-      overflow-wrap: anywhere;
-    }
+  span {
+    overflow-wrap: anywhere;
+  }
 
-    &:hover {
-      color: ${theme.textBrand};
-    }
+  &:hover {
+    color: ${theme.textBrand};
+  }
 
-    &:focus-visible {
-      outline: 2px solid ${theme.focusRing};
-      outline-offset: 0.25rem;
-      border-radius: 0.25rem;
-    }
-  `}
+  &:focus-visible {
+    outline: 2px solid ${theme.focusRing};
+    outline-offset: 0.25rem;
+    border-radius: 0.25rem;
+  }
 `;
 
 export const TableArea = styled.div`
@@ -180,10 +162,8 @@ export const TableArea = styled.div`
 `;
 
 export const GroupNumber = styled.span`
-  ${({ theme }) => css`
-    color: ${theme.text};
-    font-weight: 600;
-  `}
+  color: ${theme.text};
+  font-weight: 600;
 `;
 
 export const DetailsGrid = styled.div`
@@ -213,21 +193,17 @@ export const Detail = styled.div`
 `;
 
 export const DetailLabel = styled.span`
-  ${({ theme }) => css`
-    color: ${theme.textMuted};
-    font-size: 0.75rem;
-    line-height: 1rem;
-  `}
+  color: ${theme.textMuted};
+  font-size: 0.75rem;
+  line-height: 1rem;
 `;
 
 export const DetailValue = styled.span`
-  ${({ theme }) => css`
-    color: ${theme.text};
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.25rem;
-    overflow-wrap: anywhere;
-  `}
+  color: ${theme.text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  overflow-wrap: anywhere;
 `;
 
 export const Presence = styled.div`
@@ -239,22 +215,20 @@ export const Presence = styled.div`
 export const PresenceDot = styled.span<{
   $present: boolean;
 }>`
-  ${({ theme, $present }) => css`
-    display: block;
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-    background-color: ${$present ? theme.primary : theme.surfaceBrandSoft};
-  `}
+  display: block;
+  box-sizing: border-box;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  border: 2px solid ${({ $present }) => ($present ? theme.primary : theme.borderBrand)};
+  background-color: ${({ $present }) => ($present ? theme.primary : 'transparent')};
 `;
 
 export const Message = styled.p<{
   $error?: boolean;
 }>`
-  ${({ theme, $error }) => css`
-    margin: 0;
-    color: ${$error ? theme.error : theme.textMuted};
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  `}
+  margin: 0;
+  color: ${({ $error }) => ($error ? theme.error : theme.textMuted)};
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 `;

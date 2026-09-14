@@ -61,8 +61,8 @@
       "itemLabel": "grupos",
 
       "columns": {
-        "name": "Nome do grupo",
-        "status": "Status",
+        "name": "Grupo",
+        "status": "Função",
         "city": "Cidade"
       },
 

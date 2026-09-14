@@ -12,7 +12,7 @@ import {
 } from '../../services/participantService';
 import type { Participant, ParticipantGroup, ParticipantPresence } from '../../types/participant';
 
-import ParticipantDetails from '.';
+import { ParticipantDetails } from '.';
 
 const REQUEST_DELAY = 400;
 
