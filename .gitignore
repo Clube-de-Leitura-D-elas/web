@@ -29,3 +29,6 @@ dist-ssr
 
 # Storybook
 storybook-static
+
+# Cloudflare Wrangler
+.wrangler
