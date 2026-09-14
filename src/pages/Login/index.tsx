@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router';
-import { isAuthApiError } from '@supabase/supabase-js';
 import logoDelas from '../../assets/logo-delas.png';
 import { Input } from '../../components/Input';
 import { useAdminAccess } from '../../hooks/useAdminAccess';
 import { locale } from '../../locales';
+import { AuthServiceError } from '../../services/authErrors';
 import {
   getProfileByCurrentUser,
   hasAdminRole,
@@ -15,8 +15,9 @@ import * as Styled from './styles';
 
 const text = locale.login;
 
+// A mesma mensagem para e-mail inexistente e senha errada, para não revelar quais e-mails têm conta.
 const getErrorMessage = (error: unknown) =>
-  isAuthApiError(error) && error.code === 'invalid_credentials'
+  error instanceof AuthServiceError && error.code === 'invalid_credentials'
     ? text.errors.invalidCredentials
     : text.errors.generic;
 
@@ -83,7 +84,7 @@ export default function LoginPage() {
                 type="email"
                 label={text.email.label}
                 placeholder={text.email.placeholder}
-                autoComplete="email"
+                autoComplete="username"
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}

@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { AuthApiError, type User } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 import { expect, mocked } from 'storybook/test';
 import { MemoryRouter, Route, Routes } from 'react-router';
 
 import { locale } from '../../locales';
+import { AuthServiceError } from '../../services/authErrors';
 import { getProfileByCurrentUser, signInWithPassword, signOut } from '../../services/authService';
 import type { UserProfile } from '../../types/auth';
 
@@ -39,7 +40,7 @@ const mockLogin = (profile: UserProfile) => {
   });
 
   mocked(getProfileByCurrentUser).mockImplementation(async () => {
-    if (!signedIn) throw new Error('Usuário não autenticado');
+    if (!signedIn) throw new AuthServiceError('unauthenticated');
     await wait(REQUEST_DELAY);
 
     return profile;
@@ -156,9 +157,7 @@ export const Submitting: Story = {
 
 export const InvalidCredentials: Story = {
   beforeEach: () => {
-    mocked(signInWithPassword).mockRejectedValue(
-      new AuthApiError('Invalid login credentials', 400, 'invalid_credentials'),
-    );
+    mocked(signInWithPassword).mockRejectedValue(new AuthServiceError('invalid_credentials'));
   },
 
   play: async (context) => {
@@ -185,9 +184,7 @@ export const NoAccess: Story = {
 
 export const LoadError: Story = {
   beforeEach: () => {
-    mocked(getProfileByCurrentUser).mockRejectedValue(
-      new Error('Não foi possível carregar o perfil'),
-    );
+    mocked(getProfileByCurrentUser).mockRejectedValue(new AuthServiceError('unknown'));
   },
 
   play: async (context) => {

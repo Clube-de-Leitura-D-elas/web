@@ -3,6 +3,7 @@ import { ThemeProvider } from 'styled-components';
 import { GlobalStyle } from '../src/theme/GlobalStyle';
 import { theme } from '../src/theme/theme';
 import { mocked, sb } from 'storybook/test';
+import { AuthServiceError } from '../src/services/authErrors';
 import { getProfileByCurrentUser, onSignOut, signOut } from '../src/services/authService';
 import type { UserProfile } from '../src/types/auth';
 
@@ -30,7 +31,7 @@ const preview: Preview = {
     const signOutListeners = new Set<() => void>();
 
     mocked(getProfileByCurrentUser).mockImplementation(async () => {
-      if (!profile) throw new Error('Usuário não autenticado');
+      if (!profile) throw new AuthServiceError('unauthenticated');
       return profile;
     });
 

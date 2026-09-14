@@ -1,10 +1,26 @@
+import { isAuthApiError } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient';
+import { AuthServiceError } from './authErrors';
 import { ADMIN_ROLES, type AppRole, type UserProfile } from '../types/auth';
 
 export type LoginPayload = {
   email: string;
   password: string;
 };
+
+type UserProfileResponse = {
+  profile: UserProfile | null;
+};
+
+/** Troca o erro original por um erro de domínio, registrando o original só no console. */
+function toAuthServiceError(error: unknown) {
+  if (isAuthApiError(error) && error.code === 'invalid_credentials') {
+    return new AuthServiceError('invalid_credentials', error);
+  }
+
+  console.error('[authService]', error);
+  return new AuthServiceError('unknown', error);
+}
 
 export async function signInWithPassword(payload: LoginPayload) {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -13,7 +29,7 @@ export async function signInWithPassword(payload: LoginPayload) {
   });
 
   if (error) {
-    throw error;
+    throw toAuthServiceError(error);
   }
 
   return data.user;
@@ -22,7 +38,7 @@ export async function signInWithPassword(payload: LoginPayload) {
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) {
-    throw error;
+    throw toAuthServiceError(error);
   }
 }
 
@@ -37,53 +53,30 @@ export function onSignOut(callback: () => void) {
   return () => subscription.unsubscribe();
 }
 
-export async function getCurrentSession() {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) {
-    throw error;
-  }
-  return data.session;
-}
-
-export async function getCurrentUser() {
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  if (error) {
-    throw error;
-  }
-  return user;
-}
-
 export async function getProfileByCurrentUser(): Promise<UserProfile | null> {
   const {
     data: { session },
     error: sessionError,
   } = await supabase.auth.getSession();
 
-  if (sessionError || !session?.access_token) {
-    throw sessionError ?? new Error('Usuário não autenticado');
+  if (sessionError) {
+    throw toAuthServiceError(sessionError);
   }
 
-  const response = await fetch(
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-profile`,
-    {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    },
-  );
-
-  if (!response.ok) {
-    const payload = await response.json().catch(() => undefined);
-    throw new Error(payload?.error ?? 'Não foi possível carregar o perfil');
+  if (!session) {
+    throw new AuthServiceError('unauthenticated');
   }
 
-  const body = await response.json();
-  return body.profile as UserProfile | null;
+  // O invoke já envia o token da sessão e resolve a URL a partir do client.
+  const { data, error } = await supabase.functions.invoke<UserProfileResponse>('get-user-profile', {
+    method: 'GET',
+  });
+
+  if (error) {
+    throw toAuthServiceError(error);
+  }
+
+  return data?.profile ?? null;
 }
 
 export function hasAdminRole(appRole?: AppRole) {
