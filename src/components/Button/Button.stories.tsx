@@ -112,11 +112,11 @@ export const Variantes: Story = {
   ),
 };
 
-/** Comparação dos três tamanhos: Sm (32px), Md (40px) e Lg (56px). */
+/** Comparação dos três tamanhos: Sm (28px), Md (40px) e Lg (56px). */
 export const Tamanhos: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-      <Button size="sm">Sm - 32px</Button>
+      <Button size="sm">Sm - 28px</Button>
       <Button size="md">Md - 40px</Button>
       <Button size="lg">Lg - 56px</Button>
     </div>

@@ -19,6 +19,7 @@
     },
     "logout": "Sair"
   },
+
   "layout": {
     "openMenu": "Abrir menu"
   },
@@ -65,6 +66,52 @@
     "previousPage": "Página anterior",
     "nextPage": "Próxima página",
     "goToPage": "Ir para a página {{page}}"
+  },
+
+  "participant_details": {
+    "title": "Participante",
+    "back": "Voltar para participantes",
+    "loading": "Carregando participante...",
+    "loadError": "Não foi possível carregar os dados da participante.",
+    "updateStatusError": "Não foi possível atualizar o status da participante.",
+    "notInformed": "Não informado",
+
+    "status": {
+      "active": "Ativa",
+      "inactive": "Inativa",
+      "activate": "Tornar ativo",
+      "deactivate": "Tornar inativo"
+    },
+
+    "contact": {
+      "emailAria": "Enviar e-mail para {{name}}",
+      "instagramAria": "Abrir Instagram de {{name}}",
+      "phoneAria": "Ligar para {{name}}"
+    },
+
+    "groups": {
+      "itemLabel": "grupos",
+
+      "columns": {
+        "name": "Grupo",
+        "status": "Função",
+        "city": "Cidade"
+      },
+
+      "roles": {
+        "coordinator": "Coordenadora",
+        "member": "Membro"
+      }
+    },
+
+    "details": {
+      "presence": "Presença (últimos 5)",
+      "presenceAria": "{{present}} de {{total}} presenças nos últimos encontros",
+      "city": "Cidade",
+      "zone": "Zona",
+      "birthday": "Aniversário",
+      "occupation": "Trabalho"
+    }
   },
 
   "participants": {
