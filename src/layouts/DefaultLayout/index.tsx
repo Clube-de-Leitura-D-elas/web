@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { LuMenu } from 'react-icons/lu';
-import { Outlet } from 'react-router';
+import { Outlet, useNavigate } from 'react-router';
 import logoDelas from '../../assets/logo-delas.png';
 import { Sidebar, type SidebarUser } from '../../components/Sidebar/Sidebar';
 import { useLocale } from '../../hooks/useLocale';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { signOut } from '../../services/authService';
 import * as Styled from './styles';
 
 const CURRENT_USER: SidebarUser = { name: 'Claudine' };
@@ -29,6 +30,16 @@ export const DefaultLayout = () => {
 
   const drawerOpen = isMobile && menuOpen;
   const closeMenu = () => setMenuOpen(false);
+
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/login', { replace: true });
+    } catch {
+      // Se o logout falhar, a sessão continua válida e a usuária segue no painel.
+    }
+  };
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -70,6 +81,7 @@ export const DefaultLayout = () => {
           collapsed={isMobile ? false : collapsed}
           onToggleCollapse={isMobile ? closeMenu : () => setCollapsed((value) => !value)}
           onNavigate={closeMenu}
+          onLogout={handleLogout}
         />
       </Styled.SidebarSlot>
 
