@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { LuArrowLeft, LuInstagram, LuMail, LuPhone, LuUserRound } from 'react-icons/lu';
+import { LuArrowLeft } from 'react-icons/lu';
 import { useNavigate, useParams } from 'react-router';
 
-import { Button } from '../../components/Button';
 import { Table, type TableColumn, type TableFetchPage } from '../../components/Table';
 import { Tag } from '../../components/Tag';
-import { interpolate, locale } from '../../locales';
+import { locale } from '../../locales';
 import {
   getParticipantById,
   getParticipantGroups,
@@ -14,6 +13,9 @@ import {
 } from '../../services/participantService';
 import type { Participant, ParticipantPresence } from '../../types/participant';
 
+import { ParticipantContacts } from './ParticipantContacts';
+import { ParticipantInfoGrid } from './ParticipantInfoGrid';
+import { ParticipantSummary } from './ParticipantSummary';
 import * as Styled from './styles';
 
 const columns: TableColumn[] = [
@@ -33,26 +35,6 @@ const columns: TableColumn[] = [
     align: 'left',
   },
 ];
-
-const formatBirthDate = (birthDate: string | null) => {
-  if (!birthDate) {
-    return locale.participant_details.notInformed;
-  }
-
-  const [, month, day] = birthDate.slice(0, 10).split('-');
-
-  if (!day || !month) {
-    return birthDate;
-  }
-
-  return `${day}/${month}`;
-};
-
-const toTelHref = (phone: string) => {
-  const digits = phone.replace(/\D/g, '');
-
-  return phone.trim().startsWith('+') ? `tel:+${digits}` : `tel:+55${digits}`;
-};
 
 export const ParticipantDetails = () => {
   const { participantId } = useParams<{
@@ -167,10 +149,6 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
     }
   };
 
-  const presenceCount = presence.filter((item) => item.present).length;
-
-  const instagramUsername = participant?.instagram?.replace(/^@/, '');
-
   return (
     <Styled.Page>
       <Styled.PageHeader>
@@ -192,77 +170,14 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
       {!loading && !loadError && participant && (
         <Styled.Card>
           <Styled.ProfileHeader>
-            <Styled.ProfileArea>
-              <Styled.Avatar aria-hidden>
-                <LuUserRound />
-              </Styled.Avatar>
+            <ParticipantSummary
+              participant={participant}
+              savingStatus={savingStatus}
+              statusError={statusError}
+              onToggleActive={handleToggleActive}
+            />
 
-              <Styled.ProfileInfo>
-                <Styled.ParticipantName>{participant.name}</Styled.ParticipantName>
-
-                <Styled.StatusArea>
-                  <Tag color={participant.active ? 'primary' : 'neutral'}>
-                    {participant.active
-                      ? locale.participant_details.status.active
-                      : locale.participant_details.status.inactive}
-                  </Tag>
-
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled={savingStatus}
-                    onClick={handleToggleActive}
-                  >
-                    {participant.active
-                      ? locale.participant_details.status.deactivate
-                      : locale.participant_details.status.activate}
-                  </Button>
-                </Styled.StatusArea>
-
-                {statusError && <Styled.StatusError>{statusError}</Styled.StatusError>}
-              </Styled.ProfileInfo>
-            </Styled.ProfileArea>
-
-            <Styled.Contacts>
-              <Styled.ContactItem
-                href={`mailto:${participant.email}`}
-                aria-label={interpolate(locale.participant_details.contact.emailAria, {
-                  name: participant.name,
-                })}
-              >
-                <LuMail aria-hidden />
-
-                <span>{participant.email}</span>
-              </Styled.ContactItem>
-
-              {participant.instagram && instagramUsername && (
-                <Styled.ContactItem
-                  href={`https://instagram.com/${instagramUsername}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={interpolate(locale.participant_details.contact.instagramAria, {
-                    name: participant.name,
-                  })}
-                >
-                  <LuInstagram aria-hidden />
-
-                  <span>{participant.instagram}</span>
-                </Styled.ContactItem>
-              )}
-
-              {participant.phone && (
-                <Styled.ContactItem
-                  href={toTelHref(participant.phone)}
-                  aria-label={interpolate(locale.participant_details.contact.phoneAria, {
-                    name: participant.name,
-                  })}
-                >
-                  <LuPhone aria-hidden />
-
-                  <span>{participant.phone}</span>
-                </Styled.ContactItem>
-              )}
-            </Styled.Contacts>
+            <ParticipantContacts participant={participant} />
           </Styled.ProfileHeader>
 
           <Styled.TableArea>
@@ -274,55 +189,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
             />
           </Styled.TableArea>
 
-          <Styled.DetailsGrid>
-            <Styled.Detail>
-              <Styled.DetailLabel>{locale.participant_details.details.presence}</Styled.DetailLabel>
-
-              <Styled.Presence
-                role="img"
-                aria-label={interpolate(locale.participant_details.details.presenceAria, {
-                  present: presenceCount,
-                  total: presence.length,
-                })}
-              >
-                {presence.map((item) => (
-                  <Styled.PresenceDot key={item.meetingId} $present={item.present} aria-hidden />
-                ))}
-              </Styled.Presence>
-            </Styled.Detail>
-
-            <Styled.Detail>
-              <Styled.DetailLabel>{locale.participant_details.details.city}</Styled.DetailLabel>
-
-              <Styled.DetailValue>
-                {participant.city ?? locale.participant_details.notInformed}
-              </Styled.DetailValue>
-            </Styled.Detail>
-
-            <Styled.Detail>
-              <Styled.DetailLabel>{locale.participant_details.details.zone}</Styled.DetailLabel>
-
-              <Styled.DetailValue>
-                {participant.zone ?? locale.participant_details.notInformed}
-              </Styled.DetailValue>
-            </Styled.Detail>
-
-            <Styled.Detail>
-              <Styled.DetailLabel>{locale.participant_details.details.birthday}</Styled.DetailLabel>
-
-              <Styled.DetailValue>{formatBirthDate(participant.birthDate)}</Styled.DetailValue>
-            </Styled.Detail>
-
-            <Styled.Detail>
-              <Styled.DetailLabel>
-                {locale.participant_details.details.occupation}
-              </Styled.DetailLabel>
-
-              <Styled.DetailValue>
-                {participant.job ?? locale.participant_details.notInformed}
-              </Styled.DetailValue>
-            </Styled.Detail>
-          </Styled.DetailsGrid>
+          <ParticipantInfoGrid participant={participant} presence={presence} />
         </Styled.Card>
       )}
     </Styled.Page>
