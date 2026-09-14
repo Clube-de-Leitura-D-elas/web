@@ -1,6 +1,8 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
+import { theme } from '../../theme/theme';
 
-export const Container = styled.div<{ $fullScreen: boolean }>`
+export const Container = styled.main<{ $fullScreen: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -11,12 +13,9 @@ export const Container = styled.div<{ $fullScreen: boolean }>`
   min-height: ${({ $fullScreen }) => ($fullScreen ? '100dvh' : '100%')};
   padding: 2rem 1.5rem;
   text-align: center;
+  background-color: ${theme.background};
 
-  ${({ theme }) => css`
-    background-color: ${theme.background};
-  `}
-
-  @media (max-width: 767px) {
+  @media ${MOBILE_QUERY} {
     padding: 1.5rem 1rem;
   }
 `;
@@ -33,9 +32,9 @@ export const Code = styled.p`
   font-size: 3.5rem;
   font-weight: 700;
   line-height: 1;
-  color: ${({ theme }) => theme.textBrand};
+  color: ${theme.textBrand};
 
-  @media (max-width: 767px) {
+  @media ${MOBILE_QUERY} {
     font-size: 2.5rem;
   }
 `;
@@ -44,9 +43,9 @@ export const Title = styled.h1`
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${({ theme }) => theme.text};
+  color: ${theme.text};
 
-  @media (max-width: 767px) {
+  @media ${MOBILE_QUERY} {
     font-size: 1.25rem;
   }
 `;
@@ -56,7 +55,7 @@ export const Description = styled.p`
   margin: 0;
   font-size: 1rem;
   line-height: 1.5rem;
-  color: ${({ theme }) => theme.textMuted};
+  color: ${theme.textMuted};
 `;
 
 export const Actions = styled.div`

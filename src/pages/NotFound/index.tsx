@@ -14,24 +14,14 @@ export const NotFound = ({ title, description, fullScreen = true }: NotFoundProp
   const navigate = useNavigate();
   const { notFound: text } = useLocale();
 
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate('/');
-    }
-  };
-
   return (
-    <Styled.Container $fullScreen={fullScreen}>
-      <Styled.Logo src={logoDelas} alt={text.logoAlt} />
+    <Styled.Container as={fullScreen ? 'main' : 'div'} $fullScreen={fullScreen}>
+      <Styled.Logo src={logoDelas} alt="" />
       <Styled.Code aria-hidden>{text.code}</Styled.Code>
       <Styled.Title>{title ?? text.title}</Styled.Title>
       <Styled.Description>{description ?? text.description}</Styled.Description>
       <Styled.Actions>
-        <Button type="button" onClick={handleBack}>
-          {text.backButton}
-        </Button>
+        <Button onClick={() => navigate('/', { replace: true })}>{text.backButton}</Button>
       </Styled.Actions>
     </Styled.Container>
   );
