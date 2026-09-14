@@ -3,69 +3,56 @@ import type {
   Page,
   ParticipantFilters,
   ParticipantListItem,
-  ParticipantOrder,
   PendingParticipantListItem,
 } from '../types/participantList';
 import { supabase } from './supabaseClient';
 
-const ORDER_BY: Record<ParticipantOrder, { column: string; ascending: boolean }> = {
-  name_asc: { column: 'name', ascending: true },
-  name_desc: { column: 'name', ascending: false },
-  newest: { column: 'created_at', ascending: false },
-};
+const supabaseBaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
-const getRange = ({ page, pageSize }: TablePageRequest) => {
-  const from = (page - 1) * pageSize;
-  return [from, from + pageSize - 1] as const;
-};
+async function readEdgePage<T>(
+  functionName: 'get-participants' | 'get-pending-participants',
+  request: TablePageRequest,
+  filters: ParticipantFilters,
+): Promise<Page<T>> {
+  const url = new URL(`${supabaseBaseUrl}/functions/v1/${functionName}`);
+  url.searchParams.set('page', String(request.page));
+  url.searchParams.set('pageSize', String(request.pageSize));
+  url.searchParams.set('order', filters.order);
+
+  if (filters.search) url.searchParams.set('search', filters.search);
+  if (filters.cityId) url.searchParams.set('cityId', filters.cityId);
+  if (filters.groupId) url.searchParams.set('groupId', filters.groupId);
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ error: response.statusText }));
+    throw new Error(payload.error ?? 'Failed to fetch edge function data');
+  }
+
+  const payload = (await response.json()) as { items: T[]; total: number };
+  return {
+    items: payload.items,
+    total: payload.total,
+  };
+}
 
 export async function getParticipantsPage(
   request: TablePageRequest,
   filters: ParticipantFilters,
 ): Promise<Page<ParticipantListItem>> {
-  const [from, to] = getRange(request);
-  const { column, ascending } = ORDER_BY[filters.order];
-
-  const columns = filters.groupId
-    ? 'id, name, is_active, group_users(id), in_group:group_users!inner(group_id)'
-    : 'id, name, is_active, group_users(id)';
-
-  let query = supabase.from('users').select(columns, { count: 'exact' });
-
-  if (filters.search) query = query.ilike('name', `%${filters.search}%`);
-  if (filters.cityId) query = query.eq('city_id', filters.cityId);
-  if (filters.groupId) query = query.eq('in_group.group_id', filters.groupId);
-
-  const { data, error, count } = await query
-    .order(column, { ascending })
-    .order('id')
-    .range(from, to);
-
-  if (error) throw error;
-  return { items: data as unknown as ParticipantListItem[], total: count ?? 0 };
+  return readEdgePage<ParticipantListItem>('get-participants', request, filters);
 }
 
 export async function getPendingParticipantsPage(
   request: TablePageRequest,
   filters: ParticipantFilters,
 ): Promise<Page<PendingParticipantListItem>> {
-  const [from, to] = getRange(request);
-  const { column, ascending } = ORDER_BY[filters.order];
-
-  let query = supabase
-    .from('pending_users')
-    .select('id, name, city, phone_number, instagram_user', { count: 'exact' })
-    .eq('is_approved', false);
-
-  if (filters.search) query = query.ilike('name', `%${filters.search}%`);
-
-  const { data, error, count } = await query
-    .order(column, { ascending })
-    .order('id')
-    .range(from, to);
-
-  if (error) throw error;
-  return { items: data as unknown as PendingParticipantListItem[], total: count ?? 0 };
+  return readEdgePage<PendingParticipantListItem>('get-pending-participants', request, filters);
 }
 
 export async function approvePendingParticipant(id: string): Promise<void> {
