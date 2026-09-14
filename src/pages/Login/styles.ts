@@ -62,7 +62,7 @@ export const BrandSubtitle = styled.p`
   line-height: 1.75rem;
 `;
 
-export const FormPanel = styled.main`
+export const FormPanel = styled.section`
   flex: 1;
   display: flex;
   align-items: center;
