@@ -112,5 +112,60 @@
       "birthday": "Aniversário",
       "occupation": "Trabalho"
     }
+  },
+
+  "participants": {
+    "title": "Participantes",
+    "subtitle": "{{groups}} em {{cities}}",
+    "activeGroupsCount": {
+      "one": "{{count}} grupo ativo",
+      "other": "{{count}} grupos ativos"
+    },
+    "citiesCount": {
+      "one": "{{count}} cidade",
+      "other": "{{count}} cidades"
+    },
+    "tabs": {
+      "participants": "Participantes",
+      "requests": "Solicitações"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por nome",
+      "cityAll": "Cidade: todas",
+      "groupAll": "Grupo: todos",
+      "groupOption": "Grupo {{number}} - {{description}}",
+      "sortNameAsc": "Nome (A–Z)",
+      "sortNameDesc": "Nome (Z–A)"
+    },
+    "table": {
+      "coordinator": "Coordenadora",
+      "groupsCount": "{{count}} grupos",
+      "groupCountSingle": "1 grupo",
+      "statusActive": "Ativa",
+      "statusInactive": "Não ativada",
+      "empty": "Nenhum participante encontrado.",
+      "emptyValue": "—",
+      "itemLabel": "participantes cadastradas",
+      "actionsAriaLabel": "Ações da participante {{name}}",
+      "columns": {
+        "name": "NOME COMPLETO",
+        "groups": "GRUPOS",
+        "attendance": "PRESENÇA (ÚLTIMOS 3)",
+        "status": "STATUS"
+      }
+    },
+    "requests": {
+      "itemLabel": "solicitações pendentes",
+      "reject": "Recusar",
+      "approve": "Aceitar",
+      "rejectAriaLabel": "Recusar solicitação de {{name}}",
+      "approveAriaLabel": "Aceitar solicitação de {{name}}",
+      "columns": {
+        "name": "NOME COMPLETO",
+        "city": "CIDADE",
+        "contact": "CONTATO",
+        "actions": "AÇÕES"
+      }
+    }
   }
 }
