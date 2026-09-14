@@ -72,8 +72,9 @@ export const Container = styled.button<{ $variant: ButtonVariant; $size: ButtonS
     switch ($size) {
       case 'sm':
         return css`
-          height: 2rem;
-          padding: 0.25rem 1rem;
+          height: 1.75rem;
+          padding: 0.25rem 0.875rem;
+          font-size: 0.875rem;
         `;
       case 'md':
         return css`

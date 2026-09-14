@@ -20,19 +20,16 @@ const columns: TableColumn[] = [
   {
     key: 'number',
     label: locale.participant_details.groups.columns.name,
-    width: '40%',
     align: 'left',
   },
   {
     key: 'status',
     label: locale.participant_details.groups.columns.status,
-    width: '30%',
     align: 'center',
   },
   {
     key: 'city',
     label: locale.participant_details.groups.columns.city,
-    width: '30%',
     align: 'left',
   },
 ];
@@ -260,7 +257,7 @@ function ParticipantDetails() {
             <Table
               columns={columns}
               fetchPage={fetchGroupsPage}
-              pageSize={3}
+              pageSize={5}
               itemLabel={locale.participant_details.groups.itemLabel}
             />
           </Styled.TableArea>

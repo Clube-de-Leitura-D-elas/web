@@ -115,9 +115,4 @@ export const TopBarBrand = styled.span`
 export const Content = styled.main`
   flex: 1;
   min-width: 0;
-  padding: 2rem;
-
-  @media ${MOBILE_QUERY} {
-    padding: 1.5rem 1rem;
-  }
 `;

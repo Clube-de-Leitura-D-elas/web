@@ -5,7 +5,7 @@ export const Page = styled.main`
     width: 100%;
     min-width: 0;
     min-height: 100%;
-    padding: 4rem;
+    padding: 2rem 4rem 4rem;
     background-color: ${theme.backgroundSubtle};
   `}
 `;
