@@ -1,14 +1,19 @@
 import { Route, Routes } from 'react-router';
+import { ProtectedAdminRoute } from './components/Routes/ProtectedAdminRoute';
 import { DefaultLayout } from './layouts/DefaultLayout';
+import { LoginPage } from './pages/Login';
 import { Participants } from './pages/Participants';
 
 export const App = () => (
   <Routes>
-    <Route element={<DefaultLayout />}>
-      {/* para páginas com sidebar coloque aqui */}
-      <Route path="/participantes" element={<Participants />} />
+    <Route element={<ProtectedAdminRoute />}>
+      <Route path="/" element={<DefaultLayout />}>
+        {/* para páginas com sidebar coloque aqui */}
+        <Route path="/participantes" element={<Participants />} />
+      </Route>
     </Route>
 
     {/* para páginas sem sidebar coloque aqui*/}
+    <Route path="/login" element={<LoginPage />} />
   </Routes>
 );
