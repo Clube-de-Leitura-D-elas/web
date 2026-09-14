@@ -143,7 +143,12 @@ export const Requests: Story = {
     await userEvent.click(canvas.getByRole('tab', { name: locale.participants.tabs.requests }));
 
     await expect(await canvas.findByText(pendingParticipants[0].name)).toBeInTheDocument();
-    await expect(canvas.queryByText(locale.participants.filters.cityAll)).not.toBeVisible();
+    await expect(
+      canvas.getByRole('button', { name: locale.participants.filters.cityAll }),
+    ).toBeDisabled();
+    await expect(
+      canvas.getByRole('button', { name: locale.participants.filters.groupAll }),
+    ).toBeDisabled();
   },
 };
 

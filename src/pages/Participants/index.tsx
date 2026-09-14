@@ -291,18 +291,18 @@ export const Participants = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Styled.FilterSlot $hidden={activeTab === 'requests'}>
-          <Dropdown
-            placeholder={locale.participants.filters.cityAll}
-            options={cityOptions}
-            onSelect={(val) => setCityId(val)}
-          />
-          <Dropdown
-            placeholder={locale.participants.filters.groupAll}
-            options={groupOptions}
-            onSelect={(val) => setGroupId(val)}
-          />
-        </Styled.FilterSlot>
+        <Dropdown
+          placeholder={locale.participants.filters.cityAll}
+          options={cityOptions}
+          onSelect={(val) => setCityId(val)}
+          disabled={activeTab === 'requests'}
+        />
+        <Dropdown
+          placeholder={locale.participants.filters.groupAll}
+          options={groupOptions}
+          onSelect={(val) => setGroupId(val)}
+          disabled={activeTab === 'requests'}
+        />
         <Styled.SortButton type="button" onClick={toggleSort}>
           <LuArrowUpDown aria-hidden />
           {order === 'name_asc'

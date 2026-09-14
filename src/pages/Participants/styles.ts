@@ -75,10 +75,6 @@ export const FiltersBar = styled.section`
   }
 `;
 
-export const FilterSlot = styled.div<{ $hidden: boolean }>`
-  display: ${({ $hidden }) => ($hidden ? 'none' : 'contents')};
-`;
-
 export const SortButton = styled.button`
   display: flex;
   align-items: center;
