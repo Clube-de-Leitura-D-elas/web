@@ -1,60 +1,43 @@
-import type {
-  Participant,
-  ParticipantGroup,
-  ParticipantGroupsPage,
-  ParticipantPresence,
-} from '../types/participant';
+import type { Participant, ParticipantGroupsPage, ParticipantPresence } from '../types/participant';
 import { supabase } from './supabaseClient';
 
-type NameRelation = {
+type ParticipantResponse = {
+  id: string;
   name: string;
+  phone: string | null;
+  instagram: string | null;
+  email: string;
+  birth_date: string | null;
+  job: string | null;
+  is_active: boolean;
+  city: string | null;
+  zone: string | null;
 };
 
-type ParticipantRelation = NameRelation | NameRelation[] | null;
-
-const getRelationName = (relation: ParticipantRelation): string | null => {
-  if (!relation) return null;
-
-  if (Array.isArray(relation)) {
-    return relation[0]?.name ?? null;
-  }
-
-  return relation.name;
+type ParticipantGroupsResponse = {
+  items: { id: string; number: number; city: string | null; is_coordinator: boolean }[];
+  total: number;
 };
 
-const isPresentStatus = (status: string | null): boolean => {
-  if (!status) return false;
-
-  const normalizedStatus = status.trim().toLowerCase();
-
-  return normalizedStatus === 'present' || normalizedStatus === 'presente';
+type ParticipantPresenceResponse = {
+  items: { meeting_id: string; date: string; present: boolean }[];
 };
+
+async function invokeGet<T>(name: string, params: Record<string, string | number>): Promise<T> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => query.set(key, String(value)));
+
+  const { data, error } = await supabase.functions.invoke<T>(`${name}?${query}`, {
+    method: 'GET',
+  });
+  if (error) throw error;
+  return data as T;
+}
 
 export async function getParticipantById(participantId: string): Promise<Participant> {
-  const { data, error } = await supabase
-    .from('users')
-    .select(
-      `
-      id,
-      name,
-      phone,
-      instagram,
-      email,
-      birth_date,
-      job,
-      active,
-      cities (
-        name
-      ),
-      zones (
-        name
-      )
-    `,
-    )
-    .eq('id', participantId)
-    .single();
-
-  if (error) throw error;
+  const data = await invokeGet<ParticipantResponse>('get-participant', {
+    participant_id: participantId,
+  });
 
   return {
     id: data.id,
@@ -64,9 +47,9 @@ export async function getParticipantById(participantId: string): Promise<Partici
     email: data.email,
     birthDate: data.birth_date,
     job: data.job,
-    active: data.active,
-    city: getRelationName(data.cities),
-    zone: getRelationName(data.zones),
+    active: data.is_active,
+    city: data.city,
+    zone: data.zone,
   };
 }
 
@@ -75,120 +58,47 @@ export async function getParticipantGroups(
   page: number,
   pageSize: number,
 ): Promise<ParticipantGroupsPage> {
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-
-  const { data, error, count } = await supabase
-    .from('group_users')
-    .select(
-      `
-        id,
-        is_coordinator,
-        groups!inner (
-          id,
-          number,
-          cities (
-            name
-          )
-        )
-      `,
-      {
-        count: 'exact',
-      },
-    )
-    .eq('user_id', participantId)
-    .range(from, to);
-
-  if (error) throw error;
-
-  const groups: ParticipantGroup[] = data.flatMap((membership) => {
-    const group = Array.isArray(membership.groups) ? membership.groups[0] : membership.groups;
-
-    if (!group) return [];
-
-    return [
-      {
-        id: group.id,
-        number: group.number,
-        city: getRelationName(group.cities),
-        isCoordinator: membership.is_coordinator,
-      },
-    ];
+  const data = await invokeGet<ParticipantGroupsResponse>('get-participant-groups', {
+    participant_id: participantId,
+    page,
+    pageSize,
   });
 
   return {
-    groups,
-    total: count ?? 0,
+    groups: data.items.map((group) => ({
+      id: group.id,
+      number: group.number,
+      city: group.city,
+      isCoordinator: group.is_coordinator,
+    })),
+    total: data.total,
   };
 }
 
 export async function getParticipantPresence(
   participantId: string,
 ): Promise<ParticipantPresence[]> {
-  const { data: memberships, error: membershipsError } = await supabase
-    .from('group_users')
-    .select('id')
-    .eq('user_id', participantId);
-
-  if (membershipsError) throw membershipsError;
-
-  const membershipIds = memberships.map((membership) => membership.id);
-
-  if (membershipIds.length === 0) {
-    return [];
-  }
-
-  const { data, error } = await supabase
-    .from('meetings')
-    .select(
-      `
-      id,
-      date,
-      meeting_group_users!inner (
-        group_user_id,
-        presence_status
-      )
-    `,
-    )
-    .in('meeting_group_users.group_user_id', membershipIds)
-    .order('date', {
-      ascending: false,
-    })
-    .limit(5);
-
-  if (error) throw error;
-
-  return data.flatMap((meeting) => {
-    const attendance = Array.isArray(meeting.meeting_group_users)
-      ? meeting.meeting_group_users[0]
-      : meeting.meeting_group_users;
-
-    if (!attendance) return [];
-
-    return [
-      {
-        meetingId: meeting.id,
-        date: meeting.date,
-        present: isPresentStatus(attendance.presence_status),
-      },
-    ];
+  const data = await invokeGet<ParticipantPresenceResponse>('get-participant-presence', {
+    participant_id: participantId,
   });
+
+  return data.items.map((meeting) => ({
+    meetingId: meeting.meeting_id,
+    date: meeting.date,
+    present: meeting.present,
+  }));
 }
 
 export async function updateParticipantStatus(
   participantId: string,
   active: boolean,
 ): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('users')
-    .update({
-      active,
-    })
-    .eq('id', participantId)
-    .select('active')
-    .single();
-
+  const { data, error } = await supabase.functions.invoke<{ is_active: boolean }>(
+    'update-participant-status',
+    { body: { participant_id: participantId, is_active: active } },
+  );
   if (error) throw error;
+  if (!data) throw new Error('update-participant-status returned no data');
 
-  return data.active;
+  return data.is_active;
 }
