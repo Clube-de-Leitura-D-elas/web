@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import styled from 'styled-components';
 import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
+import { theme } from '../../theme/theme';
 
 export const Container = styled.div`
   width: 100%;
@@ -19,7 +20,7 @@ export const Header = styled.header`
 export const Title = styled.h1`
   font-size: 2rem;
   font-weight: 700;
-  color: ${({ theme }) => theme.text};
+  color: ${theme.text};
   margin: 0;
 
   @media ${MOBILE_QUERY} {
@@ -29,7 +30,7 @@ export const Title = styled.h1`
 
 export const Subtitle = styled.p`
   font-size: 1rem;
-  color: ${({ theme }) => theme.textMuted};
+  color: ${theme.textMuted};
   margin: 0;
 `;
 
@@ -86,16 +87,16 @@ export const SortButton = styled.button`
   height: 2.75rem;
   padding: 0 1.25rem;
   border-radius: 9999px;
-  border: 1px solid ${({ theme }) => theme.border};
-  background-color: ${({ theme }) => theme.surface};
-  color: ${({ theme }) => theme.text};
+  border: 1px solid ${theme.border};
+  background-color: ${theme.surface};
+  color: ${theme.text};
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
 
   &:hover {
-    background-color: ${({ theme }) => theme.background};
+    background-color: ${theme.background};
   }
 
   @media ${MOBILE_QUERY} {
@@ -116,13 +117,13 @@ export const TableContainer = styled.div`
 
 export const ParticipantName = styled.span`
   font-weight: 600;
-  color: ${({ theme }) => theme.text};
+  color: ${theme.text};
   white-space: nowrap;
 `;
 
 export const ParticipantLink = styled(Link)`
   font-weight: 600;
-  color: ${({ theme }) => theme.text};
+  color: ${theme.text};
   white-space: nowrap;
   text-decoration: none;
 
@@ -137,7 +138,7 @@ export const Contact = styled.div`
 `;
 
 export const ContactSecondary = styled.small`
-  color: ${({ theme }) => theme.textMuted};
+  color: ${theme.textMuted};
 `;
 
 export const RequestActions = styled.div`
@@ -162,9 +163,9 @@ export const AttendanceBadge = styled.span<{ $type: 'P' | 'F' }>`
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 600;
-  background-color: ${({ theme, $type }) =>
+  background-color: ${({ $type }) =>
     $type === 'P' ? theme.surfaceBrandSoft : theme.surfaceSunken};
-  color: ${({ theme, $type }) => ($type === 'P' ? theme.textBrand : theme.textMuted)};
+  color: ${({ $type }) => ($type === 'P' ? theme.textBrand : theme.textMuted)};
   flex-shrink: 0;
 `;
 
@@ -177,8 +178,8 @@ export const StatusBadge = styled.span<{ $active: boolean }>`
   font-size: 0.8125rem;
   font-weight: 500;
   white-space: nowrap;
-  background-color: ${({ theme, $active }) => ($active ? theme.successLight : theme.warningLight)};
-  color: ${({ theme, $active }) => ($active ? theme.successDark : theme.warningDark)};
+  background-color: ${({ $active }) => ($active ? theme.successLight : theme.warningLight)};
+  color: ${({ $active }) => ($active ? theme.successDark : theme.warningDark)};
 `;
 
 export const ActionButton = styled.button`
@@ -188,11 +189,11 @@ export const ActionButton = styled.button`
   border: none;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
-  color: ${({ theme }) => theme.textMuted};
+  color: ${theme.textMuted};
   font-size: 1.25rem;
   line-height: 1;
 
   &:hover {
-    color: ${({ theme }) => theme.text};
+    color: ${theme.text};
   }
 `;
