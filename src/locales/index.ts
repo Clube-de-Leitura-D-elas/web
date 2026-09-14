@@ -18,3 +18,6 @@ export const interpolate = (template: string, values: Record<string, string | nu
   template.replace(/\{\{(\w+)\}\}/g, (match, key: string) =>
     key in values ? String(values[key]) : match,
   );
+
+export const pluralize = (forms: { one: string; other: string }, count: number) =>
+  interpolate(count === 1 ? forms.one : forms.other, { count });

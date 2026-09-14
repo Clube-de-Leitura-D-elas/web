@@ -3,12 +3,14 @@ import { ProtectedAdminRoute } from './components/Routes/ProtectedAdminRoute';
 import { DefaultLayout } from './layouts/DefaultLayout';
 import { LoginPage } from './pages/Login';
 import { NotFound } from './pages/NotFound';
+import { Participants } from './pages/Participants';
 
 export const App = () => (
   <Routes>
     <Route element={<ProtectedAdminRoute />}>
       <Route path="/" element={<DefaultLayout />}>
         {/* para páginas com sidebar coloque aqui */}
+        <Route path="/participantes" element={<Participants />} />
       </Route>
     </Route>
 
