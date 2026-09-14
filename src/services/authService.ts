@@ -47,26 +47,34 @@ export async function getCurrentUser() {
 
 export async function getProfileByCurrentUser(): Promise<UserProfile | null> {
   const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) {
-    throw userError ?? new Error('Usuário não autenticado');
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+
+  if (sessionError || !session?.access_token) {
+    throw sessionError ?? new Error('Usuário não autenticado');
   }
 
-  const { data, error } = await supabase
-    .from('users')
-    .select('id, user_id, name, email, app_role')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-user-profile`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    },
+  );
 
-  if (error) {
-    throw error;
+  if (!response.ok) {
+    const payload = await response.json().catch(() => undefined);
+    throw new Error(payload?.error ?? 'Não foi possível carregar o perfil');
   }
 
-  return data as UserProfile | null;
+  const body = await response.json();
+  return body.profile as UserProfile | null;
 }
 
 export function hasAdminRole(appRole?: AppRole) {
-  return appRole === 'MANAGER' || appRole === 'FOUNDER';
+  return appRole === 'FOUNDER';
 }
