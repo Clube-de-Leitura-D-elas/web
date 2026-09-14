@@ -22,6 +22,12 @@
   "layout": {
     "openMenu": "Abrir menu"
   },
+  "notFound": {
+    "code": "404",
+    "title": "Página não encontrada",
+    "description": "Não conseguimos encontrar o que você procurava. O endereço pode estar errado ou o conteúdo pode ter sido removido.",
+    "backButton": "Voltar para o início"
+  },
   "auth": {
     "loading": "Carregando..."
   },

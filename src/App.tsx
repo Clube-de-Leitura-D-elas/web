@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router';
 import { ProtectedAdminRoute } from './components/Routes/ProtectedAdminRoute';
 import { DefaultLayout } from './layouts/DefaultLayout';
 import { LoginPage } from './pages/Login';
+import { NotFound } from './pages/NotFound';
 import { Participants } from './pages/Participants';
 
 export const App = () => (
@@ -15,5 +16,6 @@ export const App = () => (
 
     {/* para páginas sem sidebar coloque aqui*/}
     <Route path="/login" element={<LoginPage />} />
+    <Route path="*" element={<NotFound />} />
   </Routes>
 );
