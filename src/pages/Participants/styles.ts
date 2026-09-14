@@ -1,17 +1,12 @@
+import { Link } from 'react-router';
 import styled from 'styled-components';
-import { theme } from '../../theme/theme';
+import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
 
-export const Container = styled.main`
+export const Container = styled.div`
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-
-  padding: 4rem 4rem 2rem 4rem;
-
-  @media (max-width: 768px) {
-    padding: 2rem 1.25rem;
-  }
 `;
 
 export const Header = styled.header`
@@ -24,17 +19,17 @@ export const Header = styled.header`
 export const Title = styled.h1`
   font-size: 2rem;
   font-weight: 700;
-  color: ${theme.text};
+  color: ${({ theme }) => theme.text};
   margin: 0;
 
-  @media (max-width: 768px) {
+  @media ${MOBILE_QUERY} {
     font-size: 1.5rem;
   }
 `;
 
 export const Subtitle = styled.p`
   font-size: 1rem;
-  color: ${theme.textMuted};
+  color: ${({ theme }) => theme.textMuted};
   margin: 0;
 `;
 
@@ -51,7 +46,7 @@ export const FiltersBar = styled.section`
     min-width: 16rem;
     margin: 0;
 
-    @media (max-width: 768px) {
+    @media ${MOBILE_QUERY} {
       width: 100%;
       min-width: 100%;
     }
@@ -69,7 +64,7 @@ export const FiltersBar = styled.section`
     border: 0;
   }
 
-  @media (max-width: 768px) {
+  @media ${MOBILE_QUERY} {
     flex-direction: column;
     align-items: stretch;
 
@@ -77,6 +72,10 @@ export const FiltersBar = styled.section`
       width: 100% !important;
     }
   }
+`;
+
+export const FilterSlot = styled.div<{ $hidden: boolean }>`
+  display: ${({ $hidden }) => ($hidden ? 'none' : 'contents')};
 `;
 
 export const SortButton = styled.button`
@@ -87,19 +86,19 @@ export const SortButton = styled.button`
   height: 2.75rem;
   padding: 0 1.25rem;
   border-radius: 9999px;
-  border: 1px solid ${theme.border};
-  background-color: ${theme.surface};
-  color: ${theme.text};
+  border: 1px solid ${({ theme }) => theme.border};
+  background-color: ${({ theme }) => theme.surface};
+  color: ${({ theme }) => theme.text};
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
 
   &:hover {
-    background-color: ${theme.background};
+    background-color: ${({ theme }) => theme.background};
   }
 
-  @media (max-width: 768px) {
+  @media ${MOBILE_QUERY} {
     width: 100%;
   }
 `;
@@ -115,13 +114,36 @@ export const TableContainer = styled.div`
   }
 `;
 
-export const ParticipantNameCell = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+export const ParticipantName = styled.span`
   font-weight: 600;
-  color: ${theme.text};
+  color: ${({ theme }) => theme.text};
   white-space: nowrap;
+`;
+
+export const ParticipantLink = styled(Link)`
+  font-weight: 600;
+  color: ${({ theme }) => theme.text};
+  white-space: nowrap;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+export const Contact = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const ContactSecondary = styled.small`
+  color: ${({ theme }) => theme.textMuted};
+`;
+
+export const RequestActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 `;
 
 export const AttendanceList = styled.div`
@@ -140,8 +162,9 @@ export const AttendanceBadge = styled.span<{ $type: 'P' | 'F' }>`
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 600;
-  background-color: ${({ $type }) => ($type === 'P' ? '#FCE7F3' : '#F3F4F6')};
-  color: ${({ $type }) => ($type === 'P' ? '#BE185D' : '#6B7280')};
+  background-color: ${({ theme, $type }) =>
+    $type === 'P' ? theme.surfaceBrandSoft : theme.surfaceSunken};
+  color: ${({ theme, $type }) => ($type === 'P' ? theme.textBrand : theme.textMuted)};
   flex-shrink: 0;
 `;
 
@@ -154,20 +177,22 @@ export const StatusBadge = styled.span<{ $active: boolean }>`
   font-size: 0.8125rem;
   font-weight: 500;
   white-space: nowrap;
-  background-color: ${({ $active }) => ($active ? '#DCFCE7' : '#FEF3C7')};
-  color: ${({ $active }) => ($active ? '#15803D' : '#B45309')};
+  background-color: ${({ theme, $active }) => ($active ? theme.successLight : theme.warningLight)};
+  color: ${({ theme, $active }) => ($active ? theme.successDark : theme.warningDark)};
 `;
 
 export const ActionButton = styled.button`
+  display: inline-flex;
+  align-items: center;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
-  color: ${theme.textMuted};
+  color: ${({ theme }) => theme.textMuted};
   font-size: 1.25rem;
   line-height: 1;
 
   &:hover {
-    color: ${theme.text};
+    color: ${({ theme }) => theme.text};
   }
 `;

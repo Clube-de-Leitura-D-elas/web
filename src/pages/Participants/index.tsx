@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router';
+import { LuArrowUpDown, LuEllipsisVertical } from 'react-icons/lu';
 import * as Styled from './styles';
 import { Input } from '../../components/Input';
 import { Dropdown, type DropdownItemList } from '../../components/Dropdown';
@@ -30,9 +30,11 @@ import type {
   ParticipantOrder,
 } from '../../types/participantList';
 
+type ParticipantsTab = 'participants' | 'requests';
+
 export const Participants = () => {
   const locale = useLocale();
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<ParticipantsTab>('participants');
 
   // Estados dos filtros
   const [search, setSearch] = useState('');
@@ -73,6 +75,11 @@ export const Participants = () => {
     [debouncedSearch, cityId, groupId, order],
   );
 
+  const pendingFilters = useMemo(
+    () => ({ search: debouncedSearch, order }),
+    [debouncedSearch, order],
+  );
+
   const toggleSort = () => {
     setOrder((prev) => (prev === 'name_asc' ? 'name_desc' : 'name_asc'));
   };
@@ -101,12 +108,7 @@ export const Participants = () => {
         const groupCount = p.group_users?.length ?? 0;
         return {
           name: (
-            <Styled.ParticipantNameCell
-              onClick={() => navigate(`/participantes/${p.id}`)}
-              style={{ cursor: 'pointer' }}
-            >
-              <span>{p.name}</span>
-            </Styled.ParticipantNameCell>
+            <Styled.ParticipantLink to={`/participantes/${p.id}`}>{p.name}</Styled.ParticipantLink>
           ),
           groups: (
             <Tag color="neutral">
@@ -130,7 +132,7 @@ export const Participants = () => {
               type="button"
               aria-label={interpolate(locale.participants.table.actionsAriaLabel, { name: p.name })}
             >
-              ⋮
+              <LuEllipsisVertical aria-hidden />
             </Styled.ActionButton>
           ),
         };
@@ -138,7 +140,7 @@ export const Participants = () => {
 
       return { rows, total };
     },
-    [filters, locale, navigate],
+    [filters, locale],
   );
 
   // --- ABA 2: SOLICITAÇÕES ---
@@ -179,26 +181,21 @@ export const Participants = () => {
 
   const fetchPendingParticipants = useCallback(
     async (request: TablePageRequest): Promise<TablePage> => {
-      const { items, total } = await getPendingParticipantsPage(request, filters);
+      const { items, total } = await getPendingParticipantsPage(request, pendingFilters);
 
       const rows = items.map((p: PendingParticipantListItem) => ({
-        name: (
-          <Styled.ParticipantNameCell
-            onClick={() => navigate(`/participantes/solicitacoes/${p.id}`)}
-            style={{ cursor: 'pointer' }}
-          >
-            <span>{p.name}</span>
-          </Styled.ParticipantNameCell>
-        ),
+        name: <Styled.ParticipantName>{p.name}</Styled.ParticipantName>,
         city: p.city || locale.participants.table.emptyValue,
         contact: (
-          <div>
-            <div>{p.phone_number}</div>
-            {p.instagram_user && <small style={{ color: '#6B7280' }}>@{p.instagram_user}</small>}
-          </div>
+          <Styled.Contact>
+            <span>{p.phone_number}</span>
+            {p.instagram_user && (
+              <Styled.ContactSecondary>@{p.instagram_user}</Styled.ContactSecondary>
+            )}
+          </Styled.Contact>
         ),
         actions: (
-          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+          <Styled.RequestActions>
             <Button
               size="sm"
               variant="secondary"
@@ -219,13 +216,13 @@ export const Participants = () => {
             >
               {locale.participants.requests.approve}
             </Button>
-          </div>
+          </Styled.RequestActions>
         ),
       }));
 
       return { rows, total };
     },
-    [filters, locale, navigate],
+    [pendingFilters, locale],
   );
 
   const tabsConfig = useMemo(
@@ -294,25 +291,32 @@ export const Participants = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Dropdown
-          placeholder={locale.participants.filters.cityAll}
-          options={cityOptions}
-          onSelect={(val) => setCityId(val)}
-        />
-        <Dropdown
-          placeholder={locale.participants.filters.groupAll}
-          options={groupOptions}
-          onSelect={(val) => setGroupId(val)}
-        />
+        <Styled.FilterSlot $hidden={activeTab === 'requests'}>
+          <Dropdown
+            placeholder={locale.participants.filters.cityAll}
+            options={cityOptions}
+            onSelect={(val) => setCityId(val)}
+          />
+          <Dropdown
+            placeholder={locale.participants.filters.groupAll}
+            options={groupOptions}
+            onSelect={(val) => setGroupId(val)}
+          />
+        </Styled.FilterSlot>
         <Styled.SortButton type="button" onClick={toggleSort}>
-          ⇅{' '}
+          <LuArrowUpDown aria-hidden />
           {order === 'name_asc'
             ? locale.participants.filters.sortNameAsc
             : locale.participants.filters.sortNameDesc}
         </Styled.SortButton>
       </Styled.FiltersBar>
 
-      <Tabs tabs={tabsConfig} defaultActive="participants" size="lg" />
+      <Tabs
+        tabs={tabsConfig}
+        active={activeTab}
+        onChange={(value) => setActiveTab(value as ParticipantsTab)}
+        size="lg"
+      />
     </Styled.Container>
   );
 };

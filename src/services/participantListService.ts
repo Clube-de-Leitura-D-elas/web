@@ -36,7 +36,7 @@ export function getParticipantsPage(
 
 export function getPendingParticipantsPage(
   { page, pageSize }: TablePageRequest,
-  filters: ParticipantFilters,
+  filters: Pick<ParticipantFilters, 'search' | 'order'>,
 ): Promise<Page<PendingParticipantListItem>> {
   return invokeGet('get-pending-participants', {
     page,
