@@ -1,28 +1,33 @@
-import type { DropdownItemList } from '../components/Dropdown';
+import { interpolate, locale } from '../locales';
+import type {
+  ParticipantFilterOptions,
+  ParticipantFiltersResponse,
+} from '../types/participantList';
 import { supabase } from './supabaseClient';
 
-export async function getCityOptions(): Promise<DropdownItemList[]> {
-  const { data, error } = await supabase.from('cities').select('id, name').order('name');
+export async function getParticipantFilterOptions(): Promise<ParticipantFilterOptions> {
+  const { data, error } = await supabase.functions.invoke<ParticipantFiltersResponse>(
+    'get-participant-filters',
+    { method: 'GET' },
+  );
   if (error) throw error;
-  return [
-    { value: '', label: 'Cidade: todas' },
-    ...data.map((city) => ({ value: city.id, label: city.name })),
-  ];
-}
+  if (!data) throw new Error('get-participant-filters returned no data');
 
-export async function getGroupOptions(): Promise<DropdownItemList[]> {
-  const { data, error } = await supabase
-    .from('groups')
-    .select('id, number, description')
-    .eq('active', true)
-    .order('number');
-
-  if (error) throw error;
-  return [
-    { value: '', label: 'Grupo: todos' },
-    ...data.map((group) => ({
-      value: group.id,
-      label: `Grupo ${group.number} - ${group.description}`,
-    })),
-  ];
+  return {
+    cityOptions: [
+      { value: '', label: locale.participants.filters.cityAll },
+      ...data.cities.map((city) => ({ value: city.id, label: city.name })),
+    ],
+    groupOptions: [
+      { value: '', label: locale.participants.filters.groupAll },
+      ...data.groups.map((group) => ({
+        value: group.id,
+        label: interpolate(locale.participants.filters.groupOption, {
+          number: group.number,
+          description: group.description,
+        }),
+      })),
+    ],
+    summary: data.summary,
+  };
 }

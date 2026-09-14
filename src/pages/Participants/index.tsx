@@ -14,14 +14,16 @@ import { Tag } from '../../components/Tag';
 import { Button } from '../../components/Button';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useLocale } from '../../hooks/useLocale';
+import { interpolate } from '../../locales';
 import {
   getParticipantsPage,
   getPendingParticipantsPage,
   approvePendingParticipant,
   rejectPendingParticipant,
 } from '../../services/participantListService';
-import { getCityOptions, getGroupOptions } from '../../services/filterOptionsService';
+import { getParticipantFilterOptions } from '../../services/filterOptionsService';
 import type {
+  ActiveGroupsSummary,
   ParticipantFilters,
   ParticipantListItem,
   PendingParticipantListItem,
@@ -48,10 +50,16 @@ export const Participants = () => {
   // Opções dos Dropdowns carregadas do backend
   const [cityOptions, setCityOptions] = useState<DropdownItemList[]>([]);
   const [groupOptions, setGroupOptions] = useState<DropdownItemList[]>([]);
+  const [groupsSummary, setGroupsSummary] = useState<ActiveGroupsSummary | null>(null);
 
   useEffect(() => {
-    getCityOptions().then(setCityOptions).catch(console.error);
-    getGroupOptions().then(setGroupOptions).catch(console.error);
+    getParticipantFilterOptions()
+      .then(({ cityOptions, groupOptions, summary }) => {
+        setCityOptions(cityOptions);
+        setGroupOptions(groupOptions);
+        setGroupsSummary(summary);
+      })
+      .catch(console.error);
   }, []);
 
   // Objeto de filtros memoizado
@@ -72,13 +80,17 @@ export const Participants = () => {
   // --- ABA 1: PARTICIPANTES ---
   const participantColumns: TableColumn[] = useMemo(
     () => [
-      { key: 'name', label: 'NOME COMPLETO', align: 'left' },
-      { key: 'groups', label: 'GRUPOS', align: 'center' },
-      { key: 'attendance', label: 'PRESENÇA (ÚLTIMOS 3)', align: 'center' },
-      { key: 'status', label: 'STATUS', align: 'center' },
+      { key: 'name', label: locale.participants.table.columns.name, align: 'left' },
+      { key: 'groups', label: locale.participants.table.columns.groups, align: 'center' },
+      {
+        key: 'attendance',
+        label: locale.participants.table.columns.attendance,
+        align: 'center',
+      },
+      { key: 'status', label: locale.participants.table.columns.status, align: 'center' },
       { key: 'actions', label: '', align: 'right', width: '3rem' },
     ],
-    [],
+    [locale],
   );
 
   const fetchParticipants = useCallback(
@@ -97,9 +109,15 @@ export const Participants = () => {
             </Styled.ParticipantNameCell>
           ),
           groups: (
-            <Tag color="neutral">{groupCount === 1 ? '1 grupo' : `${groupCount} grupos`}</Tag>
+            <Tag color="neutral">
+              {groupCount === 1
+                ? locale.participants.table.groupCountSingle
+                : interpolate(locale.participants.table.groupsCount, { count: groupCount })}
+            </Tag>
           ),
-          attendance: <Styled.AttendanceList>—</Styled.AttendanceList>,
+          attendance: (
+            <Styled.AttendanceList>{locale.participants.table.emptyValue}</Styled.AttendanceList>
+          ),
           status: (
             <Styled.StatusBadge $active={p.is_active}>
               {p.is_active
@@ -108,7 +126,10 @@ export const Participants = () => {
             </Styled.StatusBadge>
           ),
           actions: (
-            <Styled.ActionButton type="button" aria-label="Ações da participante">
+            <Styled.ActionButton
+              type="button"
+              aria-label={interpolate(locale.participants.table.actionsAriaLabel, { name: p.name })}
+            >
               ⋮
             </Styled.ActionButton>
           ),
@@ -124,10 +145,11 @@ export const Participants = () => {
   const handleApprove = async (id: string) => {
     try {
       await approvePendingParticipant(id);
-      setRequestsReloadKey((k) => k + 1);
-      setParticipantsReloadKey((k) => k + 1);
     } catch (err) {
       console.error(err);
+    } finally {
+      setRequestsReloadKey((k) => k + 1);
+      setParticipantsReloadKey((k) => k + 1);
     }
   };
 
@@ -142,12 +164,17 @@ export const Participants = () => {
 
   const pendingColumns: TableColumn[] = useMemo(
     () => [
-      { key: 'name', label: 'NOME COMPLETO', align: 'left' },
-      { key: 'city', label: 'CIDADE', align: 'center' },
-      { key: 'contact', label: 'CONTATO', align: 'center' },
-      { key: 'actions', label: 'AÇÕES', align: 'right', width: '12rem' },
+      { key: 'name', label: locale.participants.requests.columns.name, align: 'left' },
+      { key: 'city', label: locale.participants.requests.columns.city, align: 'center' },
+      { key: 'contact', label: locale.participants.requests.columns.contact, align: 'center' },
+      {
+        key: 'actions',
+        label: locale.participants.requests.columns.actions,
+        align: 'right',
+        width: '12rem',
+      },
     ],
-    [],
+    [locale],
   );
 
   const fetchPendingParticipants = useCallback(
@@ -163,7 +190,7 @@ export const Participants = () => {
             <span>{p.name}</span>
           </Styled.ParticipantNameCell>
         ),
-        city: p.city || '—',
+        city: p.city || locale.participants.table.emptyValue,
         contact: (
           <div>
             <div>{p.phone_number}</div>
@@ -172,11 +199,25 @@ export const Participants = () => {
         ),
         actions: (
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-            <Button size="sm" variant="secondary" onClick={() => handleReject(p.id)}>
-              Recusar
+            <Button
+              size="sm"
+              variant="secondary"
+              aria-label={interpolate(locale.participants.requests.rejectAriaLabel, {
+                name: p.name,
+              })}
+              onClick={() => handleReject(p.id)}
+            >
+              {locale.participants.requests.reject}
             </Button>
-            <Button size="sm" variant="primary" onClick={() => handleApprove(p.id)}>
-              Aceitar
+            <Button
+              size="sm"
+              variant="primary"
+              aria-label={interpolate(locale.participants.requests.approveAriaLabel, {
+                name: p.name,
+              })}
+              onClick={() => handleApprove(p.id)}
+            >
+              {locale.participants.requests.approve}
             </Button>
           </div>
         ),
@@ -184,7 +225,7 @@ export const Participants = () => {
 
       return { rows, total };
     },
-    [filters, navigate],
+    [filters, locale, navigate],
   );
 
   const tabsConfig = useMemo(
@@ -199,7 +240,7 @@ export const Participants = () => {
               columns={participantColumns}
               fetchPage={fetchParticipants}
               pageSize={6}
-              itemLabel="participantes cadastradas"
+              itemLabel={locale.participants.table.itemLabel}
             />
           </Styled.TableContainer>
         ),
@@ -214,7 +255,7 @@ export const Participants = () => {
               columns={pendingColumns}
               fetchPage={fetchPendingParticipants}
               pageSize={6}
-              itemLabel="solicitações pendentes"
+              itemLabel={locale.participants.requests.itemLabel}
             />
           </Styled.TableContainer>
         ),
@@ -235,7 +276,14 @@ export const Participants = () => {
     <Styled.Container>
       <Styled.Header>
         <Styled.Title>{locale.participants.title}</Styled.Title>
-        <Styled.Subtitle>42 grupos ativos em 7 cidades</Styled.Subtitle>
+        {groupsSummary && (
+          <Styled.Subtitle>
+            {interpolate(locale.participants.subtitle, {
+              groups: groupsSummary.groups,
+              cities: groupsSummary.cities,
+            })}
+          </Styled.Subtitle>
+        )}
       </Styled.Header>
 
       <Styled.FiltersBar>
@@ -257,7 +305,10 @@ export const Participants = () => {
           onSelect={(val) => setGroupId(val)}
         />
         <Styled.SortButton type="button" onClick={toggleSort}>
-          ⇅ {order === 'name_asc' ? 'Nome (A–Z)' : 'Nome (Z–A)'}
+          ⇅{' '}
+          {order === 'name_asc'
+            ? locale.participants.filters.sortNameAsc
+            : locale.participants.filters.sortNameDesc}
         </Styled.SortButton>
       </Styled.FiltersBar>
 
