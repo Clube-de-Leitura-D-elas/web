@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, mocked } from 'storybook/test';
 import { MemoryRouter, Route, Routes } from 'react-router';
+import { DefaultLayout } from '../../layouts/DefaultLayout';
 
 import { locale } from '../../locales';
 import {
@@ -97,7 +98,9 @@ const meta = {
     (Story) => (
       <MemoryRouter initialEntries={[`/participantes/${participant.id}`]}>
         <Routes>
-          <Route path="/participantes/:participantId" element={<Story />} />
+          <Route element={<DefaultLayout />}>
+            <Route path="/participantes/:participantId" element={<Story />} />
+          </Route>
         </Routes>
       </MemoryRouter>
     ),
