@@ -7,10 +7,8 @@ export const Container = styled.main`
   display: flex;
   flex-direction: column;
 
-  /* 4rem fixo nas laterais e topo em desktop (regra do Gabriel) */
   padding: 4rem 4rem 2rem 4rem;
 
-  /* Responsivo para telas menores/mobile */
   @media (max-width: 768px) {
     padding: 2rem 1.25rem;
   }
@@ -48,7 +46,6 @@ export const FiltersBar = styled.section`
   margin-bottom: 2rem;
   flex-wrap: wrap;
 
-  /* Campo de busca */
   & > div:first-child {
     flex: 1;
     min-width: 16rem;
@@ -60,7 +57,6 @@ export const FiltersBar = styled.section`
     }
   }
 
-  /* Oculta label visualmente mantendo acessibilidade */
   & > div:first-child label {
     position: absolute;
     width: 1px;
@@ -73,7 +69,6 @@ export const FiltersBar = styled.section`
     border: 0;
   }
 
-  /* Ajuste para telas menores */
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
@@ -109,7 +104,6 @@ export const SortButton = styled.button`
   }
 `;
 
-/* Container para garantir que a tabela role suavemente no mobile sem esmagar as colunas */
 export const TableContainer = styled.div`
   width: 100%;
   overflow-x: auto;
