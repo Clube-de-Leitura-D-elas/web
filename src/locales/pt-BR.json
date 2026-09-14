@@ -36,7 +36,15 @@
 
   "participants": {
     "title": "Participantes",
-    "subtitle": "{{groups}} grupos ativos em {{cities}} cidades",
+    "subtitle": "{{groups}} em {{cities}}",
+    "activeGroupsCount": {
+      "one": "{{count}} grupo ativo",
+      "other": "{{count}} grupos ativos"
+    },
+    "citiesCount": {
+      "one": "{{count}} cidade",
+      "other": "{{count}} cidades"
+    },
     "tabs": {
       "participants": "Participantes",
       "requests": "Solicitações"

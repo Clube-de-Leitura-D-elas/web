@@ -14,7 +14,7 @@ import { Tag } from '../../components/Tag';
 import { Button } from '../../components/Button';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useLocale } from '../../hooks/useLocale';
-import { interpolate } from '../../locales';
+import { interpolate, pluralize } from '../../locales';
 import {
   getParticipantsPage,
   getPendingParticipantsPage,
@@ -279,8 +279,8 @@ export const Participants = () => {
         {groupsSummary && (
           <Styled.Subtitle>
             {interpolate(locale.participants.subtitle, {
-              groups: groupsSummary.groups,
-              cities: groupsSummary.cities,
+              groups: pluralize(locale.participants.activeGroupsCount, groupsSummary.groups),
+              cities: pluralize(locale.participants.citiesCount, groupsSummary.cities),
             })}
           </Styled.Subtitle>
         )}
