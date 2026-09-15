@@ -75,6 +75,11 @@ export const TextField = styled.input`
   font-size: 0.875rem;
   color: ${theme.text};
 
+  /* O foco já é indicado pela borda do Field; sem isto o :focus-visible global desenha um segundo anel. */
+  &:focus-visible {
+    outline: none;
+  }
+
   &::placeholder {
     color: ${theme.textMuted};
   }
@@ -86,6 +91,38 @@ export const TextField = styled.input`
 
   &:disabled::placeholder {
     color: ${theme.disabledFg};
+  }
+`;
+
+export const VisibilityToggle = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0.25rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: ${theme.textMuted};
+  cursor: pointer;
+
+  &:hover {
+    color: ${theme.text};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${theme.focusRing};
+    outline-offset: 0;
+  }
+
+  &:disabled {
+    color: ${theme.disabledFg};
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 1.125rem;
+    height: 1.125rem;
   }
 `;
 

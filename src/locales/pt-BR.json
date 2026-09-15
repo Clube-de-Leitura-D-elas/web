@@ -32,6 +32,10 @@
   "auth": {
     "loading": "Carregando..."
   },
+  "input": {
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha"
+  },
   "login": {
     "brand": {
       "logoAlt": "Clube de Leitura D'Elas",

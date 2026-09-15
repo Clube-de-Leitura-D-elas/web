@@ -65,6 +65,16 @@ export const Erro: Story = {
   args: { error: 'Campo obrigatório', helperText: undefined },
 };
 
+export const Senha: Story = {
+  args: {
+    id: 'senha',
+    label: 'Senha',
+    type: 'password',
+    placeholder: '••••••••',
+    helperText: undefined,
+  },
+};
+
 export const Desabilitado: Story = {
   args: { disabled: true, defaultValue: 'Não editável' },
 };
