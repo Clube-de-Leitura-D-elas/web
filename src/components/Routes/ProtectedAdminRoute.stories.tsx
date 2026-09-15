@@ -6,13 +6,11 @@ import { DefaultLayout } from '../../layouts/DefaultLayout';
 import { locale } from '../../locales';
 import { LoginPage } from '../../pages/Login';
 import { AuthServiceError } from '../../services/authErrors';
-import { getProfileByCurrentUser, signOut } from '../../services/authService';
+import { getCurrentUserRole, signOut } from '../../services/authService';
 
 import { ProtectedAdminRoute } from './ProtectedAdminRoute';
 
 const PROTECTED_CONTENT = 'Conteúdo protegido';
-
-const USER_ID = '11111111-1111-1111-1111-111111111111';
 
 const meta = {
   title: 'Componentes/ProtectedAdminRoute',
@@ -74,7 +72,7 @@ export const Founder: Story = {
 
 export const Manager: Story = {
   beforeEach: () => {
-    mocked(getProfileByCurrentUser).mockResolvedValue({ id: USER_ID, app_role: 'MANAGER' });
+    mocked(getCurrentUserRole).mockResolvedValue('MANAGER');
   },
 
   play: async ({ canvas }) => {
@@ -84,7 +82,7 @@ export const Manager: Story = {
 
 export const Loading: Story = {
   beforeEach: () => {
-    mocked(getProfileByCurrentUser).mockImplementation(() => new Promise(() => {}));
+    mocked(getCurrentUserRole).mockImplementation(() => new Promise(() => {}));
   },
 
   play: async ({ canvas }) => {
@@ -94,7 +92,7 @@ export const Loading: Story = {
 
 export const Unauthenticated: Story = {
   beforeEach: () => {
-    mocked(getProfileByCurrentUser).mockRejectedValue(new AuthServiceError('unauthenticated'));
+    mocked(getCurrentUserRole).mockRejectedValue(new AuthServiceError('unauthenticated'));
   },
 
   play: async ({ canvas }) => {
@@ -124,7 +122,7 @@ export const SessionEnded: Story = {
 
 export const WithoutAccess: Story = {
   beforeEach: () => {
-    mocked(getProfileByCurrentUser).mockResolvedValue({ id: USER_ID, app_role: 'READER' });
+    mocked(getCurrentUserRole).mockResolvedValue('READER');
   },
 
   play: async ({ canvas }) => {

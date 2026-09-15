@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getProfileByCurrentUser, hasAdminRole, onSignOut } from '../services/authService';
+import { getCurrentUserRole, hasAdminRole, onSignOut } from '../services/authService';
 
 export type AdminAccess = 'checking' | 'allowed' | 'denied';
 
@@ -15,8 +15,8 @@ export const useAdminAccess = (): AdminAccess => {
 
     async function checkAccess() {
       try {
-        const profile = await getProfileByCurrentUser();
-        if (active) setAccess(hasAdminRole(profile?.app_role) ? 'allowed' : 'denied');
+        const appRole = await getCurrentUserRole();
+        if (active) setAccess(hasAdminRole(appRole) ? 'allowed' : 'denied');
       } catch {
         if (active) setAccess('denied');
       }
