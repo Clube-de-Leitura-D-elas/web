@@ -1,15 +1,11 @@
 import { isAuthApiError } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient';
 import { AuthServiceError } from './authErrors';
-import { ADMIN_ROLES, type AppRole, type UserProfile } from '../types/auth';
+import { ADMIN_ROLES, APP_ROLES, type AppRole } from '../types/auth';
 
 export type LoginPayload = {
   email: string;
   password: string;
-};
-
-type UserProfileResponse = {
-  profile: UserProfile | null;
 };
 
 /** Troca o erro original por um erro de domínio, registrando o original só no console. */
@@ -53,32 +49,29 @@ export function onSignOut(callback: () => void) {
   return () => subscription.unsubscribe();
 }
 
-export async function getProfileByCurrentUser(): Promise<UserProfile | null> {
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
+const isAppRole = (value: unknown): value is AppRole =>
+  typeof value === 'string' && APP_ROLES.has(value as AppRole);
 
-  if (sessionError) {
-    throw toAuthServiceError(sessionError);
-  }
-
-  if (!session) {
-    throw new AuthServiceError('unauthenticated');
-  }
-
-  // O invoke já envia o token da sessão e resolve a URL a partir do client.
-  const { data, error } = await supabase.functions.invoke<UserProfileResponse>('get-user-profile', {
-    method: 'GET',
-  });
+/**
+ * Papel da usuária logada, lido da claim `app_role` do token (preenchida pelo
+ * `custom_access_token_hook` no banco). O `getClaims` valida a assinatura do token.
+ * Uma mudança de papel só aparece aqui depois do próximo refresh do token.
+ */
+export async function getCurrentUserRole(): Promise<AppRole | null> {
+  const { data, error } = await supabase.auth.getClaims();
 
   if (error) {
     throw toAuthServiceError(error);
   }
 
-  return data?.profile ?? null;
+  if (!data) {
+    throw new AuthServiceError('unauthenticated');
+  }
+
+  const appRole: unknown = data.claims.app_role;
+  return isAppRole(appRole) ? appRole : null;
 }
 
-export function hasAdminRole(appRole?: AppRole) {
+export function hasAdminRole(appRole?: AppRole | null) {
   return !!appRole && ADMIN_ROLES.has(appRole);
 }

@@ -6,7 +6,7 @@ import { useAdminAccess } from '../../hooks/useAdminAccess';
 import { locale } from '../../locales';
 import { AuthServiceError } from '../../services/authErrors';
 import {
-  getProfileByCurrentUser,
+  getCurrentUserRole,
   hasAdminRole,
   signInWithPassword,
   signOut,
@@ -36,9 +36,9 @@ export const LoginPage = () => {
 
     try {
       await signInWithPassword({ email, password });
-      const profile = await getProfileByCurrentUser();
+      const appRole = await getCurrentUserRole();
 
-      if (!hasAdminRole(profile?.app_role)) {
+      if (!hasAdminRole(appRole)) {
         await signOut();
         setError(text.errors.noAccess);
         return;

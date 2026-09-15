@@ -5,8 +5,8 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 
 import { locale } from '../../locales';
 import { AuthServiceError } from '../../services/authErrors';
-import { getProfileByCurrentUser, signInWithPassword, signOut } from '../../services/authService';
-import type { UserProfile } from '../../types/auth';
+import { getCurrentUserRole, signInWithPassword, signOut } from '../../services/authService';
+import type { AppRole } from '../../types/auth';
 
 import { LoginPage } from '.';
 
@@ -21,29 +21,23 @@ const credentials = {
   password: 'senha-secreta',
 };
 
-const founder: UserProfile = {
-  id: '11111111-1111-1111-1111-111111111111',
-  name: 'Claudine',
-  email: credentials.email,
-  app_role: 'FOUNDER',
-};
+const USER_ID = '11111111-1111-1111-1111-111111111111';
 
-/** Começa deslogada; depois do login, o perfil passa a ser `profile`. */
-const mockLogin = (profile: UserProfile) => {
+/** Começa deslogada; depois do login, o papel no token passa a ser `appRole`. */
+const mockLogin = (appRole: AppRole) => {
   let signedIn = false;
 
   mocked(signInWithPassword).mockImplementation(async () => {
     await wait(REQUEST_DELAY);
     signedIn = true;
 
-    return { id: profile.id, email: profile.email } as User;
+    return { id: USER_ID, email: credentials.email } as User;
   });
 
-  mocked(getProfileByCurrentUser).mockImplementation(async () => {
+  mocked(getCurrentUserRole).mockImplementation(async () => {
     if (!signedIn) throw new AuthServiceError('unauthenticated');
-    await wait(REQUEST_DELAY);
 
-    return profile;
+    return appRole;
   });
 };
 
@@ -88,7 +82,7 @@ const meta = {
   ],
 
   beforeEach: () => {
-    mockLogin(founder);
+    mockLogin('FOUNDER');
   },
 } satisfies Meta<typeof LoginPage>;
 
@@ -121,7 +115,7 @@ export const Success: Story = {
 
 export const ManagerAccess: Story = {
   beforeEach: () => {
-    mockLogin({ ...founder, app_role: 'MANAGER' });
+    mockLogin('MANAGER');
   },
 
   play: async (context) => {
@@ -134,7 +128,7 @@ export const ManagerAccess: Story = {
 
 export const AlreadyLoggedIn: Story = {
   beforeEach: () => {
-    mocked(getProfileByCurrentUser).mockResolvedValue(founder);
+    mocked(getCurrentUserRole).mockResolvedValue('FOUNDER');
   },
 
   play: async ({ canvas }) => {
@@ -171,7 +165,7 @@ export const InvalidCredentials: Story = {
 
 export const NoAccess: Story = {
   beforeEach: () => {
-    mockLogin({ ...founder, app_role: 'READER' });
+    mockLogin('READER');
   },
 
   play: async (context) => {
@@ -184,7 +178,7 @@ export const NoAccess: Story = {
 
 export const LoadError: Story = {
   beforeEach: () => {
-    mocked(getProfileByCurrentUser).mockRejectedValue(new AuthServiceError('unknown'));
+    mocked(getCurrentUserRole).mockRejectedValue(new AuthServiceError('unknown'));
   },
 
   play: async (context) => {
