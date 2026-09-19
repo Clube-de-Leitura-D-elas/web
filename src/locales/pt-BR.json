@@ -146,7 +146,7 @@
       "groupsCount": "{{count}} grupos",
       "groupCountSingle": "1 grupo",
       "statusActive": "Ativa",
-      "statusInactive": "Não ativada",
+      "statusInactive": "Inativa",
       "empty": "Nenhum participante encontrado.",
       "emptyValue": "—",
       "itemLabel": "participantes cadastradas",
