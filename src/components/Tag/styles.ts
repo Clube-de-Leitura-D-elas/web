@@ -21,6 +21,13 @@ export const Container = styled.span<{ $color: TagColor }>`
           background-color: ${theme.surfaceBrandSoft};
           color: ${theme.textBrand};
         `;
+
+      case 'warning':
+        return css`
+          background-color: ${theme.warningLight};
+          color: ${theme.warningDark};
+        `;
+
       default:
         return css`
           background-color: ${theme.surfaceSunken};
