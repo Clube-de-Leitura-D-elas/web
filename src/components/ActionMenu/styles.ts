@@ -49,6 +49,7 @@ export const MenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
   gap: 0.6rem;
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
+  white-space: nowrap;
   transition: background-color 0.15s ease;
 
   ${({ $variant }) =>
