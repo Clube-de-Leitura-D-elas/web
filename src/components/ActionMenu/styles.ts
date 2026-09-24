@@ -56,10 +56,6 @@ export const MenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
     $variant === 'danger'
       ? css`
           color: ${theme.danger};
-          border-top: 1px solid ${theme.border};
-          margin-top: 0.25rem;
-          border-radius: 0 0 8px 8px;
-
           &:hover {
             background-color: ${theme.surfaceSunken};
           }
