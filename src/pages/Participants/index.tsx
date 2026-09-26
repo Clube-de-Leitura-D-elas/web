@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { LuArrowUpDown, LuEllipsisVertical } from 'react-icons/lu';
+import { LuArrowUpDown } from 'react-icons/lu';
 import * as Styled from './styles';
 import { Input } from '../../components/Input';
 import { Dropdown, type DropdownItemList } from '../../components/Dropdown';
@@ -95,7 +95,6 @@ export const Participants = () => {
         align: 'center',
       },
       { key: 'status', label: locale.participants.table.columns.status, align: 'center' },
-      { key: 'actions', label: '', align: 'right', width: '3rem' },
     ],
     [locale],
   );
@@ -126,14 +125,6 @@ export const Participants = () => {
                 ? locale.participants.table.statusActive
                 : locale.participants.table.statusInactive}
             </Styled.StatusBadge>
-          ),
-          actions: (
-            <Styled.ActionButton
-              type="button"
-              aria-label={interpolate(locale.participants.table.actionsAriaLabel, { name: p.name })}
-            >
-              <LuEllipsisVertical aria-hidden />
-            </Styled.ActionButton>
           ),
         };
       });
