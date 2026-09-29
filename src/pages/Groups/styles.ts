@@ -99,19 +99,3 @@ export const GroupCreatedAt = styled.span`
   color: ${theme.textMuted};
   font-size: 0.75rem;
 `;
-
-export const ActionButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  color: ${theme.textMuted};
-  font-size: 1.25rem;
-  line-height: 1;
-
-  &:hover {
-    color: ${theme.text};
-  }
-`;

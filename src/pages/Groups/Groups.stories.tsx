@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { LuEllipsisVertical } from 'react-icons/lu';
 
 import { Button } from '../../components/Button';
 import { Dropdown } from '../../components/Dropdown';
@@ -33,11 +32,6 @@ const groupRows: TableRow[] = [
     coordinator: <Tag color="neutral">Joanae A.</Tag>,
     members: 26,
     nextMeeting: <Tag color="warning">Sem data definida</Tag>,
-    actions: (
-      <Styled.ActionButton type="button" aria-label="Ações do grupo">
-        <LuEllipsisVertical aria-hidden="true" />
-      </Styled.ActionButton>
-    ),
   },
   {
     name: (
@@ -50,11 +44,6 @@ const groupRows: TableRow[] = [
     coordinator: <Tag color="neutral">Simone F.</Tag>,
     members: 28,
     nextMeeting: '24 ago, 19h',
-    actions: (
-      <Styled.ActionButton type="button" aria-label="Ações do grupo">
-        <LuEllipsisVertical aria-hidden="true" />
-      </Styled.ActionButton>
-    ),
   },
   {
     name: (
@@ -67,11 +56,6 @@ const groupRows: TableRow[] = [
     coordinator: <Tag color="neutral">Vera B.</Tag>,
     members: 22,
     nextMeeting: '31 ago, 11h',
-    actions: (
-      <Styled.ActionButton type="button" aria-label="Ações do grupo">
-        <LuEllipsisVertical aria-hidden="true" />
-      </Styled.ActionButton>
-    ),
   },
   {
     name: (
@@ -84,11 +68,6 @@ const groupRows: TableRow[] = [
     coordinator: <Tag color="neutral">Rita C.</Tag>,
     members: 30,
     nextMeeting: '02 set, 15h',
-    actions: (
-      <Styled.ActionButton type="button" aria-label="Ações do grupo">
-        <LuEllipsisVertical aria-hidden="true" />
-      </Styled.ActionButton>
-    ),
   },
   {
     name: (
@@ -101,11 +80,6 @@ const groupRows: TableRow[] = [
     coordinator: <Tag color="warning">Sem coordenadora</Tag>,
     members: 26,
     nextMeeting: <Tag color="warning">Sem data definida</Tag>,
-    actions: (
-      <Styled.ActionButton type="button" aria-label="Ações do grupo">
-        <LuEllipsisVertical aria-hidden="true" />
-      </Styled.ActionButton>
-    ),
   },
   {
     name: (
@@ -118,11 +92,6 @@ const groupRows: TableRow[] = [
     coordinator: <Tag color="neutral">Carolina W.</Tag>,
     members: 15,
     nextMeeting: <Tag color="warning">Sem data definida</Tag>,
-    actions: (
-      <Styled.ActionButton type="button" aria-label="Ações do grupo">
-        <LuEllipsisVertical aria-hidden="true" />
-      </Styled.ActionButton>
-    ),
   },
 ];
 

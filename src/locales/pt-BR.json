@@ -182,8 +182,11 @@
     },
     "newGroup": "Novo Grupo",
     "table": {
-      "emptyCoordinator": "Não possui Coordenadora",
+      "itemLabel": "grupos cadastrados",
+      "createdAt": "criado em {{date}}",
+      "emptyCoordinator": "Sem coordenadora",
       "emptyNextMeeting": "Sem data definida",
+      "emptyCity": "—",
       "columns": {
         "name": "NOME DO GRUPO",
         "city": "CIDADE",
