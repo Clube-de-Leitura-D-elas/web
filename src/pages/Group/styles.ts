@@ -117,18 +117,6 @@ export const CardText = styled.span`
   color: ${theme.textMuted};
 `;
 
-export const CardAction = styled.button`
-  padding: 0;
-  border: none;
-  background: none;
-  color: ${theme.textBrand};
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  ${focusRing}
-`;
-
 export const MeetingStatus = styled.span<{ $confirmed: boolean }>`
   padding: 0.2rem 0.75rem;
   border-radius: 999px;

@@ -173,15 +173,10 @@
     }
   },
   "group_details": {
-    "title": "Grupo",
     "back": "Voltar para Grupos",
     "loading": "Carregando grupo...",
     "loadError": "Não foi possível carregar os dados do grupo.",
     "notInformed": "—",
-    "status": {
-      "active": "Ativo",
-      "inactive": "Inativo"
-    },
     "header": {
       "subtitle": "{{city}} • {{count}} participantes ativas",
       "editGroup": "Editar Grupo",
@@ -215,9 +210,6 @@
         "email": "EMAIL",
         "actions": "AÇÕES"
       }
-    },
-    "pagination": {
-      "showing": "Mostrando {{from}}-{{to}} de {{total}} participantes cadastradas"
     },
     "history": {
       "itemLabel": "encontros realizados",

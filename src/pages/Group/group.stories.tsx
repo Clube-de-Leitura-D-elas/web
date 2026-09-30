@@ -27,7 +27,7 @@ const group: GroupDetailsData = {
   coordinator_name: 'Joseane Alves',
   coordinator_email: 'joseane.alves@email.com',
   next_meeting: {
-    date: '2024-08-24T19:00:00',
+    date: '2024-08-24T22:30:00Z',
     book_title: 'A Hora da Estrela',
     book_author: 'Clarice Lispector',
     place: 'Casa da Ana',

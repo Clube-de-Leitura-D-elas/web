@@ -6,19 +6,7 @@ import type {
   PendingParticipantListItem,
 } from '../types/participantList';
 import { supabase } from './supabaseClient';
-
-async function invokeGet<T>(name: string, params: Record<string, string | number>): Promise<T> {
-  const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== '') query.set(key, String(value));
-  });
-
-  const { data, error } = await supabase.functions.invoke<T>(`${name}?${query}`, {
-    method: 'GET',
-  });
-  if (error) throw error;
-  return data as T;
-}
+import { invokeGet } from './invokeGet';
 
 export function getParticipantsPage(
   { page, pageSize }: TablePageRequest,

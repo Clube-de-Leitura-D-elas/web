@@ -29,7 +29,7 @@ const formatMeetingDate = (iso: string) => {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-    timeZone: 'UTC',
+    timeZone: 'America/Sao_Paulo',
   }).formatToParts(new Date(iso));
   const get = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
   const month = get('month').replace('.', '');
@@ -42,17 +42,20 @@ const formatNextMeetingDate = (iso: string) => {
   const day = new Intl.DateTimeFormat('pt-BR', {
     day: 'numeric',
     month: 'long',
-    timeZone: 'UTC',
+    timeZone: 'America/Sao_Paulo',
   }).format(date);
-  const time = new Intl.DateTimeFormat('pt-BR', {
+  const timeParts = new Intl.DateTimeFormat('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
-    timeZone: 'UTC',
+    timeZone: 'America/Sao_Paulo',
     hourCycle: 'h23',
-  }).format(date);
+  }).formatToParts(date);
 
+  const hour = timeParts.find((p) => p.type === 'hour')?.value ?? '';
+  const minute = timeParts.find((p) => p.type === 'minute')?.value ?? '';
+  const formattedTime = minute === '00' ? `${hour}h` : `${hour}h${minute}`;
   const [d, , month] = day.split(' ');
-  return `${d} de ${month.charAt(0).toUpperCase()}${month.slice(1)}, ${time.replace(':00', 'h')}`;
+  return `${d} de ${month.charAt(0).toUpperCase()}${month.slice(1)}, ${formattedTime}`;
 };
 
 const getInitials = (name: string | null) => {
@@ -88,7 +91,6 @@ export const GroupDetails = () => {
 
   const loading = result?.id !== groupId;
   const group = result?.group ?? null;
-  const hasError = !loading && !group;
 
   //aba 1
   const participantColumns: TableColumn[] = useMemo(
@@ -129,8 +131,12 @@ export const GroupDetails = () => {
           <Styled.AttendanceList>
             {p.attendance.length > 0
               ? p.attendance.map((mark, index) => (
-                  <Styled.AttendanceMark key={index} $present={mark === 'P'}>
-                    {mark}
+                  <Styled.AttendanceMark
+                    key={index}
+                    $present={mark === 'P'}
+                    aria-label={mark === 'P' ? 'Presente' : 'Falta'}
+                  >
+                    <span aria-hidden="true">{mark}</span>
                   </Styled.AttendanceMark>
                 ))
               : locale.group_details.table.emptyValue}
@@ -263,7 +269,7 @@ export const GroupDetails = () => {
   );
 
   if (loading) return <Styled.Message>{locale.group_details.loading}</Styled.Message>;
-  if (hasError || !group) return <Styled.Message>{locale.group_details.loadError}</Styled.Message>;
+  if (!group) return <Styled.Message>{locale.group_details.loadError}</Styled.Message>;
 
   const meeting = group.next_meeting;
 
