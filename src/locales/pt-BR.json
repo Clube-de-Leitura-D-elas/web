@@ -175,24 +175,27 @@
       "other": "{{count}} cidades"
     },
     "filters": {
-      "searchPlaceholder": "Busca por nome ou cidade",
+      "searchPlaceholder": "Buscar por nome ou cidade",
       "cityAll": "Cidade: todas",
-      "sortNameAsc": "Nome (A–Z)",
-      "sortNameDesc": "Nome (Z–A)"
+      "sortNameAsc": "Ordenar: Nome (A–Z)",
+      "sortNameDesc": "Ordenar: Nome (Z–A)"
     },
-    "newGroup": "Novo Grupo",
+    "newGroup": "Novo grupo",
     "table": {
       "itemLabel": "grupos cadastrados",
       "createdAt": "criado em {{date}}",
       "emptyCoordinator": "Sem coordenadora",
       "emptyNextMeeting": "Sem data definida",
       "emptyCity": "—",
+      "statusActive": "Ativo",
+      "statusClosed": "Inativo",
       "columns": {
         "name": "NOME DO GRUPO",
         "city": "CIDADE",
         "coordinator": "COORDENADORA",
         "members": "MEMBRAS",
-        "nextMeeting": "PRÓXIMO ENCONTRO"
+        "nextMeeting": "PRÓXIMO ENCONTRO",
+        "status": "STATUS"
       }
     }
   }

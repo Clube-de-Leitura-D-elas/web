@@ -19,6 +19,7 @@ export type GroupListItem = {
   coordinator: string | null;
   members: number;
   nextMeetingAt: string | null;
+  status: string;
 };
 
 export type GroupsSummary = {

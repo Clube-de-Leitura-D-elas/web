@@ -90,6 +90,11 @@ export const Groups = () => {
         label: locale.groups.table.columns.nextMeeting,
         align: 'center',
       },
+      {
+        key: 'status',
+        label: locale.groups.table.columns.status,
+        align: 'center',
+      },
     ],
     [locale],
   );
@@ -142,6 +147,13 @@ export const Groups = () => {
             {locale.groups.table.emptyNextMeeting}
           </Tag>
         ),
+
+        status:
+          group.status === 'active' ? (
+            <Tag color="success">{locale.groups.table.statusActive}</Tag>
+          ) : (
+            <Tag color="error">{locale.groups.table.statusClosed}</Tag>
+          ),
       }));
 
       return { rows, total };

@@ -8,7 +8,7 @@ export async function getGroupGrid(
 ): Promise<GroupGridResponse> {
   const trimmedSearch = search.trim();
 
-  const { data, error } = await supabase.functions.invoke<GroupGridResponse>('group-grid-web', {
+  const { data, error } = await supabase.functions.invoke<GroupGridResponse>('get-group-web', {
     body: {
       page,
       pageSize,

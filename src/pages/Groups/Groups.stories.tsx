@@ -1,11 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Button } from '../../components/Button';
 import { Dropdown } from '../../components/Dropdown';
 import { Input } from '../../components/Input';
-import { Table, type TableRow } from '../../components/Table';
+import { Table, type TableColumn, type TableRow } from '../../components/Table';
 import { Tag } from '../../components/Tag';
+import { useLocale } from '../../hooks/useLocale';
+import { interpolate, pluralize } from '../../locales';
 import * as Styled from './styles';
 
 const meta = {
@@ -29,9 +31,10 @@ const groupRows: TableRow[] = [
       </Styled.GroupInfo>
     ),
     city: 'São Paulo',
-    coordinator: <Tag color="neutral">Joanae A.</Tag>,
+    coordinator: <Tag color="neutral">Joana A.</Tag>,
     members: 26,
     nextMeeting: <Tag color="warning">Sem data definida</Tag>,
+    status: <Tag color="success">Ativo</Tag>,
   },
   {
     name: (
@@ -44,6 +47,7 @@ const groupRows: TableRow[] = [
     coordinator: <Tag color="neutral">Simone F.</Tag>,
     members: 28,
     nextMeeting: '24 ago, 19h',
+    status: <Tag color="success">Ativo</Tag>,
   },
   {
     name: (
@@ -56,6 +60,7 @@ const groupRows: TableRow[] = [
     coordinator: <Tag color="neutral">Vera B.</Tag>,
     members: 22,
     nextMeeting: '31 ago, 11h',
+    status: <Tag color="success">Ativo</Tag>,
   },
   {
     name: (
@@ -68,6 +73,7 @@ const groupRows: TableRow[] = [
     coordinator: <Tag color="neutral">Rita C.</Tag>,
     members: 30,
     nextMeeting: '02 set, 15h',
+    status: <Tag color="success">Ativo</Tag>,
   },
   {
     name: (
@@ -77,9 +83,10 @@ const groupRows: TableRow[] = [
       </Styled.GroupInfo>
     ),
     city: 'Belo Horizonte',
-    coordinator: <Tag color="warning">Sem coordenadora</Tag>,
+    coordinator: null,
     members: 26,
-    nextMeeting: <Tag color="warning">Sem data definida</Tag>,
+    nextMeeting: null,
+    status: <Tag color="success">Ativo</Tag>,
   },
   {
     name: (
@@ -91,104 +98,149 @@ const groupRows: TableRow[] = [
     city: 'Porto Alegre',
     coordinator: <Tag color="neutral">Carolina W.</Tag>,
     members: 15,
-    nextMeeting: <Tag color="warning">Sem data definida</Tag>,
+    nextMeeting: null,
+    status: <Tag color="error">Inativo</Tag>,
   },
-];
-
-const groupColumns = [
-  {
-    key: 'name',
-    label: 'NOME DO GRUPO',
-    align: 'left' as const,
-  },
-  {
-    key: 'city',
-    label: 'CIDADE',
-    align: 'center' as const,
-  },
-  {
-    key: 'coordinator',
-    label: 'COORDENADORA',
-    align: 'center' as const,
-  },
-  {
-    key: 'members',
-    label: 'MEMBRAS',
-    align: 'center' as const,
-  },
-  {
-    key: 'nextMeeting',
-    label: 'PRÓXIMO ENCONTRO',
-    align: 'center' as const,
-  },
-  {
-    key: 'actions',
-    label: 'AÇÕES',
-    align: 'right' as const,
-    width: '4rem',
-  },
-];
-
-const cityOptions = [
-  { label: 'Todas', value: 'all' },
-  { label: 'Belo Horizonte', value: 'belo-horizonte' },
-  { label: 'Florianópolis', value: 'florianopolis' },
-  { label: 'Porto Alegre', value: 'porto-alegre' },
-  { label: 'São Paulo', value: 'sao-paulo' },
-];
-
-const orderOptions = [
-  { label: 'Nome (A–Z)', value: 'name_asc' },
-  { label: 'Nome (Z–A)', value: 'name_desc' },
 ];
 
 function GroupsStory() {
+  const locale = useLocale();
+
   const [search, setSearch] = useState('');
-  //const [city, setCity] = useState('all');
-  //const [order, setOrder] = useState('name_asc');
+  const [, setCity] = useState('');
+  const [order, setOrder] = useState('name_asc');
 
   const cityCount = new Set(groupRows.map((group) => group.city)).size;
+
+  const groupColumns: TableColumn[] = [
+    {
+      key: 'name',
+      label: locale.groups.table.columns.name,
+      align: 'left',
+    },
+    {
+      key: 'city',
+      label: locale.groups.table.columns.city,
+      align: 'center',
+    },
+    {
+      key: 'coordinator',
+      label: locale.groups.table.columns.coordinator,
+      align: 'center',
+    },
+    {
+      key: 'members',
+      label: locale.groups.table.columns.members,
+      align: 'center',
+    },
+    {
+      key: 'nextMeeting',
+      label: locale.groups.table.columns.nextMeeting,
+      align: 'center',
+    },
+    {
+      key: 'status',
+      label: locale.groups.table.columns.status,
+      align: 'center',
+    },
+  ];
+
+  const rows = groupRows.map((group) => ({
+    ...group,
+
+    coordinator: group.coordinator ?? (
+      <Tag color="warning">{locale.groups.table.emptyCoordinator}</Tag>
+    ),
+
+    nextMeeting: group.nextMeeting ?? (
+      <Tag color="warning">{locale.groups.table.emptyNextMeeting}</Tag>
+    ),
+  }));
+
+  const cityOptions = [
+    {
+      label: locale.groups.filters.cityAll,
+      value: '',
+    },
+    {
+      label: 'Belo Horizonte',
+      value: 'belo-horizonte',
+    },
+    {
+      label: 'Florianópolis',
+      value: 'florianopolis',
+    },
+    {
+      label: 'Porto Alegre',
+      value: 'porto-alegre',
+    },
+    {
+      label: 'São Paulo',
+      value: 'sao-paulo',
+    },
+  ];
+
+  const orderOptions = [
+    {
+      label: locale.groups.filters.sortNameAsc,
+      value: 'name_asc',
+    },
+    {
+      label: locale.groups.filters.sortNameDesc,
+      value: 'name_desc',
+    },
+  ];
 
   return (
     <Styled.Container>
       <Styled.Header>
-        <Styled.Title>Grupos</Styled.Title>
+        <Styled.Title>{locale.groups.title}</Styled.Title>
 
         <Styled.Subtitle>
-          {groupRows.length} grupos ativos em {cityCount} cidades
+          {interpolate(locale.groups.subtitle, {
+            groups: pluralize(locale.groups.activeGroupsCount, groupRows.length),
+            cities: pluralize(locale.groups.citiesCount, cityCount),
+          })}
         </Styled.Subtitle>
       </Styled.Header>
 
       <Styled.FiltersBar>
         <Input
           id="storybook-group-search"
-          label="Buscar por nome ou cidade"
-          placeholder="Buscar por nome ou cidade"
+          label={locale.groups.filters.searchPlaceholder}
+          placeholder={locale.groups.filters.searchPlaceholder}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
 
         <Dropdown
-          placeholder="Cidade: todas"
+          placeholder={locale.groups.filters.cityAll}
           options={cityOptions}
-          //onSelect={setCity}
-          onSelect={() => {}}
+          onSelect={setCity}
         />
 
         <Dropdown
-          placeholder="Ordenar: Nome (A–Z)"
+          placeholder={
+            order === 'name_asc'
+              ? locale.groups.filters.sortNameAsc
+              : locale.groups.filters.sortNameDesc
+          }
           options={orderOptions}
-          //onSelect={setOrder}
-          onSelect={() => {}}
+          onSelect={setOrder}
         />
 
         <Button variant="primary" size="md">
-          Novo grupo
+          {locale.groups.newGroup}
         </Button>
       </Styled.FiltersBar>
 
       <Styled.TableContainer>
-        <Table columns={groupColumns} rows={groupRows} pageSize={6} itemLabel="grupos" />
+        <Table
+          columns={groupColumns}
+          rows={rows}
+          pageSize={6}
+          itemLabel={locale.groups.table.itemLabel}
+        />
       </Styled.TableContainer>
     </Styled.Container>
   );
