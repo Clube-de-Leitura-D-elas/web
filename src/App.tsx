@@ -5,6 +5,7 @@ import { LoginPage } from './pages/Login';
 import { NotFound } from './pages/NotFound';
 import { ParticipantDetails } from './pages/Participant';
 import { Participants } from './pages/Participants';
+import { GroupDetails } from './pages/Group';
 import { Groups } from './pages/Groups';
 
 export const App = () => (
@@ -15,6 +16,7 @@ export const App = () => (
         <Route path="/participantes" element={<Participants />} />
         <Route path="/participantes/:participantId" element={<ParticipantDetails />} />
         <Route path="/grupos" element={<Groups />} />
+        <Route path="/grupos/:groupId" element={<GroupDetails />} />
       </Route>
     </Route>
 
