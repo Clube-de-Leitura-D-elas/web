@@ -40,7 +40,7 @@ export const Groups = () => {
   // Opções dos filtros
   // =========================
 
-  // Cidades e resumo vêm na mesma resposta da tabela (group-grid-web)
+  // Cidades e resumo vêm na mesma resposta da tabela (get-groups-web)
   const [cityOptions, setCityOptions] = useState<DropdownItemList[]>([
     { value: '', label: locale.groups.filters.cityAll },
   ]);

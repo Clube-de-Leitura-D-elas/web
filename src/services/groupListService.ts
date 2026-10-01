@@ -18,12 +18,12 @@ export async function getGroupGrid(
   if (cityId) query.set('cityId', cityId);
 
   const { data, error } = await supabase.functions.invoke<GroupGridResponse>(
-    `get-group-web?${query}`,
+    `get-groups-web?${query}`,
     { method: 'GET' },
   );
 
   if (error) throw error;
-  if (!data) throw new Error('get-group-web returned no data');
+  if (!data) throw new Error('get-groups-web returned no data');
 
   return data;
 }

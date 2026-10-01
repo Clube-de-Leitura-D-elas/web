@@ -28,7 +28,7 @@ export type GroupsSummary = {
   cities: number;
 };
 
-// Resposta da Edge Function `get-group-web`
+// Resposta da Edge Function `get-groups-web`
 export type GroupGridResponse = {
   items: GroupListItem[];
   // total considerando os filtros atuais (usado na paginação)
