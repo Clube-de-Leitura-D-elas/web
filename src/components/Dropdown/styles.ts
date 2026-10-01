@@ -52,16 +52,6 @@ export const Trigger = styled.button<{
       : css`
           height: 2.5rem;
         `}
-  & > span:first-child {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    text-align: left;
-  }
-  & > span:last-child {
-    flex-shrink: 0;
-  }
   &:focus {
     border-color: ${({ $isError }) => ($isError ? theme.error : theme.primary)};
   }
@@ -72,6 +62,19 @@ export const Trigger = styled.button<{
     border-color: ${theme.border};
     opacity: 0.6;
   }
+`;
+
+export const TriggerValue = styled.span`
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+`;
+
+export const TriggerIcon = styled.span`
+  display: flex;
+  flex-shrink: 0;
 `;
 
 export const Menu = styled.ul`
@@ -97,7 +100,8 @@ export const MenuItem = styled.li<{ $isSelected?: boolean }>`
   cursor: pointer;
   font-weight: 600;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     background-color: ${theme.surfaceBrandSoft};
     color: ${theme.textBrand};
   }
