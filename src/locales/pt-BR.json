@@ -227,8 +227,9 @@
     },
     "table": {
       "coordinatorTag": "Coordenadora",
+      "present": "Presente",
+      "absent": "Falta",
       "itemLabel": "participantes cadastradas",
-      "empty": "Nenhuma participante cadastrada.",
       "emptyValue": "—",
       "actionsAriaLabel": "Ações da participante {{name}}",
       "columns": {
@@ -241,7 +242,6 @@
     },
     "history": {
       "itemLabel": "encontros realizados",
-      "empty": "Nenhum encontro realizado.",
       "book": "{{title}} - {{author}}",
       "attendance": "{{present}} / {{total}} ({{percent}}%)",
       "votes": "({{count}} votos)",

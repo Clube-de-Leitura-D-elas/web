@@ -20,7 +20,8 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const group: GroupDetailsData = {
   id: 'g-03',
-  name: 'Grupo 3 - Quinta à noite',
+  number: 3,
+  description: 'Quinta à noite',
   city: 'Porto Alegre',
   is_active: true,
   active_participants_count: 8,

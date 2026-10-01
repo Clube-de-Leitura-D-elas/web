@@ -15,12 +15,12 @@ export function getGroupParticipantsPage(
   groupId: string,
   { page, pageSize }: TablePageRequest,
 ): Promise<Page<GroupParticipantListItem>> {
-  return invokeGet('get-group-participants', { groupId, page, pageSize });
+  return invokeGet('get-group-participants-web', { groupId, page, pageSize });
 }
 
 export function getGroupMeetingsPage(
   groupId: string,
   { page, pageSize }: TablePageRequest,
 ): Promise<Page<GroupMeetingHistoryItem>> {
-  return invokeGet('get-group-meetings', { groupId, page, pageSize });
+  return invokeGet('get-group-meetings-web', { groupId, page, pageSize });
 }

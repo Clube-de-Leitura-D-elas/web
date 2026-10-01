@@ -9,7 +9,9 @@ export type GroupNextMeeting = {
 
 export type GroupDetails = {
   id: string;
-  name: string;
+  // o nome exibido é montado com number + description, como na grade de grupos
+  number: number;
+  description: string;
   city: string | null;
   is_active: boolean;
   active_participants_count: number;

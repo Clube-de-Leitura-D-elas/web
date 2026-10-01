@@ -24,7 +24,7 @@ import type {
 
 type GroupDetailsTab = 'participants' | 'history';
 
-const formatMeetingDate = (iso: string) => {
+const formatHistoryDate = (iso: string) => {
   const parts = new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: 'short',
@@ -134,7 +134,11 @@ export const GroupDetails = () => {
                   <Styled.AttendanceMark
                     key={index}
                     $present={mark === 'P'}
-                    aria-label={mark === 'P' ? 'Presente' : 'Falta'}
+                    aria-label={
+                      mark === 'P'
+                        ? locale.group_details.table.present
+                        : locale.group_details.table.absent
+                    }
                   >
                     <span aria-hidden="true">{mark}</span>
                   </Styled.AttendanceMark>
@@ -181,7 +185,7 @@ export const GroupDetails = () => {
       const { items, total } = await getGroupMeetingsPage(groupId, request);
 
       const rows = items.map((m: GroupMeetingHistoryItem) => {
-        const date = formatMeetingDate(m.date);
+        const date = formatHistoryDate(m.date);
         const percent =
           m.attendance_total > 0
             ? Math.round((m.attendance_present / m.attendance_total) * 100)
@@ -282,7 +286,12 @@ export const GroupDetails = () => {
 
       <Styled.Header>
         <Styled.HeaderInfo>
-          <Styled.Title>{group.name}</Styled.Title>
+          <Styled.Title>
+            {interpolate(locale.groups.table.groupName, {
+              number: String(group.number).padStart(2, '0'),
+              description: group.description,
+            })}
+          </Styled.Title>
           <Styled.Subtitle>
             {interpolate(locale.group_details.header.subtitle, {
               city: group.city || locale.group_details.notInformed,
