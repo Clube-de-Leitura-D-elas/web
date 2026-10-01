@@ -181,6 +181,24 @@
       "sortNameDesc": "Ordenar: Nome (Z–A)"
     },
     "newGroup": "Novo grupo",
+    "newGroupModal": {
+      "title": "Criar novo grupo",
+      "description": "Preencha as informações básicas para abrir um novo grupo de leitura.",
+      "name": {
+        "label": "Nome do grupo *",
+        "placeholder": "Ex: Grupo 43 — Moinhos de Vento",
+        "helperText": "O nome deve ser único dentro da mesma cidade"
+      },
+      "city": {
+        "label": "Cidade ou Zona *",
+        "placeholder": "Ex: Porto Alegre"
+      },
+      "coordinator": {
+        "label": "Coordenadora inicial",
+        "placeholder": "Selecione uma leitora cadastrada ou deixe para definir depois"
+      },
+      "save": "Salvar grupo"
+    },
     "table": {
       "itemLabel": "grupos cadastrados",
       "groupName": "Grupo {{number}} — {{description}}",

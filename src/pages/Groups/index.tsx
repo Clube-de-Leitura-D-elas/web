@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { LuTriangleAlert } from 'react-icons/lu';
+import { LuPlus, LuTriangleAlert } from 'react-icons/lu';
 
 import * as Styled from './styles';
 
@@ -24,6 +24,8 @@ import type { GroupFilters, GroupListItem, GroupOrder, GroupsSummary } from '../
 
 import { formatMeetingDate, formatMonthYear } from '../../utils/date';
 
+import { NewGroupModal } from './NewGroupModal';
+
 export const Groups = () => {
   // =========================
   // Estados dos filtros
@@ -32,6 +34,7 @@ export const Groups = () => {
   const [search, setSearch] = useState('');
   const [cityId, setCityId] = useState('');
   const [order, setOrder] = useState<GroupOrder>('name_asc');
+  const [isNewGroupOpen, setIsNewGroupOpen] = useState(false);
 
   // Evita fazer uma requisição a cada tecla digitada
   const debouncedSearch = useDebounce(search, 400);
@@ -223,7 +226,12 @@ export const Groups = () => {
           onSelect={(value) => setOrder(value as GroupOrder)}
         />
 
-        <Button variant="primary" size="md" onClick={() => {}}>
+        <Button
+          variant="primary"
+          size="md"
+          icon={<LuPlus aria-hidden />}
+          onClick={() => setIsNewGroupOpen(true)}
+        >
           {locale.groups.newGroup}
         </Button>
       </Styled.FiltersBar>
@@ -237,6 +245,12 @@ export const Groups = () => {
           itemLabel={locale.groups.table.itemLabel}
         />
       </Styled.TableContainer>
+
+      <NewGroupModal
+        isOpen={isNewGroupOpen}
+        onClose={() => setIsNewGroupOpen(false)}
+        onSave={() => setIsNewGroupOpen(false)}
+      />
     </Styled.Container>
   );
 };
