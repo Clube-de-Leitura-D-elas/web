@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import { Dropdown } from '../../../components/Dropdown';
 import { Input } from '../../../components/Input';
@@ -25,6 +25,7 @@ export const NewGroupModal = ({ isOpen, onClose, onSave }: NewGroupModalProps) =
 
 const NewGroupForm = ({ onClose, onSave }: Omit<NewGroupModalProps, 'isOpen'>) => {
   const text = useLocale().groups.newGroupModal;
+  const nameId = useId();
 
   const [name, setName] = useState('');
   const [cityId, setCityId] = useState('');
@@ -52,7 +53,7 @@ const NewGroupForm = ({ onClose, onSave }: Omit<NewGroupModalProps, 'isOpen'>) =
     >
       <Styled.Fields>
         <Input
-          id="new-group-name"
+          id={nameId}
           label={text.name.label}
           placeholder={text.name.placeholder}
           helperText={text.name.helperText}
