@@ -2,12 +2,12 @@ import styled, { css } from 'styled-components';
 import type { DropdownVariants } from '.';
 import { theme } from '../../theme/theme';
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ $fullWidth: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   width: 100%;
-  max-width: 20rem;
+  max-width: ${({ $fullWidth }) => ($fullWidth ? 'none' : '20rem')};
 `;
 
 export const Label = styled.label`
@@ -52,6 +52,16 @@ export const Trigger = styled.button<{
       : css`
           height: 2.5rem;
         `}
+  & > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+  }
+  & > span:last-child {
+    flex-shrink: 0;
+  }
   &:focus {
     border-color: ${({ $isError }) => ($isError ? theme.error : theme.primary)};
   }

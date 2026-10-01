@@ -18,6 +18,7 @@ export type DropdownProps = {
   helperText?: string;
   isError?: boolean;
   disabled?: boolean;
+  fullWidth?: boolean;
 };
 
 export const Dropdown = ({
@@ -29,6 +30,7 @@ export const Dropdown = ({
   helperText,
   isError = false,
   disabled = false,
+  fullWidth = false,
 }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<DropdownItemList | null>(null);
@@ -64,7 +66,7 @@ export const Dropdown = ({
   }, [isOpen]);
 
   return (
-    <Styled.Wrapper ref={dropdownRef}>
+    <Styled.Wrapper ref={dropdownRef} $fullWidth={fullWidth}>
       {label && <Styled.Label>{label}</Styled.Label>}
       <Styled.Field>
         <Styled.Trigger

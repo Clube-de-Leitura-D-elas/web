@@ -32,6 +32,12 @@ export const TamanhoGrande: Story = {
   },
 };
 
+export const LarguraTotal: Story = {
+  args: {
+    fullWidth: true,
+  },
+};
+
 export const Desabilitado: Story = {
   args: {
     disabled: true,
