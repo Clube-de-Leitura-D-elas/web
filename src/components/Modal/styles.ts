@@ -13,8 +13,7 @@ export const Overlay = styled.div`
   inset: 0;
   z-index: 1000;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow-y: auto;
   padding: 1rem;
   background-color: ${theme.overlayScrim};
 `;
@@ -22,8 +21,7 @@ export const Overlay = styled.div`
 export const Container = styled.div<{ $size: ModalSize }>`
   width: 100%;
   max-width: ${({ $size }) => MAX_WIDTH_BY_SIZE[$size]};
-  max-height: calc(100vh - 2rem);
-  overflow-y: auto;
+  margin: auto;
   display: flex;
   flex-direction: column;
   padding: 1.5rem;

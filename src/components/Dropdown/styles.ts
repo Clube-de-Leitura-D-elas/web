@@ -2,12 +2,12 @@ import styled, { css } from 'styled-components';
 import type { DropdownVariants } from '.';
 import { theme } from '../../theme/theme';
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ $fullWidth: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   width: 100%;
-  max-width: 20rem;
+  max-width: ${({ $fullWidth }) => ($fullWidth ? 'none' : '20rem')};
 `;
 
 export const Label = styled.label`
@@ -64,6 +64,19 @@ export const Trigger = styled.button<{
   }
 `;
 
+export const TriggerValue = styled.span`
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+`;
+
+export const TriggerIcon = styled.span`
+  display: flex;
+  flex-shrink: 0;
+`;
+
 export const Menu = styled.ul`
   position: absolute;
   top: calc(100% + 0.25rem);
@@ -87,7 +100,8 @@ export const MenuItem = styled.li<{ $isSelected?: boolean }>`
   cursor: pointer;
   font-weight: 600;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     background-color: ${theme.surfaceBrandSoft};
     color: ${theme.textBrand};
   }

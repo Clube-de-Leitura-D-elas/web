@@ -12,7 +12,10 @@ const meta = {
           'Diálogo para confirmações e inputs de informações curtas.',
           'Overlay escuro atrás do card, bloqueia interação com o resto da tela.',
           'Fecha ao pressionar Esc, clicar no overlay, no X ou no botão "Cancelar".',
-          'Enquanto aberto, o foco fica preso dentro do modal (focus trap).',
+          'Enquanto aberto, o foco fica preso dentro do modal (focus trap); ao fechar, volta para',
+          'o elemento que estava focado antes de abrir (normalmente o botão que abriu o modal).',
+          'O foco inicial vai para o primeiro elemento focável, ou para o que tiver `data-autofocus`.',
+          'Use `confirmDisabled` para bloquear a confirmação enquanto o formulário estiver incompleto.',
           '',
           '### Como importar',
           '',
@@ -41,6 +44,10 @@ const meta = {
     title: { control: 'text', description: 'Título do modal.' },
     description: { control: 'text', description: 'Texto de apoio abaixo do título.' },
     confirmText: { control: 'text', description: 'Texto do botão de confirmação.' },
+    confirmDisabled: {
+      control: 'boolean',
+      description: 'Desabilita o botão de confirmação. Padrão: false.',
+    },
     size: {
       control: 'inline-radio',
       options: ['sm', 'md', 'lg'],
@@ -73,6 +80,10 @@ export const Medio: Story = {
 
 export const Grande: Story = {
   args: { size: 'lg' },
+};
+
+export const ConfirmacaoDesabilitada: Story = {
+  args: { confirmDisabled: true },
 };
 
 export const ComConteudo: Story = {

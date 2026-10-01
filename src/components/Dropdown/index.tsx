@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId, type FocusEvent, type KeyboardEvent } from 'react';
 import { TbChevronDown, TbChevronUp } from 'react-icons/tb';
 import * as Styled from './styles';
 
@@ -18,6 +18,7 @@ export type DropdownProps = {
   helperText?: string;
   isError?: boolean;
   disabled?: boolean;
+  fullWidth?: boolean;
 };
 
 export const Dropdown = ({
@@ -29,14 +30,27 @@ export const Dropdown = ({
   helperText,
   isError = false,
   disabled = false,
+  fullWidth = false,
 }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<DropdownItemList | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const pendingFocusIndex = useRef<number | null>(null);
+
+  const baseId = useId();
+  const labelId = `${baseId}-label`;
+  const triggerId = `${baseId}-trigger`;
+  const valueId = `${baseId}-value`;
+  const menuId = `${baseId}-menu`;
+
+  const selectedIndex = options.findIndex((option) => option.value === selectedOption?.value);
 
   const handleToggle = () => {
     if (!disabled) {
+      triggerRef.current?.focus();
       setIsOpen(!isOpen);
     }
   };
@@ -44,8 +58,67 @@ export const Dropdown = ({
   const handleSelectOption = (option: DropdownItemList) => {
     setSelectedOption(option);
     setIsOpen(false);
+    triggerRef.current?.focus();
     onSelect(option.value);
   };
+
+  const handleTriggerKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+
+    event.preventDefault();
+    if (options.length === 0) return;
+
+    const index = Math.max(selectedIndex, 0);
+    if (isOpen) {
+      optionRefs.current[index]?.focus();
+    } else {
+      pendingFocusIndex.current = index;
+      setIsOpen(true);
+    }
+  };
+
+  const handleOptionKeyDown = (event: KeyboardEvent<HTMLLIElement>, index: number) => {
+    const lastIndex = options.length - 1;
+    const nextIndexByKey: Record<string, number> = {
+      ArrowDown: Math.min(index + 1, lastIndex),
+      ArrowUp: Math.max(index - 1, 0),
+      Home: 0,
+      End: lastIndex,
+    };
+
+    if (event.key in nextIndexByKey) {
+      event.preventDefault();
+      optionRefs.current[nextIndexByKey[event.key]]?.focus();
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleSelectOption(options[index]);
+    } else if (event.key === 'Tab' && event.shiftKey) {
+      event.preventDefault();
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    }
+  };
+
+  const handleWrapperKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Escape' || !isOpen) return;
+
+    event.stopPropagation();
+    setIsOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  const handleWrapperBlur = (event: FocusEvent<HTMLDivElement>) => {
+    if (isOpen && !event.currentTarget.contains(event.relatedTarget)) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen || pendingFocusIndex.current === null) return;
+
+    optionRefs.current[pendingFocusIndex.current]?.focus();
+    pendingFocusIndex.current = null;
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -64,27 +137,51 @@ export const Dropdown = ({
   }, [isOpen]);
 
   return (
-    <Styled.Wrapper ref={dropdownRef}>
-      {label && <Styled.Label>{label}</Styled.Label>}
+    <Styled.Wrapper
+      ref={dropdownRef}
+      $fullWidth={fullWidth}
+      onKeyDown={handleWrapperKeyDown}
+      onBlur={handleWrapperBlur}
+    >
+      {label && <Styled.Label id={labelId}>{label}</Styled.Label>}
       <Styled.Field>
         <Styled.Trigger
+          ref={triggerRef}
+          id={triggerId}
           type="button"
           onClick={handleToggle}
+          onKeyDown={handleTriggerKeyDown}
+          onKeyUp={(event) => {
+            if (event.key === ' ') event.preventDefault();
+          }}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+          aria-controls={isOpen ? menuId : undefined}
+          aria-labelledby={label ? `${labelId} ${valueId}` : undefined}
           $size={size}
           $isOpen={isOpen}
           $isError={isError}
           disabled={disabled}
         >
-          <span>{selectedOption ? selectedOption.label : placeholder}</span>
-          <span>{isOpen ? <TbChevronUp /> : <TbChevronDown />}</span>
+          <Styled.TriggerValue id={valueId}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </Styled.TriggerValue>
+          <Styled.TriggerIcon>{isOpen ? <TbChevronUp /> : <TbChevronDown />}</Styled.TriggerIcon>
         </Styled.Trigger>
         {isOpen && (
-          <Styled.Menu>
-            {options.map((option) => (
+          <Styled.Menu id={menuId} role="listbox" aria-labelledby={triggerId}>
+            {options.map((option, index) => (
               <Styled.MenuItem
                 key={option.value}
+                ref={(element) => {
+                  optionRefs.current[index] = element;
+                }}
+                role="option"
+                tabIndex={-1}
+                aria-selected={selectedOption?.value === option.value}
                 $isSelected={selectedOption?.value === option.value}
                 onClick={() => handleSelectOption(option)}
+                onKeyDown={(event) => handleOptionKeyDown(event, index)}
               >
                 {option.label}
               </Styled.MenuItem>

@@ -1,13 +1,16 @@
 import { useState } from 'react';
+import { LuPlus } from 'react-icons/lu';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 
 import { Button } from '../../components/Button';
 import { Dropdown } from '../../components/Dropdown';
 import { Input } from '../../components/Input';
 import { Table, type TableColumn, type TableRow } from '../../components/Table';
 import { Tag } from '../../components/Tag';
-import { useLocale } from '../../hooks/useLocale';
+import { messages, useLocale } from '../../hooks/useLocale';
 import { interpolate, pluralize } from '../../locales';
+import { NewGroupModal } from './NewGroupModal';
 import * as Styled from './styles';
 
 const meta = {
@@ -109,6 +112,7 @@ function GroupsStory() {
   const [search, setSearch] = useState('');
   const [, setCity] = useState('');
   const [order, setOrder] = useState('name_asc');
+  const [isNewGroupOpen, setIsNewGroupOpen] = useState(false);
 
   const cityCount = new Set(groupRows.map((group) => group.city)).size;
 
@@ -229,7 +233,12 @@ function GroupsStory() {
           onSelect={setOrder}
         />
 
-        <Button variant="primary" size="md">
+        <Button
+          variant="primary"
+          size="md"
+          icon={<LuPlus aria-hidden />}
+          onClick={() => setIsNewGroupOpen(true)}
+        >
           {locale.groups.newGroup}
         </Button>
       </Styled.FiltersBar>
@@ -242,8 +251,24 @@ function GroupsStory() {
           itemLabel={locale.groups.table.itemLabel}
         />
       </Styled.TableContainer>
+
+      <NewGroupModal
+        isOpen={isNewGroupOpen}
+        onClose={() => setIsNewGroupOpen(false)}
+        onSave={() => setIsNewGroupOpen(false)}
+      />
     </Styled.Container>
   );
 }
 
 export const Default: Story = {};
+
+export const NewGroupOpen: Story = {
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole('button', { name: messages.groups.newGroup }));
+
+    await expect(
+      await canvas.findByRole('dialog', { name: messages.groups.newGroupModal.title }),
+    ).toBeInTheDocument();
+  },
+};
