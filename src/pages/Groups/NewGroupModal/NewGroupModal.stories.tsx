@@ -69,12 +69,18 @@ type PlayContext = Parameters<NonNullable<Story['play']>>[0];
 
 const getSaveButton = ({ canvas }: PlayContext) => canvas.getByRole('button', { name: text.save });
 
+const getCityTrigger = ({ canvas }: PlayContext, value = text.city.placeholder) =>
+  canvas.getByRole('button', { name: `${text.city.label} ${value}` });
+
+const getCoordinatorTrigger = ({ canvas }: PlayContext) =>
+  canvas.getByRole('button', { name: `${text.coordinator.label} ${text.coordinator.placeholder}` });
+
 const fillRequiredFields = async (context: PlayContext) => {
   const { canvas, userEvent } = context;
 
   await userEvent.type(canvas.getByLabelText(text.name.label), GROUP_NAME);
-  await userEvent.click(canvas.getByRole('button', { name: text.city.placeholder }));
-  await userEvent.click(canvas.getByText(CITY.label));
+  await userEvent.click(getCityTrigger(context));
+  await userEvent.click(canvas.getByRole('option', { name: CITY.label }));
 };
 
 const expectClosedAndResetOnReopen = async (context: PlayContext) => {
@@ -86,7 +92,7 @@ const expectClosedAndResetOnReopen = async (context: PlayContext) => {
   await userEvent.click(canvas.getByRole('button', { name: locale.groups.newGroup }));
 
   await expect(canvas.getByLabelText(text.name.label)).toHaveValue('');
-  await expect(canvas.getByRole('button', { name: text.city.placeholder })).toBeInTheDocument();
+  await expect(getCityTrigger(context)).toBeInTheDocument();
   await expect(getSaveButton(context)).toBeDisabled();
 };
 
@@ -103,8 +109,8 @@ export const SaveEnablesWithRequiredFields: Story = {
     await expect(getSaveButton(context)).toBeDisabled();
 
     await userEvent.type(canvas.getByLabelText(text.name.label), '   ');
-    await userEvent.click(canvas.getByRole('button', { name: text.city.placeholder }));
-    await userEvent.click(canvas.getByText(CITY.label));
+    await userEvent.click(getCityTrigger(context));
+    await userEvent.click(canvas.getByRole('option', { name: CITY.label }));
     await expect(getSaveButton(context)).toBeDisabled();
 
     await userEvent.clear(canvas.getByLabelText(text.name.label));
@@ -127,8 +133,8 @@ export const NameAloneDoesNotEnableSave: Story = {
     const { canvas, userEvent } = context;
 
     await userEvent.type(canvas.getByLabelText(text.name.label), GROUP_NAME);
-    await userEvent.click(canvas.getByRole('button', { name: text.coordinator.placeholder }));
-    await userEvent.click(canvas.getByText(COORDINATOR.label));
+    await userEvent.click(getCoordinatorTrigger(context));
+    await userEvent.click(canvas.getByRole('option', { name: COORDINATOR.label }));
 
     await expect(getSaveButton(context)).toBeDisabled();
   },
@@ -139,8 +145,8 @@ export const SaveWithCoordinator: Story = {
     const { canvas, userEvent, args } = context;
 
     await fillRequiredFields(context);
-    await userEvent.click(canvas.getByRole('button', { name: text.coordinator.placeholder }));
-    await userEvent.click(canvas.getByText(COORDINATOR.label));
+    await userEvent.click(getCoordinatorTrigger(context));
+    await userEvent.click(canvas.getByRole('option', { name: COORDINATOR.label }));
     await userEvent.click(getSaveButton(context));
 
     await expect(args.onSave).toHaveBeenCalledWith({
@@ -208,5 +214,63 @@ export const FocusTrap: Story = {
 
     await userEvent.keyboard('{Escape}');
     await expect(trigger).toHaveFocus();
+  },
+};
+
+export const KeyboardOnly: Story = {
+  args: { isOpen: false },
+  play: async (context) => {
+    const { canvas, userEvent, args } = context;
+    const secondCity = MOCK_CITY_OPTIONS[1];
+
+    canvas.getByRole('button', { name: locale.groups.newGroup }).focus();
+    await userEvent.keyboard('{Enter}');
+
+    const nameInput = canvas.getByLabelText(text.name.label);
+    await expect(nameInput).toHaveFocus();
+    await userEvent.type(nameInput, GROUP_NAME, { skipClick: true });
+    await userEvent.tab();
+    await expect(getCityTrigger(context)).toHaveFocus();
+
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(canvas.getByRole('option', { name: CITY.label })).toHaveFocus();
+
+    await userEvent.keyboard('{Escape}');
+    await expect(canvas.getByRole('dialog')).toBeInTheDocument();
+    await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument();
+    await expect(getCityTrigger(context)).toHaveFocus();
+
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}{Enter}');
+    await expect(getCityTrigger(context, secondCity.label)).toHaveFocus();
+    await expect(getSaveButton(context)).toBeEnabled();
+
+    await userEvent.tab();
+    await userEvent.tab();
+    await userEvent.tab();
+    await expect(getSaveButton(context)).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+
+    await expect(args.onSave).toHaveBeenCalledWith({
+      name: GROUP_NAME,
+      cityId: secondCity.value,
+      coordinatorId: null,
+    });
+  },
+};
+
+export const DragFromInputDoesNotClose: Story = {
+  play: async ({ canvas, userEvent }) => {
+    const nameInput = canvas.getByLabelText(text.name.label);
+    const overlay = canvas.getByRole('dialog').parentElement as HTMLElement;
+
+    await userEvent.pointer([
+      { keys: '[MouseLeft>]', target: nameInput },
+      { target: overlay },
+      { keys: '[/MouseLeft]', target: overlay },
+    ]);
+    await expect(canvas.getByRole('dialog')).toBeInTheDocument();
+
+    await userEvent.click(overlay);
+    await expect(canvas.queryByRole('dialog')).not.toBeInTheDocument();
   },
 };
