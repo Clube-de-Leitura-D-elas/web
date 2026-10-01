@@ -42,6 +42,7 @@ export const Dropdown = ({
 
   const baseId = useId();
   const labelId = `${baseId}-label`;
+  const triggerId = `${baseId}-trigger`;
   const valueId = `${baseId}-value`;
   const menuId = `${baseId}-menu`;
 
@@ -49,6 +50,7 @@ export const Dropdown = ({
 
   const handleToggle = () => {
     if (!disabled) {
+      triggerRef.current?.focus();
       setIsOpen(!isOpen);
     }
   };
@@ -56,6 +58,7 @@ export const Dropdown = ({
   const handleSelectOption = (option: DropdownItemList) => {
     setSelectedOption(option);
     setIsOpen(false);
+    triggerRef.current?.focus();
     onSelect(option.value);
   };
 
@@ -89,6 +92,9 @@ export const Dropdown = ({
     } else if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       handleSelectOption(options[index]);
+    } else if (event.key === 'Tab' && event.shiftKey) {
+      event.preventDefault();
+      setIsOpen(false);
       triggerRef.current?.focus();
     }
   };
@@ -141,9 +147,13 @@ export const Dropdown = ({
       <Styled.Field>
         <Styled.Trigger
           ref={triggerRef}
+          id={triggerId}
           type="button"
           onClick={handleToggle}
           onKeyDown={handleTriggerKeyDown}
+          onKeyUp={(event) => {
+            if (event.key === ' ') event.preventDefault();
+          }}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           aria-controls={isOpen ? menuId : undefined}
@@ -159,7 +169,7 @@ export const Dropdown = ({
           <Styled.TriggerIcon>{isOpen ? <TbChevronUp /> : <TbChevronDown />}</Styled.TriggerIcon>
         </Styled.Trigger>
         {isOpen && (
-          <Styled.Menu id={menuId} role="listbox" aria-labelledby={label ? labelId : undefined}>
+          <Styled.Menu id={menuId} role="listbox" aria-labelledby={triggerId}>
             {options.map((option, index) => (
               <Styled.MenuItem
                 key={option.value}
