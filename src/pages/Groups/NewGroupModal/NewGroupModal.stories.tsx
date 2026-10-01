@@ -270,7 +270,39 @@ export const DragFromInputDoesNotClose: Story = {
     ]);
     await expect(canvas.getByRole('dialog')).toBeInTheDocument();
 
+    await userEvent.pointer([
+      { keys: '[MouseLeft>]', target: overlay },
+      { target: nameInput },
+      { keys: '[/MouseLeft]', target: nameInput },
+    ]);
+    await expect(canvas.getByRole('dialog')).toBeInTheDocument();
+
     await userEvent.click(overlay);
     await expect(canvas.queryByRole('dialog')).not.toBeInTheDocument();
+  },
+};
+
+export const MenuClosesWhenFocusLeaves: Story = {
+  play: async (context) => {
+    const { canvas, userEvent } = context;
+
+    await userEvent.click(getCityTrigger(context));
+    await expect(canvas.getByRole('listbox')).toBeInTheDocument();
+    await userEvent.keyboard('{ArrowDown}');
+    await userEvent.tab({ shift: true });
+    await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument();
+    await expect(getCityTrigger(context)).toHaveFocus();
+
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(canvas.getByRole('option', { name: CITY.label })).toHaveFocus();
+    await userEvent.tab();
+    await expect(canvas.queryByRole('listbox')).not.toBeInTheDocument();
+    await expect(getCoordinatorTrigger(context)).toHaveFocus();
+
+    await userEvent.click(getCoordinatorTrigger(context));
+    await userEvent.click(canvas.getByRole('option', { name: COORDINATOR.label }));
+    await expect(
+      canvas.getByRole('button', { name: `${text.coordinator.label} ${COORDINATOR.label}` }),
+    ).toHaveFocus();
   },
 };
