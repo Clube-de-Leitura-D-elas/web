@@ -33,6 +33,7 @@ export const Modal = ({
   size = 'md',
 }: ModalProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const pressStartedOnOverlay = useRef(false);
   const titleId = useId();
 
   const handleClose = useEffectEvent(onClose);
@@ -44,7 +45,9 @@ export const Modal = ({
     if (!dialog) return;
 
     const previouslyFocused =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      document.activeElement instanceof HTMLElement && !dialog.contains(document.activeElement)
+        ? document.activeElement
+        : null;
     const getFocusables = () =>
       Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
 
@@ -92,14 +95,20 @@ export const Modal = ({
   if (!isOpen) return null;
 
   return (
-    <Styled.Overlay onClick={onClose}>
+    <Styled.Overlay
+      onMouseDown={(event) => {
+        pressStartedOnOverlay.current = event.target === event.currentTarget;
+      }}
+      onClick={(event) => {
+        if (pressStartedOnOverlay.current && event.target === event.currentTarget) onClose();
+      }}
+    >
       <Styled.Container
         ref={dialogRef}
         $size={size}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        onClick={(event) => event.stopPropagation()}
       >
         <Styled.Header>
           <Styled.Title id={titleId}>{title}</Styled.Title>
