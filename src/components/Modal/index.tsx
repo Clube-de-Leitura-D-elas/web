@@ -99,6 +99,9 @@ export const Modal = ({
       onMouseDown={(event) => {
         pressStartedOnOverlay.current = event.target === event.currentTarget;
       }}
+      onMouseUp={(event) => {
+        if (event.target !== event.currentTarget) pressStartedOnOverlay.current = false;
+      }}
       onClick={(event) => {
         if (pressStartedOnOverlay.current && event.target === event.currentTarget) onClose();
       }}
