@@ -13,7 +13,8 @@ export type GroupCity = {
 
 export type GroupListItem = {
   id: string;
-  name: string;
+  number: number;
+  description: string;
   createdAt: string;
   city: GroupCity | null;
   coordinator: string | null;
@@ -27,7 +28,7 @@ export type GroupsSummary = {
   cities: number;
 };
 
-// Resposta da Edge Function `group-grid-web`
+// Resposta da Edge Function `get-group-web`
 export type GroupGridResponse = {
   items: GroupListItem[];
   // total considerando os filtros atuais (usado na paginação)

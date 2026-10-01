@@ -183,6 +183,7 @@
     "newGroup": "Novo grupo",
     "table": {
       "itemLabel": "grupos cadastrados",
+      "groupName": "Grupo {{number}} — {{description}}",
       "createdAt": "criado em {{date}}",
       "emptyCoordinator": "Sem coordenadora",
       "emptyNextMeeting": "Sem data definida",

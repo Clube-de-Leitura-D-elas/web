@@ -117,7 +117,12 @@ export const Groups = () => {
         name: (
           <Styled.GroupLink to={`/grupos/${group.id}`}>
             <Styled.GroupInfo>
-              <Styled.GroupName>{group.name}</Styled.GroupName>
+              <Styled.GroupName>
+                {interpolate(locale.groups.table.groupName, {
+                  number: String(group.number).padStart(2, '0'),
+                  description: group.description,
+                })}
+              </Styled.GroupName>
 
               <Styled.GroupCreatedAt>
                 {interpolate(locale.groups.table.createdAt, {

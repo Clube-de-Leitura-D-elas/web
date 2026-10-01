@@ -6,21 +6,24 @@ export async function getGroupGrid(
   { page, pageSize }: TablePageRequest,
   { search, cityId, order }: GroupFilters,
 ): Promise<GroupGridResponse> {
-  const trimmedSearch = search.trim();
-
-  const { data, error } = await supabase.functions.invoke<GroupGridResponse>('get-group-web', {
-    body: {
-      page,
-      pageSize,
-      order,
-      // filtros vazios não são enviados
-      ...(trimmedSearch ? { search: trimmedSearch } : {}),
-      ...(cityId ? { cityId } : {}),
-    },
+  const query = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+    order,
   });
 
+  // filtros vazios não são enviados
+  const trimmedSearch = search.trim();
+  if (trimmedSearch) query.set('search', trimmedSearch);
+  if (cityId) query.set('cityId', cityId);
+
+  const { data, error } = await supabase.functions.invoke<GroupGridResponse>(
+    `get-group-web?${query}`,
+    { method: 'GET' },
+  );
+
   if (error) throw error;
-  if (!data) throw new Error('group-grid-web returned no data');
+  if (!data) throw new Error('get-group-web returned no data');
 
   return data;
 }
