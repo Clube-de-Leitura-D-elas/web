@@ -199,5 +199,61 @@
         "status": "STATUS"
       }
     }
+  },
+  "group_details": {
+    "back": "Voltar para Grupos",
+    "loading": "Carregando grupo...",
+    "loadError": "Não foi possível carregar os dados do grupo.",
+    "notInformed": "—",
+    "header": {
+      "subtitle": "{{city}} • {{count}} participantes ativas",
+      "editGroup": "Editar Grupo",
+      "closeGroup": "Encerrar Grupo"
+    },
+    "coordinator": {
+      "label": "Coordenadora Responsável",
+      "change": "Trocar"
+    },
+    "nextMeeting": {
+      "label": "Próximo Encontro Agendado",
+      "bookLabel": "Livro:",
+      "location": "{{place}} — {{neighborhood}}",
+      "statusConfirmed": "Confirmado",
+      "statusPending": "Pendente"
+    },
+    "tabs": {
+      "participants": "Participantes Cadastrados",
+      "history": "Histórico de Encontros"
+    },
+    "table": {
+      "coordinatorTag": "Coordenadora",
+      "present": "Presente",
+      "absent": "Falta",
+      "itemLabel": "participantes cadastradas",
+      "emptyValue": "—",
+      "actionsAriaLabel": "Ações da participante {{name}}",
+      "columns": {
+        "name": "NOME COMPLETO",
+        "entryDate": "DATA DE ENTRADA",
+        "attendance": "PRESENÇA",
+        "email": "EMAIL",
+        "actions": "AÇÕES"
+      }
+    },
+    "history": {
+      "itemLabel": "encontros realizados",
+      "book": "{{title}} - {{author}}",
+      "attendance": "{{present}} / {{total}} ({{percent}}%)",
+      "votes": "({{count}} votos)",
+      "actionsAriaLabel": "Ações do encontro de {{date}}",
+      "columns": {
+        "date": "DATA DO ENCONTRO",
+        "book": "LIVRO DISCUTIDO",
+        "place": "LOCAL",
+        "attendance": "PRESENÇAS",
+        "rating": "AVALIAÇÃO MÉDIA",
+        "actions": "AÇÕES"
+      }
+    }
   }
 }
