@@ -6,6 +6,7 @@ import { NotFound } from './pages/NotFound';
 import { ParticipantDetails } from './pages/Participant';
 import { Participants } from './pages/Participants';
 import { GroupDetails } from './pages/Group';
+import { Groups } from './pages/Groups';
 
 export const App = () => (
   <Routes>
@@ -14,11 +15,12 @@ export const App = () => (
         {/* para páginas com sidebar coloque aqui */}
         <Route path="/participantes" element={<Participants />} />
         <Route path="/participantes/:participantId" element={<ParticipantDetails />} />
+        <Route path="/grupos" element={<Groups />} />
         <Route path="/grupos/:groupId" element={<GroupDetails />} />
       </Route>
     </Route>
 
-    {/* para páginas sem sidebar coloque aqui*/}
+    {/* para páginas sem sidebar coloque aqui */}
     <Route path="/login" element={<LoginPage />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
