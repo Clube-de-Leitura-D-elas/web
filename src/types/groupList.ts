@@ -38,3 +38,13 @@ export type GroupGridResponse = {
   // lista de cidades (usada no dropdown de filtro)
   cities: GroupCity[];
 };
+
+export type CreateGroupResponse = {
+  id: string;
+  number: number;
+  description: string;
+  cityId: string;
+  zoneId: string | null;
+  coordinatorId: string | null;
+  createdAt: string;
+};

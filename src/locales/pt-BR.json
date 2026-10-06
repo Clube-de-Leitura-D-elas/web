@@ -185,9 +185,10 @@
       "title": "Criar novo grupo",
       "description": "Preencha as informações básicas para abrir um novo grupo de leitura.",
       "name": {
-        "label": "Nome do grupo *",
-        "placeholder": "Ex: Grupo 43 — Moinhos de Vento",
-        "helperText": "O nome deve ser único dentro da mesma cidade"
+        "label": "Número do grupo *",
+        "placeholder": "Ex: Grupo 43",
+        "helperText": "O número deve ser único em todo o clube",
+        "invalid": "Informe apenas o número, com ou sem o prefixo \"Grupo\"."
       },
       "city": {
         "label": "Cidade ou Zona *",

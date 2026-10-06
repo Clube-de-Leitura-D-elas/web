@@ -1,43 +1,131 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 
+import { FunctionsHttpError } from '@supabase/functions-js';
 import { Dropdown } from '../../../components/Dropdown';
 import { Input } from '../../../components/Input';
 import { Modal } from '../../../components/Modal';
 import { useLocale } from '../../../hooks/useLocale';
+import {
+  getGroupFormOptions,
+  type CityOrZoneOption,
+  type CoordinatorOption,
+} from '../../../services/groupFormService';
+import { createGroup } from '../../../services/groupService';
 
-import { MOCK_CITY_OPTIONS, MOCK_COORDINATOR_OPTIONS } from './mockOptions';
 import * as Styled from './styles';
 
-export type NewGroupFormValues = {
-  name: string;
-  cityId: string;
-  coordinatorId: string | null;
+const GROUP_NUMBER = /^(?:grupo\s*)?\d{1,9}$/i;
+type CreateGroupRequest = typeof createGroup;
+type LoadOptionsRequest = () => Promise<[CityOrZoneOption[], CoordinatorOption[]]>;
+
+const loadOptions = async (): ReturnType<LoadOptionsRequest> => {
+  const { citiesAndZones, coordinators } = await getGroupFormOptions();
+  return [citiesAndZones, coordinators];
 };
 
 export type NewGroupModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (values: NewGroupFormValues) => void;
+  onSave: () => void;
+  createGroupRequest?: CreateGroupRequest;
+  loadOptionsRequest?: LoadOptionsRequest;
 };
 
-export const NewGroupModal = ({ isOpen, onClose, onSave }: NewGroupModalProps) =>
-  isOpen ? <NewGroupForm onClose={onClose} onSave={onSave} /> : null;
+export const NewGroupModal = ({
+  isOpen,
+  onClose,
+  onSave,
+  createGroupRequest = createGroup,
+  loadOptionsRequest = loadOptions,
+}: NewGroupModalProps) =>
+  isOpen ? (
+    <NewGroupForm
+      onClose={onClose}
+      onSave={onSave}
+      createGroupRequest={createGroupRequest}
+      loadOptionsRequest={loadOptionsRequest}
+    />
+  ) : null;
 
-const NewGroupForm = ({ onClose, onSave }: Omit<NewGroupModalProps, 'isOpen'>) => {
+type NewGroupFormProps = Omit<
+  NewGroupModalProps,
+  'isOpen' | 'createGroupRequest' | 'loadOptionsRequest'
+> & {
+  createGroupRequest: CreateGroupRequest;
+  loadOptionsRequest: LoadOptionsRequest;
+};
+
+const NewGroupForm = ({
+  onClose,
+  onSave,
+  createGroupRequest,
+  loadOptionsRequest,
+}: NewGroupFormProps) => {
   const text = useLocale().groups.newGroupModal;
   const nameId = useId();
 
   const [name, setName] = useState('');
   const [cityId, setCityId] = useState('');
   const [coordinatorId, setCoordinatorId] = useState('');
+  const [cityOptions, setCityOptions] = useState<CityOrZoneOption[]>([]);
+  const [coordinatorOptions, setCoordinatorOptions] = useState<CoordinatorOption[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const load = async () => {
+      try {
+        const [citiesAndZones, coordinators] = await loadOptionsRequest();
+        if (!active) return;
+        setCityOptions(citiesAndZones);
+        setCoordinatorOptions(coordinators);
+      } catch (error) {
+        console.error('new-group options loading error', error);
+        if (!active) return;
+        const message = error instanceof Error ? error.message : 'erro desconhecido';
+        setLoadError(`Não foi possível carregar as opções: ${message}`);
+      }
+    };
+
+    void load();
+
+    return () => {
+      active = false;
+    };
+  }, [loadOptionsRequest]);
 
   const trimmedName = name.trim();
-  const canSave = trimmedName !== '' && cityId !== '';
+  const isGroupNumberValid = GROUP_NUMBER.test(trimmedName);
+  const nameError = trimmedName !== '' && !isGroupNumberValid ? text.name.invalid : undefined;
+  const canSave = isGroupNumberValid && cityId !== '' && !isSaving;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!canSave) return;
 
-    onSave({ name: trimmedName, cityId, coordinatorId: coordinatorId || null });
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      await createGroupRequest({
+        name: trimmedName,
+        cityId,
+        coordinatorId: coordinatorId || null,
+      });
+      onSave();
+    } catch (error) {
+      const isDuplicate =
+        error instanceof FunctionsHttpError && error.context?.response?.status === 409;
+      setSaveError(
+        isDuplicate
+          ? 'Já existe um grupo com esse número. Escolha outro.'
+          : 'Não foi possível criar o grupo. Tente novamente.',
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -47,7 +135,7 @@ const NewGroupForm = ({ onClose, onSave }: Omit<NewGroupModalProps, 'isOpen'>) =
       title={text.title}
       description={text.description}
       onConfirm={handleSave}
-      confirmText={text.save}
+      confirmText={isSaving ? 'Salvando...' : text.save}
       confirmDisabled={!canSave}
       size="lg"
     >
@@ -57,6 +145,7 @@ const NewGroupForm = ({ onClose, onSave }: Omit<NewGroupModalProps, 'isOpen'>) =
           label={text.name.label}
           placeholder={text.name.placeholder}
           helperText={text.name.helperText}
+          error={nameError}
           value={name}
           onChange={(event) => setName(event.target.value)}
           required
@@ -66,7 +155,7 @@ const NewGroupForm = ({ onClose, onSave }: Omit<NewGroupModalProps, 'isOpen'>) =
         <Dropdown
           label={text.city.label}
           placeholder={text.city.placeholder}
-          options={MOCK_CITY_OPTIONS}
+          options={cityOptions}
           onSelect={setCityId}
           fullWidth
         />
@@ -74,10 +163,13 @@ const NewGroupForm = ({ onClose, onSave }: Omit<NewGroupModalProps, 'isOpen'>) =
         <Dropdown
           label={text.coordinator.label}
           placeholder={text.coordinator.placeholder}
-          options={MOCK_COORDINATOR_OPTIONS}
+          options={coordinatorOptions}
           onSelect={setCoordinatorId}
           fullWidth
         />
+
+        {saveError && <Styled.ErrorMessage role="alert">{saveError}</Styled.ErrorMessage>}
+        {loadError && <Styled.ErrorMessage role="alert">{loadError}</Styled.ErrorMessage>}
       </Styled.Fields>
     </Modal>
   );
