@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LuPlus } from 'react-icons/lu';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn } from 'storybook/test';
+import { FunctionsHttpError } from '@supabase/functions-js';
 
 import { Button } from '../../../components/Button';
 import { locale } from '../../../locales';
@@ -332,5 +333,70 @@ export const MenuClosesWhenFocusLeaves: Story = {
     await expect(
       canvas.getByRole('button', { name: `${text.coordinator.label} ${COORDINATOR.label}` }),
     ).toHaveFocus();
+  },
+};
+
+export const SaveShowsSavingState: Story = {
+  args: {
+    createGroupRequest: fn().mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 30_000)),
+    ),
+  },
+  play: async (context) => {
+    const { canvas, userEvent } = context;
+
+    await fillRequiredFields(context);
+    await userEvent.click(getSaveButton(context));
+
+    await expect(canvas.getByRole('button', { name: 'Salvando...' })).toBeDisabled();
+  },
+};
+
+export const SaveErrorOnDuplicate: Story = {
+  args: {
+    createGroupRequest: fn().mockRejectedValue(
+      new FunctionsHttpError({ response: { status: 409 } }),
+    ),
+  },
+  play: async (context) => {
+    const { canvas, userEvent, args } = context;
+
+    await fillRequiredFields(context);
+    await userEvent.click(getSaveButton(context));
+
+    await expect(canvas.getByRole('alert')).toHaveTextContent(
+      'Já existe um grupo com esse número. Escolha outro.',
+    );
+    await expect(args.onSave).not.toHaveBeenCalled();
+    await expect(getSaveButton(context)).toBeEnabled();
+  },
+};
+
+export const SaveErrorOnGenericFailure: Story = {
+  args: {
+    createGroupRequest: fn().mockRejectedValue(new Error('internal server error')),
+  },
+  play: async (context) => {
+    const { canvas, userEvent, args } = context;
+
+    await fillRequiredFields(context);
+    await userEvent.click(getSaveButton(context));
+
+    await expect(canvas.getByRole('alert')).toHaveTextContent(
+      'Não foi possível criar o grupo. Tente novamente.',
+    );
+    await expect(args.onSave).not.toHaveBeenCalled();
+    await expect(getSaveButton(context)).toBeEnabled();
+  },
+};
+
+export const LoadOptionsError: Story = {
+  args: {
+    loadOptionsRequest: fn().mockRejectedValue(new Error('network failure')),
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('alert')).toHaveTextContent(
+      'Não foi possível carregar as opções: network failure',
+    );
   },
 };
