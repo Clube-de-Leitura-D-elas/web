@@ -15,12 +15,14 @@ import {
   getGroupDetails,
   getGroupMeetingsPage,
   getGroupParticipantsPage,
+  updateGroupStatus,
 } from '../../services/groupService';
 import type {
   GroupDetails as GroupDetailsData,
   GroupMeetingHistoryItem,
   GroupParticipantListItem,
 } from '../../types/group';
+import { Modal } from '../../components/Modal';
 
 type GroupDetailsTab = 'participants' | 'history';
 
@@ -65,6 +67,9 @@ const getInitials = (name: string | null) => {
 };
 
 export const GroupDetails = () => {
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const locale = useLocale();
   const navigate = useNavigate();
   const { groupId = '' } = useParams<{ groupId: string }>();
@@ -300,11 +305,15 @@ export const GroupDetails = () => {
           </Styled.Subtitle>
         </Styled.HeaderInfo>
         <Styled.HeaderActions>
-          <Styled.EditButton size="sm" variant="secondary">
+          <Styled.EditButton size="md" variant="secondary">
             {locale.group_details.header.editGroup}
           </Styled.EditButton>
-          <Styled.CloseButton size="sm" variant="secondary">
-            {locale.group_details.header.closeGroup}
+          <Styled.CloseButton
+            size="md"
+            variant="secondary"
+            onClick={() => setIsCloseModalOpen(true)}
+          >
+            {group.is_active !== false ? 'Encerrar Grupo' : 'Reativar Grupo'}
           </Styled.CloseButton>
         </Styled.HeaderActions>
       </Styled.Header>
@@ -374,6 +383,34 @@ export const GroupDetails = () => {
         active={activeTab}
         onChange={(value) => setActiveTab(value as GroupDetailsTab)}
         size="lg"
+      />
+
+      <Modal
+        isOpen={isCloseModalOpen}
+        onClose={() => setIsCloseModalOpen(false)}
+        title={group.is_active !== false ? 'Encerrar grupo?' : 'Reativar grupo?'}
+        description={
+          group.is_active !== false
+            ? 'O grupo deixará de estar ativo na operação e no calendário, mas todo o histórico de encontros, leituras e presenças será preservado.'
+            : 'O grupo voltará a ficar ativo na operação e os seus encontros constarão no calendário.'
+        }
+        confirmText={group.is_active !== false ? 'Encerrar grupo' : 'Reativar grupo'}
+        confirmDisabled={isSubmitting}
+        onConfirm={() => {
+          const targetStatus = group.is_active === false;
+          setIsSubmitting(true);
+          updateGroupStatus(groupId, targetStatus)
+            .then((newStatus) => {
+              setResult((prev) =>
+                prev && prev.group
+                  ? { ...prev, group: { ...prev.group, is_active: newStatus } }
+                  : prev,
+              );
+              setIsCloseModalOpen(false);
+            })
+            .catch((err) => console.error(err))
+            .finally(() => setIsSubmitting(false));
+        }}
       />
     </Styled.Container>
   );
