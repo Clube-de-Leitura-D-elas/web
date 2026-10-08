@@ -35,6 +35,7 @@ export const Groups = () => {
   const [cityId, setCityId] = useState('');
   const [order, setOrder] = useState<GroupOrder>('name_asc');
   const [isNewGroupOpen, setIsNewGroupOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Evita fazer uma requisição a cada tecla digitada
   const debouncedSearch = useDebounce(search, 400);
@@ -239,6 +240,7 @@ export const Groups = () => {
       {/* Tabela */}
       <Styled.TableContainer>
         <Table
+          key={refreshKey}
           columns={groupColumns}
           fetchPage={fetchGroups}
           pageSize={6}
@@ -249,7 +251,10 @@ export const Groups = () => {
       <NewGroupModal
         isOpen={isNewGroupOpen}
         onClose={() => setIsNewGroupOpen(false)}
-        onSave={() => setIsNewGroupOpen(false)}
+        onSave={() => {
+          setIsNewGroupOpen(false);
+          setRefreshKey((key) => key + 1);
+        }}
       />
     </Styled.Container>
   );

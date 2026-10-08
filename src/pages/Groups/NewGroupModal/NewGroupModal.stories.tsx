@@ -11,7 +11,7 @@ import { NewGroupModal } from '.';
 
 const text = locale.groups.newGroupModal;
 
-const GROUP_NAME = 'Grupo 43 — Moinhos de Vento';
+const GROUP_NAME = 'Grupo 43';
 const CITY = MOCK_CITY_OPTIONS[0];
 const COORDINATOR = MOCK_COORDINATOR_OPTIONS[0];
 
@@ -25,7 +25,7 @@ const meta = {
         component: [
           'Modal "Criar novo grupo", aberto pelo botão "+ Novo grupo" da tela de Grupos.',
           '',
-          '"Salvar grupo" só habilita com nome (sem contar espaços) e cidade/zona preenchidos;',
+          '"Salvar grupo" só habilita com número válido e cidade/zona preenchidos;',
           'a coordenadora é opcional. Cancelar, X e Esc fecham sem salvar, e o formulário volta',
           'vazio na próxima abertura. As opções dos dropdowns ainda são mock (`mockOptions.ts`).',
         ].join('\n'),
@@ -36,6 +36,16 @@ const meta = {
     isOpen: true,
     onClose: fn(),
     onSave: fn(),
+    createGroupRequest: fn().mockResolvedValue({
+      id: 'group-43',
+      number: 43,
+      description: CITY.label,
+      cityId: CITY.value,
+      zoneId: null,
+      coordinatorId: null,
+      createdAt: '2026-10-06T00:00:00.000Z',
+    }),
+    loadOptionsRequest: fn().mockResolvedValue([MOCK_CITY_OPTIONS, MOCK_COORDINATOR_OPTIONS]),
   },
   render: (args) => {
     const [isOpen, setIsOpen] = useState(args.isOpen);
@@ -51,8 +61,10 @@ const meta = {
             args.onClose();
             setIsOpen(false);
           }}
-          onSave={(values) => {
-            args.onSave(values);
+          createGroupRequest={args.createGroupRequest}
+          loadOptionsRequest={args.loadOptionsRequest}
+          onSave={() => {
+            args.onSave();
             setIsOpen(false);
           }}
         />
@@ -119,11 +131,12 @@ export const SaveEnablesWithRequiredFields: Story = {
 
     await userEvent.click(getSaveButton(context));
 
-    await expect(args.onSave).toHaveBeenCalledWith({
+    await expect(args.createGroupRequest).toHaveBeenCalledWith({
       name: GROUP_NAME,
       cityId: CITY.value,
       coordinatorId: null,
     });
+    await expect(args.onSave).toHaveBeenCalledWith();
     await expect(canvas.queryByRole('dialog')).not.toBeInTheDocument();
   },
 };
@@ -140,6 +153,19 @@ export const NameAloneDoesNotEnableSave: Story = {
   },
 };
 
+export const InvalidGroupNumberDoesNotEnableSave: Story = {
+  play: async (context) => {
+    const { canvas, userEvent } = context;
+
+    await userEvent.type(canvas.getByLabelText(text.name.label), 'Grupo 43 — Moinhos de Vento');
+    await userEvent.click(getCityTrigger(context));
+    await userEvent.click(canvas.getByRole('option', { name: CITY.label }));
+
+    await expect(getSaveButton(context)).toBeDisabled();
+    await expect(canvas.getByText(text.name.invalid)).toBeInTheDocument();
+  },
+};
+
 export const SaveWithCoordinator: Story = {
   play: async (context) => {
     const { canvas, userEvent, args } = context;
@@ -149,11 +175,12 @@ export const SaveWithCoordinator: Story = {
     await userEvent.click(canvas.getByRole('option', { name: COORDINATOR.label }));
     await userEvent.click(getSaveButton(context));
 
-    await expect(args.onSave).toHaveBeenCalledWith({
+    await expect(args.createGroupRequest).toHaveBeenCalledWith({
       name: GROUP_NAME,
       cityId: CITY.value,
       coordinatorId: COORDINATOR.value,
     });
+    await expect(args.onSave).toHaveBeenCalledWith();
   },
 };
 
@@ -250,11 +277,12 @@ export const KeyboardOnly: Story = {
     await expect(getSaveButton(context)).toHaveFocus();
     await userEvent.keyboard('{Enter}');
 
-    await expect(args.onSave).toHaveBeenCalledWith({
+    await expect(args.createGroupRequest).toHaveBeenCalledWith({
       name: GROUP_NAME,
       cityId: secondCity.value,
       coordinatorId: null,
     });
+    await expect(args.onSave).toHaveBeenCalledWith();
   },
 };
 
