@@ -117,7 +117,7 @@ const NewGroupForm = ({
       onSave();
     } catch (error) {
       const isDuplicate =
-        error instanceof FunctionsHttpError && error.context?.response?.status === 409;
+        error instanceof FunctionsHttpError && error.context?.status === 409;
       setSaveError(
         isDuplicate
           ? 'Já existe um grupo com esse número. Escolha outro.'
