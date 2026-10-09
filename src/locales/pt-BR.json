@@ -226,8 +226,19 @@
     "header": {
       "subtitle": "{{city}} • {{count}} participantes ativas",
       "editGroup": "Editar Grupo",
-      "closeGroup": "Encerrar Grupo"
+      "closeGroup": "Encerrar Grupo",
+      "reopenGroup": "Reativar Grupo"
     },
+    "statusModal": {
+      "closeTitle": "Encerrar grupo?",
+      "closeDescription": "Ao encerrar o grupo, os participantes não poderão mais registrar novos encontros ou interagir nele.",
+      "closeConfirm": "Encerrar Grupo",
+      "reopenTitle": "Reativar grupo?",
+      "reopenDescription": "Ao reativar o grupo, as atividades e encontros voltarão a ficar disponíveis.",
+      "reopenConfirm": "Reativar Grupo",
+      "cancel": "Cancelar"
+    },
+    "updateStatusError": "Não foi possível atualizar o status do grupo. Tente novamente.",
     "coordinator": {
       "label": "Coordenadora Responsável",
       "change": "Trocar"

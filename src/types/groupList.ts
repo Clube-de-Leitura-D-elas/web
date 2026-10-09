@@ -12,7 +12,6 @@ export type GroupCity = {
 };
 
 export type GroupListItem = {
-  is_active?: boolean;
   id: string;
   number: number;
   description: string;
