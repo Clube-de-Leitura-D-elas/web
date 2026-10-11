@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { LuArrowLeft } from 'react-icons/lu';
-import { useNavigate, useParams } from 'react-router';
-
+import { useParams } from 'react-router';
 import { Table, type TableColumn, type TableFetchPage } from '../../components/Table';
 import { Tag } from '../../components/Tag';
 import { locale } from '../../locales';
@@ -17,6 +15,7 @@ import { ParticipantContacts } from './ParticipantContacts';
 import { ParticipantInfoGrid } from './ParticipantInfoGrid';
 import { ParticipantSummary } from './ParticipantSummary';
 import * as Styled from './styles';
+import { BackButton } from '../../components/BackButton';
 
 const columns: TableColumn[] = [
   {
@@ -45,8 +44,6 @@ export const ParticipantDetails = () => {
 };
 
 const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
-  const navigate = useNavigate();
-
   const [participant, setParticipant] = useState<Participant | null>(null);
 
   const [presence, setPresence] = useState<ParticipantPresence[]>([]);
@@ -121,10 +118,6 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
     [participantId],
   );
 
-  const handleBack = () => {
-    navigate('/participantes');
-  };
-
   const handleToggleActive = async () => {
     if (!participant) return;
 
@@ -151,15 +144,9 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
 
   return (
     <Styled.Page>
-      <Styled.PageHeader>
-        <Styled.BackButton
-          type="button"
-          onClick={handleBack}
-          aria-label={locale.participant_details.back}
-        >
-          <LuArrowLeft aria-hidden />
-        </Styled.BackButton>
+      <BackButton label={locale.participant_details.back} />
 
+      <Styled.PageHeader>
         <Styled.PageTitle>{locale.participant_details.title}</Styled.PageTitle>
       </Styled.PageHeader>
 

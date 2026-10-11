@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router';
-import { LuArrowLeft, LuCalendar, LuMapPin, LuStar } from 'react-icons/lu';
+import { useParams } from 'react-router';
+import { LuCalendar, LuMapPin, LuStar } from 'react-icons/lu';
+import { BackButton } from '../../components/BackButton';
 import * as Styled from './styles';
 import { Tabs } from '../../components/Tab';
 import {
@@ -66,7 +67,6 @@ const getInitials = (name: string | null) => {
 
 export const GroupDetails = () => {
   const locale = useLocale();
-  const navigate = useNavigate();
   const { groupId = '' } = useParams<{ groupId: string }>();
 
   const [activeTab, setActiveTab] = useState<GroupDetailsTab>('participants');
@@ -279,10 +279,7 @@ export const GroupDetails = () => {
 
   return (
     <Styled.Container>
-      <Styled.BackButton type="button" onClick={() => navigate('/grupos')}>
-        <LuArrowLeft aria-hidden />
-        {locale.group_details.back}
-      </Styled.BackButton>
+      <BackButton label={locale.group_details.back} />
 
       <Styled.Header>
         <Styled.HeaderInfo>

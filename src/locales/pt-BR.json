@@ -219,7 +219,7 @@
     }
   },
   "group_details": {
-    "back": "Voltar para Grupos",
+    "back": "Voltar para grupos",
     "loading": "Carregando grupo...",
     "loadError": "Não foi possível carregar os dados do grupo.",
     "notInformed": "—",
