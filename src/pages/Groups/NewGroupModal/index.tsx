@@ -1,6 +1,5 @@
 import { useEffect, useId, useState } from 'react';
 
-import { FunctionsHttpError } from '@supabase/functions-js';
 import { Dropdown } from '../../../components/Dropdown';
 import { Input } from '../../../components/Input';
 import { Modal } from '../../../components/Modal';
@@ -10,11 +9,12 @@ import {
   type CityOrZoneOption,
   type CoordinatorOption,
 } from '../../../services/groupFormService';
+import { GroupServiceError } from '../../../services/groupErrors';
 import { createGroup } from '../../../services/groupService';
 
 import * as Styled from './styles';
 
-const GROUP_NUMBER = /^(?:grupo\s*)?\d{1,9}$/i;
+const GROUP_NUMBER = /^(?:grupo\s*)?0*[1-9]\d{0,8}$/i;
 type CreateGroupRequest = typeof createGroup;
 type LoadOptionsRequest = () => Promise<[CityOrZoneOption[], CoordinatorOption[]]>;
 
@@ -85,8 +85,7 @@ const NewGroupForm = ({
       } catch (error) {
         console.error('new-group options loading error', error);
         if (!active) return;
-        const message = error instanceof Error ? error.message : 'erro desconhecido';
-        setLoadError(`Não foi possível carregar as opções: ${message}`);
+        setLoadError(text.errors.loadOptions);
       }
     };
 
@@ -95,7 +94,7 @@ const NewGroupForm = ({
     return () => {
       active = false;
     };
-  }, [loadOptionsRequest]);
+  }, [loadOptionsRequest, text.errors.loadOptions]);
 
   const trimmedName = name.trim();
   const isGroupNumberValid = GROUP_NUMBER.test(trimmedName);
@@ -116,12 +115,10 @@ const NewGroupForm = ({
       });
       onSave();
     } catch (error) {
-      const isDuplicate =
-        error instanceof FunctionsHttpError && error.context?.status === 409;
       setSaveError(
-        isDuplicate
-          ? 'Já existe um grupo com esse número. Escolha outro.'
-          : 'Não foi possível criar o grupo. Tente novamente.',
+        error instanceof GroupServiceError && error.code === 'duplicate_number'
+          ? text.errors.duplicate
+          : text.errors.generic,
       );
     } finally {
       setIsSaving(false);
@@ -131,11 +128,13 @@ const NewGroupForm = ({
   return (
     <Modal
       isOpen
-      onClose={onClose}
+      onClose={() => {
+        if (!isSaving) onClose();
+      }}
       title={text.title}
       description={text.description}
       onConfirm={handleSave}
-      confirmText={isSaving ? 'Salvando...' : text.save}
+      confirmText={isSaving ? text.saving : text.save}
       confirmDisabled={!canSave}
       size="lg"
     >

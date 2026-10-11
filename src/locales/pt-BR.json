@@ -198,7 +198,13 @@
         "label": "Coordenadora inicial",
         "placeholder": "Selecione uma leitora cadastrada ou deixe para definir depois"
       },
-      "save": "Salvar grupo"
+      "save": "Salvar grupo",
+      "saving": "Salvando...",
+      "errors": {
+        "duplicate": "Já existe um grupo com esse número. Escolha outro.",
+        "generic": "Não foi possível criar o grupo. Tente novamente.",
+        "loadOptions": "Não foi possível carregar as opções. Tente novamente."
+      }
     },
     "table": {
       "itemLabel": "grupos cadastrados",

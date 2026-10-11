@@ -1,3 +1,4 @@
+import { FunctionsHttpError } from '@supabase/functions-js';
 import type { TablePageRequest } from '../components/Table';
 import type {
   GroupDetails,
@@ -5,7 +6,7 @@ import type {
   GroupParticipantListItem,
 } from '../types/group';
 import type { Page } from '../types/participantList';
-import type { CreateGroupResponse } from '../types/groupList';
+import { GroupServiceError } from './groupErrors';
 import { invokeGet } from './invokeGet';
 import { supabase } from './supabaseClient';
 
@@ -33,12 +34,31 @@ export type CreateGroupPayload = {
   coordinatorId: string | null;
 };
 
+type CreateGroupResponse = {
+  id: string;
+  number: number;
+  description: string;
+  cityId: string;
+  zoneId: string | null;
+  coordinatorId: string | null;
+  createdAt: string;
+};
+
+function toGroupServiceError(error: unknown) {
+  if (error instanceof FunctionsHttpError && error.context?.status === 409) {
+    return new GroupServiceError('duplicate_number', error);
+  }
+
+  console.error('[groupService]', error);
+  return new GroupServiceError('unknown', error);
+}
+
 export async function createGroup(payload: CreateGroupPayload): Promise<CreateGroupResponse> {
   const { data, error } = await supabase.functions.invoke<CreateGroupResponse>('create-group', {
     body: payload,
   });
 
-  if (error) throw error;
+  if (error) throw toGroupServiceError(error);
   if (!data) throw new Error('create-group returned no data');
 
   return data;

@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { LuPlus } from 'react-icons/lu';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn } from 'storybook/test';
-import { FunctionsHttpError } from '@supabase/functions-js';
-
 import { Button } from '../../../components/Button';
 import { locale } from '../../../locales';
+import { GroupServiceError } from '../../../services/groupErrors';
 
 import { MOCK_CITY_OPTIONS, MOCK_COORDINATOR_OPTIONS } from './mockOptions';
 import { NewGroupModal } from '.';
@@ -28,7 +27,8 @@ const meta = {
           '',
           '"Salvar grupo" só habilita com número válido e cidade/zona preenchidos;',
           'a coordenadora é opcional. Cancelar, X e Esc fecham sem salvar, e o formulário volta',
-          'vazio na próxima abertura. As opções dos dropdowns ainda são mock (`mockOptions.ts`).',
+          'vazio na próxima abertura. As opções são carregadas por `get-group-form-options`;',
+          'as stories usam `mockOptions.ts` via `loadOptionsRequest`.',
         ].join('\n'),
       },
     },
@@ -354,9 +354,7 @@ export const SaveShowsSavingState: Story = {
 
 export const SaveErrorOnDuplicate: Story = {
   args: {
-    createGroupRequest: fn().mockRejectedValue(
-      new FunctionsHttpError({ response: { status: 409 } }),
-    ),
+    createGroupRequest: fn().mockRejectedValue(new GroupServiceError('duplicate_number')),
   },
   play: async (context) => {
     const { canvas, userEvent, args } = context;
@@ -364,9 +362,7 @@ export const SaveErrorOnDuplicate: Story = {
     await fillRequiredFields(context);
     await userEvent.click(getSaveButton(context));
 
-    await expect(canvas.getByRole('alert')).toHaveTextContent(
-      'Já existe um grupo com esse número. Escolha outro.',
-    );
+    await expect(canvas.getByRole('alert')).toHaveTextContent(text.errors.duplicate);
     await expect(args.onSave).not.toHaveBeenCalled();
     await expect(getSaveButton(context)).toBeEnabled();
   },
@@ -382,9 +378,7 @@ export const SaveErrorOnGenericFailure: Story = {
     await fillRequiredFields(context);
     await userEvent.click(getSaveButton(context));
 
-    await expect(canvas.getByRole('alert')).toHaveTextContent(
-      'Não foi possível criar o grupo. Tente novamente.',
-    );
+    await expect(canvas.getByRole('alert')).toHaveTextContent(text.errors.generic);
     await expect(args.onSave).not.toHaveBeenCalled();
     await expect(getSaveButton(context)).toBeEnabled();
   },
@@ -395,8 +389,6 @@ export const LoadOptionsError: Story = {
     loadOptionsRequest: fn().mockRejectedValue(new Error('network failure')),
   },
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('alert')).toHaveTextContent(
-      'Não foi possível carregar as opções: network failure',
-    );
+    await expect(canvas.getByRole('alert')).toHaveTextContent(text.errors.loadOptions);
   },
 };
