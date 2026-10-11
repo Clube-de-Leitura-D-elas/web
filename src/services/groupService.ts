@@ -1,3 +1,4 @@
+import { FunctionsHttpError } from '@supabase/functions-js';
 import type { TablePageRequest } from '../components/Table';
 import type {
   GroupDetails,
@@ -5,7 +6,9 @@ import type {
   GroupParticipantListItem,
 } from '../types/group';
 import type { Page } from '../types/participantList';
+import { GroupServiceError } from './groupErrors';
 import { invokeGet } from './invokeGet';
+import { supabase } from './supabaseClient';
 
 export function getGroupDetails(groupId: string): Promise<GroupDetails> {
   return invokeGet('get-group-details-web', { groupId });
@@ -23,4 +26,40 @@ export function getGroupMeetingsPage(
   { page, pageSize }: TablePageRequest,
 ): Promise<Page<GroupMeetingHistoryItem>> {
   return invokeGet('get-group-meetings-web', { groupId, page, pageSize });
+}
+
+export type CreateGroupPayload = {
+  name: string;
+  cityId: string;
+  coordinatorId: string | null;
+};
+
+type CreateGroupResponse = {
+  id: string;
+  number: number;
+  description: string;
+  cityId: string;
+  zoneId: string | null;
+  coordinatorId: string | null;
+  createdAt: string;
+};
+
+function toGroupServiceError(error: unknown) {
+  if (error instanceof FunctionsHttpError && error.context?.status === 409) {
+    return new GroupServiceError('duplicate_number', error);
+  }
+
+  console.error('[groupService]', error);
+  return new GroupServiceError('unknown', error);
+}
+
+export async function createGroup(payload: CreateGroupPayload): Promise<CreateGroupResponse> {
+  const { data, error } = await supabase.functions.invoke<CreateGroupResponse>('create-group', {
+    body: payload,
+  });
+
+  if (error) throw toGroupServiceError(error);
+  if (!data) throw new Error('create-group returned no data');
+
+  return data;
 }
