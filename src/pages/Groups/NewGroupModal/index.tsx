@@ -61,6 +61,7 @@ const NewGroupForm = ({ onClose, onSave }: Omit<NewGroupModalProps, 'isOpen'>) =
           onChange={(event) => setName(event.target.value)}
           required
           data-autofocus
+          fullWidth
         />
 
         <Dropdown

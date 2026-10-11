@@ -13,6 +13,7 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'id' | 'siz
   size?: InputSize;
   helperText?: string;
   error?: string;
+  fullWidth?: boolean;
 };
 
 export const Input = ({
@@ -21,6 +22,7 @@ export const Input = ({
   size = 'md',
   helperText,
   error,
+  fullWidth,
   disabled,
   type,
   onChange,
@@ -47,7 +49,7 @@ export const Input = ({
   };
 
   return (
-    <Styled.Container>
+    <Styled.Container $fullWidth={!!fullWidth}>
       <Styled.Label htmlFor={id}>{label}</Styled.Label>
       <Styled.Field $size={size} $error={!!visibleError} $disabled={!!disabled}>
         <Styled.TextField
