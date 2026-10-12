@@ -35,6 +35,9 @@
     "showPassword": "Mostrar senha",
     "hidePassword": "Ocultar senha"
   },
+  "autocomplete": {
+    "noResults": "Nenhuma opção encontrada"
+  },
   "login": {
     "brand": {
       "logoAlt": "Clube de Leitura D'Elas",
@@ -192,7 +195,10 @@
       },
       "city": {
         "label": "Cidade ou Zona *",
-        "placeholder": "Ex: Porto Alegre"
+        "placeholder": "Ex: Porto Alegre",
+        "noResults": "Cidade não encontrada",
+        "loading": "Carregando cidades...",
+        "loadError": "Não foi possível carregar as cidades."
       },
       "coordinator": {
         "label": "Coordenadora inicial",
