@@ -129,3 +129,28 @@ export const theme: AppTheme = {
   infoLight: '#E6EDFD',
   infoDark: '#1D4ED8',
 };
+
+export const fieldTokens = {
+  border: {
+    width: '0.0625rem',
+    radius: '0.6rem',
+  },
+  height: {
+    md: '2,5rem',
+    lg: '1rem',
+  },
+  padding: {
+    md: '0.5rem 1rem',
+    lg: '1rem',
+  },
+  typography: {
+    labelSize: '0.875rem',
+    labelWeight: '700',
+    fontSize: '0.875rem',
+    helperSize: '0.75rem',
+  },
+  gap: {
+    container: '0.5rem',
+  },
+  transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+};

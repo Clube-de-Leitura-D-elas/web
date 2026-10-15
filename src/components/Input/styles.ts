@@ -1,44 +1,40 @@
 import styled, { css } from 'styled-components';
 import type { InputSize } from './index';
-import { theme } from '../../theme/theme';
+import { theme, fieldTokens } from '../../theme/theme';
 
-export const Container = styled.div`
+export const Container = styled.div<{ $fullWidth: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: ${fieldTokens.gap.container};
   width: 100%;
+  max-width: ${({ $fullWidth }) => ($fullWidth ? 'none' : '20rem')};
 `;
 
 export const Label = styled.label`
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-size: ${fieldTokens.typography.labelSize};
+  font-weight: ${fieldTokens.typography.labelWeight};
   color: ${theme.text};
 `;
-
-const sizeStyles = {
-  md: css`
-    height: 2.5rem;
-    padding: 0.5rem 1rem;
-  `,
-  lg: css`
-    height: 3.5rem;
-    padding: 1rem;
-  `,
-};
 
 export const Field = styled.div<{
   $size: InputSize;
   $error: boolean;
   $disabled: boolean;
 }>`
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-radius: 0.5rem;
-  border: 0.0625rem solid ${theme.border};
+  border-radius: ${fieldTokens.border.radius};
+  border: ${fieldTokens.border.width} solid ${theme.border};
   background-color: ${theme.surface};
+  height: ${({ $size = 'md' }) => fieldTokens.height[$size]};
+  padding: ${({ $size = 'md' }) => fieldTokens.padding[$size]};
+  transition: ${fieldTokens.transition};
 
-  ${({ $size }) => sizeStyles[$size]}
+  &:hover:not(:disabled) {
+    border-color: ${theme.primary};
+  }
 
   &:focus-within {
     border-color: ${theme.focusRing};
@@ -49,6 +45,7 @@ export const Field = styled.div<{
     css`
       border-color: ${theme.error};
 
+      &:hover:not(:disabled),
       &:focus-within {
         border-color: ${theme.error};
       }
@@ -59,6 +56,8 @@ export const Field = styled.div<{
     css`
       background-color: ${theme.disabledBg};
       border-color: ${theme.border};
+      opacity: 0.6;
+      cursor: not-allowed;
 
       &:focus-within {
         border-color: ${theme.border};
@@ -72,7 +71,7 @@ export const TextField = styled.input`
   border: none;
   outline: none;
   background: transparent;
-  font-size: 0.875rem;
+  font-size: ${fieldTokens.typography.fontSize};
   color: ${theme.text};
 
   /* O foco já é indicado pela borda do Field; sem isto o :focus-visible global desenha um segundo anel. */
@@ -127,6 +126,6 @@ export const VisibilityToggle = styled.button`
 `;
 
 export const Helper = styled.span<{ $error: boolean }>`
-  font-size: 0.75rem;
+  font-size: ${fieldTokens.typography.helperSize};
   color: ${({ $error }) => ($error ? theme.error : theme.textMuted)};
 `;

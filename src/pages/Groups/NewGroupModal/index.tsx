@@ -149,6 +149,7 @@ const NewGroupForm = ({
           onChange={(event) => setName(event.target.value)}
           required
           data-autofocus
+          fullWidth
         />
 
         <Dropdown

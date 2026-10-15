@@ -1,18 +1,18 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import type { DropdownVariants } from '.';
-import { theme } from '../../theme/theme';
+import { theme, fieldTokens } from '../../theme/theme';
 
 export const Wrapper = styled.div<{ $fullWidth: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: ${fieldTokens.gap.container};
   width: 100%;
   max-width: ${({ $fullWidth }) => ($fullWidth ? 'none' : '20rem')};
 `;
 
 export const Label = styled.label`
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: ${fieldTokens.typography.labelSize};
+  font-weight: ${fieldTokens.typography.labelWeight};
   color: ${theme.text};
   user-select: none;
 `;
@@ -33,27 +33,22 @@ export const Trigger = styled.button<{
   width: 100%;
   background-color: ${theme.surface};
   color: ${theme.text};
-  border-radius: 0.5rem;
-  border: 2px solid
+  border-radius: ${fieldTokens.border.radius};
+  border: ${fieldTokens.border.width} solid
     ${({ $isOpen, $isError }) => ($isError ? theme.error : $isOpen ? theme.focusRing : theme.border)};
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
+  height: ${({ $size = 'md' }) => fieldTokens.height[$size]};
+  padding: ${({ $size = 'md' }) => fieldTokens.padding[$size]};
+  font-size: ${fieldTokens.typography.fontSize};
   cursor: pointer;
   outline: none;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: ${fieldTokens.transition};
 
-  ${({ $size }) =>
-    $size === 'lg'
-      ? css`
-          height: 3.5rem;
-        `
-      : css`
-          height: 2.5rem;
-        `}
+  &:hover:not(:disabled) {
+    border-color: ${({ $isError, $isOpen }) =>
+      $isError ? theme.error : $isOpen ? theme.focusRing : theme.primary};
+  }
   &:focus {
-    border-color: ${({ $isError }) => ($isError ? theme.error : theme.primary)};
+    border-color: ${({ $isError }) => ($isError ? theme.error : theme.focusRing)};
   }
   &:disabled {
     cursor: not-allowed;
@@ -88,13 +83,13 @@ export const Menu = styled.ul`
   padding: 0;
   list-style: none;
   background-color: ${theme.surface};
-  border: 1px solid ${theme.border};
-  border-radius: 0.5rem;
+  border: ${fieldTokens.border.width} solid ${theme.border};
+  border-radius: ${fieldTokens.border.radius};
   z-index: 10;
 `;
 
 export const MenuItem = styled.li<{ $isSelected?: boolean }>`
-  padding: 0.5rem 1rem;
+  padding: ${fieldTokens.padding.md};
   color: ${({ $isSelected }) => ($isSelected ? theme.textBrand : theme.text)};
   background-color: ${({ $isSelected }) => ($isSelected ? theme.surfaceBrandSoft : theme.background)};
   cursor: pointer;
@@ -108,6 +103,6 @@ export const MenuItem = styled.li<{ $isSelected?: boolean }>`
 `;
 
 export const HelperText = styled.span<{ $isError?: boolean }>`
-  font-size: 0.875rem;
+  font-size: ${fieldTokens.typography.helperSize};
   color: ${({ $isError }) => ($isError ? theme.error : theme.textMuted)};
 `;
