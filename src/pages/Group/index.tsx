@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 import { LuCalendar, LuMapPin, LuStar } from 'react-icons/lu';
 import { BackButton } from '../../components/BackButton';
 import * as Styled from './styles';
+import { Modal } from '../../components/Modal';
 import { Tabs } from '../../components/Tab';
 import {
   Table,
@@ -16,6 +17,7 @@ import {
   getGroupDetails,
   getGroupMeetingsPage,
   getGroupParticipantsPage,
+  updateGroupStatus,
 } from '../../services/groupService';
 import type {
   GroupDetails as GroupDetailsData,
@@ -69,6 +71,9 @@ export const GroupDetails = () => {
   const locale = useLocale();
   const { groupId = '' } = useParams<{ groupId: string }>();
 
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<GroupDetailsTab>('participants');
   const [result, setResult] = useState<{ id: string; group: GroupDetailsData | null } | null>(null);
 
@@ -91,6 +96,32 @@ export const GroupDetails = () => {
 
   const loading = result?.id !== groupId;
   const group = result?.group ?? null;
+
+  const handleOpenModal = () => {
+    setStatusError(null);
+    setIsCloseModalOpen(true);
+  };
+
+  const handleToggleStatus = async () => {
+    if (!group || isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      setStatusError(null);
+
+      const targetStatus = !isActive;
+      const updatedStatus = await updateGroupStatus(groupId, targetStatus);
+      setResult((prev) =>
+        prev && prev.group ? { ...prev, group: { ...prev.group, is_active: updatedStatus } } : prev,
+      );
+      setIsCloseModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      setStatusError(locale.group_details.updateStatusError);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   //aba 1
   const participantColumns: TableColumn[] = useMemo(
@@ -276,6 +307,7 @@ export const GroupDetails = () => {
   if (!group) return <Styled.Message>{locale.group_details.loadError}</Styled.Message>;
 
   const meeting = group.next_meeting;
+  const isActive = group.is_active;
 
   return (
     <Styled.Container>
@@ -297,11 +329,13 @@ export const GroupDetails = () => {
           </Styled.Subtitle>
         </Styled.HeaderInfo>
         <Styled.HeaderActions>
-          <Styled.EditButton size="sm" variant="secondary">
+          <Styled.EditButton size="md" variant="secondary">
             {locale.group_details.header.editGroup}
           </Styled.EditButton>
-          <Styled.CloseButton size="sm" variant="secondary">
-            {locale.group_details.header.closeGroup}
+          <Styled.CloseButton size="md" variant="secondary" onClick={handleOpenModal}>
+            {isActive
+              ? locale.group_details.header.closeGroup
+              : locale.group_details.header.reopenGroup}
           </Styled.CloseButton>
         </Styled.HeaderActions>
       </Styled.Header>
@@ -372,6 +406,32 @@ export const GroupDetails = () => {
         onChange={(value) => setActiveTab(value as GroupDetailsTab)}
         size="lg"
       />
+
+      <Modal
+        isOpen={isCloseModalOpen}
+        onClose={() => {
+          if (!isSubmitting) setIsCloseModalOpen(false);
+        }}
+        title={
+          isActive
+            ? locale.group_details.statusModal.closeTitle
+            : locale.group_details.statusModal.reopenTitle
+        }
+        description={
+          isActive
+            ? locale.group_details.statusModal.closeDescription
+            : locale.group_details.statusModal.reopenDescription
+        }
+        confirmText={
+          isActive
+            ? locale.group_details.statusModal.closeConfirm
+            : locale.group_details.statusModal.reopenConfirm
+        }
+        confirmDisabled={isSubmitting}
+        onConfirm={handleToggleStatus}
+      >
+        {statusError && <p style={{ color: 'red', marginTop: '0.5rem' }}>{statusError}</p>}
+      </Modal>
     </Styled.Container>
   );
 };

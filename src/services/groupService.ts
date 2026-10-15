@@ -28,6 +28,18 @@ export function getGroupMeetingsPage(
   return invokeGet('get-group-meetings-web', { groupId, page, pageSize });
 }
 
+export const updateGroupStatus = async (groupId: string, isActive: boolean): Promise<boolean> => {
+  const { data, error } = await supabase.functions.invoke<{ is_active: boolean }>(
+    'update-group-status',
+    { body: { group_id: groupId, is_active: isActive } },
+  );
+
+  if (error) throw error;
+  if (!data) throw new Error('update-group-status returned no data');
+
+  return data.is_active;
+};
+
 export type CreateGroupPayload = {
   name: string;
   cityId: string;
