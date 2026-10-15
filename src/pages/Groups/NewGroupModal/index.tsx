@@ -1,20 +1,22 @@
 import { useEffect, useId, useState } from 'react';
 
+import { Autocomplete } from '../../../components/Autocomplete';
 import { Dropdown } from '../../../components/Dropdown';
 import { Input } from '../../../components/Input';
 import { Modal } from '../../../components/Modal';
 import { useLocale } from '../../../hooks/useLocale';
+import { GroupServiceError } from '../../../services/groupErrors';
 import {
   getGroupFormOptions,
   type CityOrZoneOption,
   type CoordinatorOption,
 } from '../../../services/groupFormService';
-import { GroupServiceError } from '../../../services/groupErrors';
 import { createGroup } from '../../../services/groupService';
 
 import * as Styled from './styles';
 
 const GROUP_NUMBER = /^(?:grupo\s*)?0*[1-9]\d{0,8}$/i;
+
 type CreateGroupRequest = typeof createGroup;
 type LoadOptionsRequest = () => Promise<[CityOrZoneOption[], CoordinatorOption[]]>;
 
@@ -67,8 +69,11 @@ const NewGroupForm = ({
   const [name, setName] = useState('');
   const [cityId, setCityId] = useState('');
   const [coordinatorId, setCoordinatorId] = useState('');
+
   const [cityOptions, setCityOptions] = useState<CityOrZoneOption[]>([]);
   const [coordinatorOptions, setCoordinatorOptions] = useState<CoordinatorOption[]>([]);
+
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -79,13 +84,22 @@ const NewGroupForm = ({
     const load = async () => {
       try {
         const [citiesAndZones, coordinators] = await loadOptionsRequest();
+
         if (!active) return;
+
         setCityOptions(citiesAndZones);
         setCoordinatorOptions(coordinators);
+        setLoadError(null);
       } catch (error) {
         console.error('new-group options loading error', error);
+
         if (!active) return;
+
         setLoadError(text.errors.loadOptions);
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -98,8 +112,12 @@ const NewGroupForm = ({
 
   const trimmedName = name.trim();
   const isGroupNumberValid = GROUP_NUMBER.test(trimmedName);
+
   const nameError = trimmedName !== '' && !isGroupNumberValid ? text.name.invalid : undefined;
-  const canSave = isGroupNumberValid && cityId !== '' && !isSaving;
+
+  const validCity = cityOptions.some((option) => option.value === cityId);
+
+  const canSave = isGroupNumberValid && validCity && !isLoading && !loadError && !isSaving;
 
   const handleSave = async () => {
     if (!canSave) return;
@@ -113,6 +131,7 @@ const NewGroupForm = ({
         cityId,
         coordinatorId: coordinatorId || null,
       });
+
       onSave();
     } catch (error) {
       setSaveError(
@@ -152,12 +171,18 @@ const NewGroupForm = ({
           fullWidth
         />
 
-        <Dropdown
+        <Autocomplete
           label={text.city.label}
           placeholder={text.city.placeholder}
           options={cityOptions}
-          onSelect={setCityId}
-          fullWidth
+          value={cityId || null}
+          onChange={(value) => setCityId(value ?? '')}
+          minCharacters={3}
+          noResultsText={text.city.noResults}
+          helperText={isLoading ? text.city.loading : undefined}
+          error={loadError ?? undefined}
+          disabled={isLoading || !!loadError || isSaving}
+          required
         />
 
         <Dropdown
@@ -169,6 +194,7 @@ const NewGroupForm = ({
         />
 
         {saveError && <Styled.ErrorMessage role="alert">{saveError}</Styled.ErrorMessage>}
+
         {loadError && <Styled.ErrorMessage role="alert">{loadError}</Styled.ErrorMessage>}
       </Styled.Fields>
     </Modal>
