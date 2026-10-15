@@ -297,5 +297,197 @@
         "actions": "AÇÕES"
       }
     }
+  },
+  "landing": {
+    "skipToContent": "Pular para o conteúdo",
+    "header": {
+      "brand": "Clube de Leitura D'Elas",
+      "navLabel": "Seções da página",
+      "nav": {
+        "about": "O clube",
+        "howItWorks": "Como funciona",
+        "agreements": "Combinados",
+        "projects": "Projetos",
+        "where": "Onde estamos"
+      },
+      "signUp": "Inscreva-se"
+    },
+    "hero": {
+      "eyebrow": "Clube de Leitura D'Elas",
+      "title": "Ler juntas transforma a experiência da leitura",
+      "description": "Aqui, a leitura é o ponto de partida para encontros, conversas, descobertas e novas perspectivas. Somos uma comunidade de mulheres que se encontra para ler, conversar e compartilhar diferentes olhares sobre os livros.",
+      "primaryCta": "Quero participar",
+      "secondaryCta": "Como funciona",
+      "logoAlt": "Logo do Clube de Leitura D'Elas"
+    },
+    "stats": {
+      "label": "O clube em números",
+      "items": [
+        {
+          "value": "~1.000",
+          "label": "mulheres leitoras"
+        },
+        {
+          "value": "41",
+          "label": "grupos ativos"
+        },
+        {
+          "value": "13",
+          "label": "cidades em 7 estados"
+        },
+        {
+          "value": "35–40",
+          "label": "dias entre os encontros"
+        }
+      ]
+    },
+    "purpose": {
+      "title": "Propósito, missão e visão",
+      "items": [
+        {
+          "title": "Por que existimos?",
+          "text": "Transformar a leitura em experiência coletiva, criando espaços de encontro, diálogo e formação entre mulheres."
+        },
+        {
+          "title": "O que fazemos?",
+          "text": "Promover experiências de leitura e diálogo que ampliem repertórios, estimulem o pensamento crítico, fortaleçam vínculos e aproximem mulheres da literatura, da cultura e da cidadania."
+        },
+        {
+          "title": "Onde queremos chegar?",
+          "text": "Ser uma comunidade de referência na formação de mulheres por meio da leitura, do diálogo e da participação cidadã, conectando milhares de leitoras em diferentes lugares."
+        }
+      ],
+      "valuesTitle": "Nossos valores",
+      "values": [
+        {
+          "title": "Leitura",
+          "text": "A base de tudo que somos."
+        },
+        {
+          "title": "Pluralidade",
+          "text": "Diferentes olhares enriquecem a conversa."
+        },
+        {
+          "title": "Escuta",
+          "text": "Ouvir é tão importante quanto falar."
+        },
+        {
+          "title": "Respeito",
+          "text": "Pelo livro, pelas ideias e pelas pessoas."
+        },
+        {
+          "title": "Curiosidade",
+          "text": "A vontade de aprender sempre mais."
+        }
+      ]
+    },
+    "howItWorks": {
+      "title": "Como funciona o clube?",
+      "description": "Cada grupo possui sua própria dinâmica, mas todos compartilham a mesma proposta: ler, encontrar-se e conversar sobre a obra escolhida.",
+      "steps": [
+        {
+          "title": "Grupos",
+          "text": "41 grupos espalhados por 13 cidades do Brasil."
+        },
+        {
+          "title": "Coordenadoras",
+          "text": "Cada grupo tem sua liderança local."
+        },
+        {
+          "title": "Leitoras",
+          "text": "Em média, 30 integrantes por grupo."
+        },
+        {
+          "title": "Encontro presencial",
+          "text": "A cada 35 a 40 dias."
+        },
+        {
+          "title": "Conversa",
+          "text": "Troca de experiências sobre o livro do ciclo."
+        }
+      ],
+      "quote": "Não existe uma única maneira \"correta\" de participar. O que une os grupos é a regularidade e a clareza da proposta.",
+      "participationTitle": "Como funciona a participação?",
+      "participation": [
+        "Cada grupo lê livros de literatura de ficção.",
+        "Cada leitora indica um livro para o sorteio.",
+        "Quando sorteada, a leitora é responsável por organizar a reunião do grupo.",
+        "A participação é ativa: toda integrante contribui."
+      ]
+    },
+    "agreements": {
+      "title": "Nossos combinados",
+      "highlight": "No Clube de Leitura D'Elas, ninguém precisa saber mais para ter o direito de falar.",
+      "items": [
+        "Escutamos antes de responder.",
+        "Discordamos de ideias, não de pessoas.",
+        "Não existe interpretação única do livro.",
+        "Todas as participantes têm espaço para falar.",
+        "Não exigimos conhecimento prévio sobre literatura, política ou qualquer outro tema.",
+        "Respeitamos diferentes experiências e opiniões.",
+        "O grupo é um espaço de diálogo, não de disputa."
+      ]
+    },
+    "projects": {
+      "title": "Conheça os projetos D'Elas",
+      "reading": {
+        "title": "Clube de Leitura D'Elas",
+        "tag": "41 grupos · ~1.000 participantes",
+        "text": "Nossa comunidade principal: mulheres reunidas em grupos de leitura para compartilhar livros, experiências e perspectivas. Lemos ficção literária. Cada uma contribui indicando um livro e, quando sorteada, organiza o encontro.",
+        "cta": "Inscreva-se no Clube de Leitura"
+      },
+      "political": {
+        "title": "Clube Político D'Elas",
+        "tag": "Ciência política e cidadania",
+        "text": "Um desdobramento dedicado à leitura e discussão de ciência política, democracia, instituições e cidadania, sem ideologias, partidarismo ou polarização. Tem curadoria própria e estatuto específico de missão e comportamento. Não é necessário ser especialista em política para participar.",
+        "cta": "Inscreva-se no Clube Político"
+      },
+      "opensInNewTab": "(abre em nova aba)"
+    },
+    "where": {
+      "title": "Nossa presença no Brasil",
+      "states": [
+        {
+          "name": "Rio Grande do Sul",
+          "cities": "Porto Alegre · Esteio · Novo Hamburgo · Caxias do Sul · Santa Maria"
+        },
+        {
+          "name": "Santa Catarina",
+          "cities": "Florianópolis · Tijucas"
+        },
+        {
+          "name": "Paraná",
+          "cities": "Curitiba"
+        },
+        {
+          "name": "Minas Gerais",
+          "cities": "Belo Horizonte"
+        },
+        {
+          "name": "Rio de Janeiro",
+          "cities": "Rio de Janeiro · Niterói"
+        },
+        {
+          "name": "São Paulo",
+          "cities": "São Paulo"
+        },
+        {
+          "name": "Distrito Federal",
+          "cities": "Brasília"
+        }
+      ]
+    },
+    "closing": {
+      "title": "Seja bem-vinda!",
+      "text": "Você pode fazer parte de algo maior: uma comunidade de mulheres que acredita no poder transformador da leitura coletiva. Leia, participe, compartilhe e se deixe surpreender.",
+      "cta": "Quero participar"
+    },
+    "footer": {
+      "socialTitle": "Redes e conteúdos",
+      "instagram": "Instagram",
+      "video": "Claudine explica o funcionamento do clube",
+      "adminLogin": "Acesso da coordenação",
+      "copyright": "Clube de Leitura D'Elas"
+    }
   }
 }
