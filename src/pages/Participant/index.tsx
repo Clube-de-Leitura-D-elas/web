@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 import { Table, type TableColumn, type TableFetchPage } from '../../components/Table';
 import { Tag } from '../../components/Tag';
 import { locale } from '../../locales';
+import { formatEntryDate } from '../../utils/date';
 import {
   getParticipantById,
   getParticipantGroups,
@@ -26,6 +27,11 @@ const columns: TableColumn[] = [
   {
     key: 'status',
     label: locale.participant_details.groups.columns.status,
+    align: 'center',
+  },
+  {
+    key: 'entryDate',
+    label: locale.participant_details.groups.columns.entryDate,
     align: 'center',
   },
   {
@@ -108,6 +114,9 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
                 : locale.participant_details.groups.roles.member}
             </Tag>
           ),
+
+          entryDate:
+            formatEntryDate(group.entryDate) || locale.participant_details.groups.emptyValue,
 
           city: group.city ?? locale.participant_details.notInformed,
         })),

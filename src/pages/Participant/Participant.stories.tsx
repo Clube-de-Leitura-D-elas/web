@@ -29,6 +29,8 @@ const participant: Participant = {
   birthDate: '1990-10-24',
   job: 'Advogada',
   active: true,
+  // 01:30 UTC de 16/03 ainda é 15/03 em São Paulo
+  entryDate: '2025-03-16T01:30:00Z',
 };
 
 const groups: ParticipantGroup[] = [
@@ -37,24 +39,28 @@ const groups: ParticipantGroup[] = [
     number: 3,
     city: 'São Paulo',
     isCoordinator: true,
+    entryDate: '2025-03-20T12:00:00Z',
   },
   {
     id: '22222222-2222-2222-2222-222222222222',
     number: 12,
     city: 'Porto Alegre',
     isCoordinator: false,
+    entryDate: '2025-05-22T18:30:00Z',
   },
   {
     id: '23333333-3333-3333-3333-333333333333',
     number: 7,
     city: 'Porto Alegre',
     isCoordinator: false,
+    entryDate: null,
   },
   {
     id: '24444444-4444-4444-4444-444444444444',
     number: 10,
     city: 'Canoas',
     isCoordinator: false,
+    entryDate: '2025-08-14T14:00:00Z',
   },
 ];
 
@@ -164,6 +170,17 @@ export const WithoutGroups: Story = {
     mocked(getParticipantGroups).mockResolvedValue({
       groups: [],
       total: 0,
+    });
+  },
+};
+
+export const WithoutEntryDate: Story = {
+  beforeEach: () => {
+    mocked(getParticipantById).mockResolvedValue({ ...participant, entryDate: null });
+
+    mocked(getParticipantGroups).mockResolvedValue({
+      groups: groups.map((group) => ({ ...group, entryDate: null })),
+      total: groups.length,
     });
   },
 };

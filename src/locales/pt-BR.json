@@ -93,9 +93,11 @@
     },
     "groups": {
       "itemLabel": "grupos",
+      "emptyValue": "—",
       "columns": {
         "name": "Grupo",
         "status": "Função",
+        "entryDate": "Data de Entrada",
         "city": "Cidade"
       },
       "roles": {
@@ -109,6 +111,7 @@
       "city": "Cidade",
       "zone": "Zona",
       "birthday": "Aniversário",
+      "entryDate": "Data de Entrada no Sistema",
       "occupation": "Trabalho"
     }
   },
