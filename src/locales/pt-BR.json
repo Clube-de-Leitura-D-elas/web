@@ -280,5 +280,18 @@
         "actions": "AÇÕES"
       }
     }
+  },
+  "calendar": {
+    "title": "Calendário",
+    "subtitle": "Visualize os encontros de todos os grupos do clube.",
+    "weekdays": {
+      "sunday": "DOM.",
+      "monday": "SEG.",
+      "tuesday": "TER.",
+      "wednesday": "QUA.",
+      "thursday": "QUI.",
+      "friday": "SEX.",
+      "saturday": "SÁB."
+    }
   }
 }
