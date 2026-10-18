@@ -1,21 +1,30 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
+import { BackButton } from '../../components/BackButton';
 import { Table, type TableColumn, type TableFetchPage } from '../../components/Table';
 import { Tag } from '../../components/Tag';
 import { locale } from '../../locales';
 import {
+  getCities,
   getParticipantById,
   getParticipantGroups,
   getParticipantPresence,
+  getZones,
+  updateParticipant,
   updateParticipantStatus,
 } from '../../services/participantService';
-import type { Participant, ParticipantPresence } from '../../types/participant';
+import type {
+  Participant,
+  ParticipantFormValues,
+  ParticipantOption,
+  ParticipantPresence,
+} from '../../types/participant';
 
 import { ParticipantContacts } from './ParticipantContacts';
 import { ParticipantInfoGrid } from './ParticipantInfoGrid';
+import { ParticipantModal } from './ParticipantModal';
 import { ParticipantSummary } from './ParticipantSummary';
 import * as Styled from './styles';
-import { BackButton } from '../../components/BackButton';
 
 const columns: TableColumn[] = [
   {
@@ -49,6 +58,15 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
   const [presence, setPresence] = useState<ParticipantPresence[]>([]);
 
   const [loading, setLoading] = useState(Boolean(participantId));
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [savingParticipant, setSavingParticipant] = useState(false);
+
+  const [cities, setCities] = useState<ParticipantOption[]>([]);
+  const [zones, setZones] = useState<ParticipantOption[]>([]);
+  const [optionsError, setOptionsError] = useState(false);
 
   const [loadError, setLoadError] = useState<string | null>(
     participantId ? null : locale.participant_details.loadError,
@@ -85,6 +103,26 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
       ignore = true;
     };
   }, [participantId]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    Promise.all([getCities(), getZones()])
+      .then(([citiesData, zonesData]) => {
+        if (ignore) return;
+
+        setCities(citiesData);
+        setZones(zonesData);
+      })
+      .catch((error) => {
+        console.error(error);
+        if (!ignore) setOptionsError(true);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const fetchGroupsPage: TableFetchPage = useCallback(
     async ({ page, pageSize }) => {
@@ -142,6 +180,65 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
     }
   };
 
+  const handleOpenModal = () => {
+    setUpdateError(null);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setUpdateError(null);
+    setIsModalOpen(false);
+  };
+
+  const handleUpdateParticipant = async (values: ParticipantFormValues) => {
+    if (!participant) return;
+
+    setSavingParticipant(true);
+    setUpdateError(null);
+
+    try {
+      await updateParticipant(participant.id, {
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        instagram: values.instagram || null,
+        cityId: values.cityId,
+        zoneId: values.zoneId,
+        birthDate: values.birthDate,
+        job: values.job || null,
+        appRole: values.appRole,
+      });
+
+      // Deu certo: atualiza a página e só então fecha o modal.
+      setParticipant((current) =>
+        current
+          ? {
+              ...current,
+              name: values.name,
+              email: values.email,
+              phone: values.phone || null,
+              instagram: values.instagram || null,
+              city: values.city,
+              zone: values.zone,
+              birthDate: values.birthDate,
+              job: values.job || null,
+              appRole: values.appRole,
+            }
+          : current,
+      );
+      setIsModalOpen(false);
+    } catch (error) {
+      // Deu erro: mantém o modal aberto e mostra a mensagem.
+      setUpdateError(
+        error instanceof Error && error.message
+          ? error.message
+          : locale.participant_details.modal.saveError,
+      );
+    } finally {
+      setSavingParticipant(false);
+    }
+  };
+
   return (
     <Styled.Page>
       <BackButton label={locale.participant_details.back} />
@@ -162,10 +259,24 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
               savingStatus={savingStatus}
               statusError={statusError}
               onToggleActive={handleToggleActive}
+              onEdit={handleOpenModal}
             />
 
             <ParticipantContacts participant={participant} />
           </Styled.ProfileHeader>
+
+          <ParticipantModal
+            isOpen={isModalOpen}
+            participant={participant}
+            cities={cities}
+            zones={zones}
+            onClose={handleCloseModal}
+            onConfirm={handleUpdateParticipant}
+            saving={savingParticipant}
+            error={
+              updateError ?? (optionsError ? locale.participant_details.modal.optionsError : null)
+            }
+          />
 
           <Styled.TableArea>
             <Table
