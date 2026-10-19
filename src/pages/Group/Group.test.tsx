@@ -1,0 +1,235 @@
+import { screen, waitFor, within } from '@testing-library/react';
+import { interpolate, locale } from '../../locales';
+import {
+  getGroupDetails,
+  getGroupMeetingsPage,
+  getGroupParticipantsPage,
+  updateGroupStatus,
+} from '../../services/groupService';
+import { pending, renderWithProviders } from '../../test/render';
+import type { GroupDetails as GroupDetailsData } from '../../types/group';
+import { GroupDetails } from '.';
+
+jest.mock('../../services/groupService', () => ({
+  getGroupDetails: jest.fn(),
+  getGroupMeetingsPage: jest.fn(),
+  getGroupParticipantsPage: jest.fn(),
+  updateGroupStatus: jest.fn(),
+}));
+
+const text = locale.group_details;
+const firstPage = { page: 1, pageSize: 6 };
+
+const group: GroupDetailsData = {
+  id: 'g1',
+  number: 7,
+  description: 'Centro',
+  city: 'Canoas',
+  is_active: true,
+  active_participants_count: 12,
+  coordinator_name: 'Joana Alves',
+  coordinator_email: 'joana@gmail.com',
+  next_meeting: {
+    date: '2026-08-24T22:00:00Z',
+    book_title: 'Torto Arado',
+    book_author: 'Itamar Vieira Junior',
+    place: 'Biblioteca Pública',
+    neighborhood: 'Centro Histórico',
+    confirmed: true,
+  },
+};
+
+const renderPage = () =>
+  renderWithProviders(<GroupDetails />, { route: '/grupos/g1', path: '/grupos/:groupId' });
+
+beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.mocked(getGroupDetails).mockResolvedValue(group);
+  jest.mocked(getGroupParticipantsPage).mockResolvedValue({
+    items: [
+      {
+        id: 'p1',
+        name: 'Ana Souza',
+        entry_date: '2024-03-01',
+        attendance: ['P', 'F', 'P'],
+        email: null,
+        is_coordinator: true,
+      },
+    ],
+    total: 1,
+  });
+  jest.mocked(getGroupMeetingsPage).mockResolvedValue({
+    items: [
+      {
+        id: 'm1',
+        date: '2026-08-24T22:00:00Z',
+        book_title: 'Torto Arado',
+        book_author: 'Itamar Vieira Junior',
+        place: null,
+        neighborhood: 'Centro',
+        attendance_present: 3,
+        attendance_total: 4,
+        average_rating: 4.5,
+        votes_count: 2,
+      },
+      {
+        id: 'm2',
+        date: '2026-07-10T22:00:00Z',
+        book_title: 'Quarto de Despejo',
+        book_author: 'Carolina Maria de Jesus',
+        place: 'Café',
+        neighborhood: null,
+        attendance_present: 0,
+        attendance_total: 0,
+        average_rating: null,
+        votes_count: 0,
+      },
+    ],
+    total: 2,
+  });
+});
+
+describe('GroupDetails', () => {
+  it('mostra o carregamento', () => {
+    jest.mocked(getGroupDetails).mockReturnValue(pending());
+
+    renderPage();
+
+    expect(screen.getByText(text.loading)).toBeInTheDocument();
+  });
+
+  it('mostra o erro quando o grupo não carrega', async () => {
+    jest.mocked(getGroupDetails).mockRejectedValue(new Error('404'));
+
+    renderPage();
+
+    expect(await screen.findByText(text.loadError)).toBeInTheDocument();
+  });
+
+  it('mostra o cabeçalho com nome, cidade e participantes ativas', async () => {
+    renderPage();
+
+    expect(await screen.findByRole('heading', { name: 'Grupo 07 — Centro' })).toBeInTheDocument();
+    expect(getGroupDetails).toHaveBeenCalledWith('g1');
+    expect(screen.getByText('Canoas • 12 participantes ativas')).toBeInTheDocument();
+  });
+
+  it('mostra a coordenadora com as iniciais', async () => {
+    renderPage();
+    await screen.findByText('Joana Alves');
+
+    expect(screen.getByText('JA')).toBeInTheDocument();
+    expect(screen.getByText('joana@gmail.com')).toBeInTheDocument();
+  });
+
+  it('mostra o próximo encontro no horário de Brasília', async () => {
+    renderPage();
+
+    expect(await screen.findByText('24 de Agosto, 19h')).toBeInTheDocument();
+    expect(screen.getByText(text.nextMeeting.statusConfirmed)).toBeInTheDocument();
+    expect(screen.getByText('Torto Arado')).toBeInTheDocument();
+    expect(screen.getByText('Biblioteca Pública — Centro Histórico')).toBeInTheDocument();
+  });
+
+  it('sem próximo encontro nem coordenadora, mostra "não informado"', async () => {
+    jest.mocked(getGroupDetails).mockResolvedValue({
+      ...group,
+      coordinator_name: null,
+      coordinator_email: null,
+      next_meeting: null,
+    });
+
+    renderPage();
+    await screen.findByRole('heading', { name: 'Grupo 07 — Centro' });
+
+    // nome e e-mail da coordenadora, e o card do encontro
+    expect(screen.getAllByText(text.notInformed)).toHaveLength(3);
+    expect(screen.queryByText(text.nextMeeting.statusConfirmed)).not.toBeInTheDocument();
+  });
+
+  it('lista as participantes do grupo', async () => {
+    renderPage();
+
+    const link = await screen.findByRole('link', { name: 'Ana Souza' });
+    expect(link).toHaveAttribute('href', '/participantes/p1');
+    expect(getGroupParticipantsPage).toHaveBeenCalledWith('g1', firstPage);
+
+    const row = link.closest('tr')!;
+    expect(within(row).getByText(text.table.coordinatorTag)).toBeInTheDocument();
+    expect(within(row).getByText('01/03/2024')).toBeInTheDocument();
+    expect(within(row).getAllByLabelText(text.table.present)).toHaveLength(2);
+    expect(within(row).getAllByLabelText(text.table.absent)).toHaveLength(1);
+    expect(within(row).getByText(text.table.emptyValue)).toBeInTheDocument();
+  });
+
+  it('mostra o histórico de encontros na segunda aba', async () => {
+    const { user } = renderPage();
+    await screen.findByRole('heading', { name: 'Grupo 07 — Centro' });
+
+    await user.click(screen.getByRole('tab', { name: text.tabs.history }));
+
+    const first = (await screen.findByText('24 Ago 2026')).closest('tr')!;
+    expect(getGroupMeetingsPage).toHaveBeenCalledWith('g1', firstPage);
+    expect(within(first).getByText('Torto Arado - Itamar Vieira Junior')).toBeInTheDocument();
+    expect(within(first).getByText('— — Centro')).toBeInTheDocument();
+    expect(within(first).getByText('3 / 4 (75%)')).toBeInTheDocument();
+    expect(within(first).getByText('4.5')).toBeInTheDocument();
+    expect(within(first).getByText('(2 votos)')).toBeInTheDocument();
+
+    const second = screen.getByText('10 Jul 2026').closest('tr')!;
+    expect(within(second).getByText('0 / 0 (0%)')).toBeInTheDocument();
+    expect(within(second).getByText(text.table.emptyValue)).toBeInTheDocument();
+  });
+
+  it('encerra o grupo pelo modal de confirmação', async () => {
+    jest.mocked(updateGroupStatus).mockResolvedValue(false);
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: text.header.closeGroup }));
+    const dialog = screen.getByRole('dialog', { name: text.statusModal.closeTitle });
+    await user.click(within(dialog).getByRole('button', { name: text.statusModal.closeConfirm }));
+
+    expect(updateGroupStatus).toHaveBeenCalledWith('g1', false);
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.getByRole('button', { name: text.header.reopenGroup })).toBeInTheDocument();
+  });
+
+  it('reativa um grupo encerrado', async () => {
+    jest.mocked(getGroupDetails).mockResolvedValue({ ...group, is_active: false });
+    jest.mocked(updateGroupStatus).mockResolvedValue(true);
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: text.header.reopenGroup }));
+    const dialog = screen.getByRole('dialog', { name: text.statusModal.reopenTitle });
+    await user.click(within(dialog).getByRole('button', { name: text.statusModal.reopenConfirm }));
+
+    expect(updateGroupStatus).toHaveBeenCalledWith('g1', true);
+    expect(await screen.findByRole('button', { name: text.header.closeGroup })).toBeInTheDocument();
+  });
+
+  it('mantém o modal aberto e avisa quando o status não muda', async () => {
+    jest.mocked(updateGroupStatus).mockRejectedValue(new Error('500'));
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: text.header.closeGroup }));
+    const dialog = screen.getByRole('dialog', { name: text.statusModal.closeTitle });
+    await user.click(within(dialog).getByRole('button', { name: text.statusModal.closeConfirm }));
+
+    expect(await within(dialog).findByText(text.updateStatusError)).toBeInTheDocument();
+    expect(dialog).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole('button', { name: text.statusModal.closeConfirm }),
+    ).toBeEnabled();
+  });
+
+  it('o botão de ações de cada linha cita a participante', async () => {
+    renderPage();
+    await screen.findByRole('link', { name: 'Ana Souza' });
+
+    expect(
+      screen.getByRole('button', {
+        name: interpolate(text.table.actionsAriaLabel, { name: 'Ana Souza' }),
+      }),
+    ).toBeInTheDocument();
+  });
+});
