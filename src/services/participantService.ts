@@ -12,10 +12,17 @@ type ParticipantResponse = {
   is_active: boolean;
   city: string | null;
   zone: string | null;
+  created_at?: string | null;
 };
 
 type ParticipantGroupsResponse = {
-  items: { id: string; number: number; city: string | null; is_coordinator: boolean }[];
+  items: {
+    id: string;
+    number: number;
+    city: string | null;
+    is_coordinator: boolean;
+    entry_date?: string | null;
+  }[];
   total: number;
 };
 
@@ -50,6 +57,7 @@ export async function getParticipantById(participantId: string): Promise<Partici
     active: data.is_active,
     city: data.city,
     zone: data.zone,
+    entryDate: data.created_at ?? null,
   };
 }
 
@@ -70,6 +78,7 @@ export async function getParticipantGroups(
       number: group.number,
       city: group.city,
       isCoordinator: group.is_coordinator,
+      entryDate: group.entry_date ?? null,
     })),
     total: data.total,
   };
