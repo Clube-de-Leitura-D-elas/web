@@ -1,0 +1,68 @@
+name: CI
+
+# Roda em todo PR (e a cada novo push nele) e nas branches principais, para a develop e a
+# main também mostrarem se estão verdes. São as mesmas checagens do pre-push do Husky, mais os
+# testes — quem pulou o hook com --no-verify é pego aqui.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Um push novo no mesmo PR cancela a execução anterior, que já ficou velha.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Na CI não há commits, então os hooks do Husky não precisam ser instalados.
+  HUSKY: 0
+
+jobs:
+  quality:
+    name: Tipos, lint e formatação
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn typecheck
+      - run: yarn lint
+      - run: yarn format:check
+
+  test:
+    name: Testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn test:coverage --ci
+
+      - name: Publica o relatório de cobertura
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/lcov-report
+          retention-days: 7
+          if-no-files-found: ignore
