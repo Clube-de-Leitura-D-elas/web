@@ -1,8 +1,5 @@
 name: CI
 
-# Roda em todo PR (e a cada novo push nele) e nas branches principais, para a develop e a
-# main também mostrarem se estão verdes. São as mesmas checagens do pre-push do Husky, mais os
-# testes — quem pulou o hook com --no-verify é pego aqui.
 on:
   pull_request:
   push:
@@ -14,13 +11,11 @@ on:
 permissions:
   contents: read
 
-# Um push novo no mesmo PR cancela a execução anterior, que já ficou velha.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
-  # Na CI não há commits, então os hooks do Husky não precisam ser instalados.
   HUSKY: 0
 
 jobs:
