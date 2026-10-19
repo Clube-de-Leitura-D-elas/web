@@ -60,7 +60,7 @@ jobs:
 
       - name: Publica o relatório de cobertura
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage
           path: coverage/lcov-report
