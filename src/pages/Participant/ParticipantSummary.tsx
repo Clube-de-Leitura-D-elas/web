@@ -12,6 +12,7 @@ type ParticipantSummaryProps = {
   savingStatus: boolean;
   statusError: string | null;
   onToggleActive: () => void;
+  onEdit: () => void;
 };
 
 export const ParticipantSummary = ({
@@ -19,6 +20,7 @@ export const ParticipantSummary = ({
   savingStatus,
   statusError,
   onToggleActive,
+  onEdit,
 }: ParticipantSummaryProps) => (
   <Styled.ProfileArea>
     <Styled.Avatar aria-hidden>
@@ -39,6 +41,10 @@ export const ParticipantSummary = ({
           {participant.active
             ? locale.participant_details.status.deactivate
             : locale.participant_details.status.activate}
+        </Button>
+
+        <Button variant="primary" size="sm" onClick={onEdit}>
+          {locale.participant_details.editButton}
         </Button>
       </Styled.StatusArea>
 
