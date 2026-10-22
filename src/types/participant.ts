@@ -12,6 +12,7 @@ export type Participant = {
   city: string | null;
   zone: string | null;
   appRole: ParticipantAppRole;
+  entryDate: string | null;
 };
 
 export type ParticipantGroup = {
@@ -19,6 +20,7 @@ export type ParticipantGroup = {
   number: number;
   city: string | null;
   isCoordinator: boolean;
+  entryDate: string | null;
 };
 
 export type ParticipantGroupsPage = {
