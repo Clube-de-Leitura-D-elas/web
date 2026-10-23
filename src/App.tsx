@@ -7,6 +7,7 @@ import { ParticipantDetails } from './pages/Participant';
 import { Participants } from './pages/Participants';
 import { GroupDetails } from './pages/Group';
 import { Groups } from './pages/Groups';
+import { EventDetails } from './pages/Event';
 
 export const App = () => (
   <Routes>
@@ -17,6 +18,7 @@ export const App = () => (
         <Route path="/participantes/:participantId" element={<ParticipantDetails />} />
         <Route path="/grupos" element={<Groups />} />
         <Route path="/grupos/:groupId" element={<GroupDetails />} />
+        <Route path="/eventos/:eventId" element={<EventDetails />} />
       </Route>
     </Route>
 
