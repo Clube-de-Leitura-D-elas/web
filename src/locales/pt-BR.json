@@ -115,6 +115,23 @@
       "occupation": "Trabalho"
     }
   },
+  "event_details": {
+    "loading": "Carregando evento...",
+    "back": "Voltar para grupo",
+    "groupLink": "Ver grupo",
+    "comingSoon": "Em breve",
+    "header": {
+      "subtitle": "{{city}} • {{dateTime}}"
+    },
+    "notFoundTitle": "Evento não encontrado.",
+    "notFoundDescription": "O evento não existe ou você não tem permissão para vê-lo",
+    "sections": {
+      "participation": "Participação",
+      "book": "Livro",
+      "placeAndHost": "Local e anfitriã",
+      "photos": "Fotos do evento"
+    }
+  },
   "participants": {
     "title": "Participantes",
     "subtitle": "{{groups}} em {{cities}}",
