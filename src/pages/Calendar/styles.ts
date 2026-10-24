@@ -111,3 +111,50 @@ export const DayNumber = styled.span<{
 
   background-color: ${({ $today }) => ($today ? theme.textBrand : 'transparent')};
 `;
+
+export const Feedback = styled.div`
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: ${theme.textMuted};
+  flex-shrink: 0;
+`;
+
+export const EventsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.375rem;
+  min-width: 0;
+  overflow: hidden;
+`;
+
+export const EventItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  font-size: 0.75rem;
+  color: ${theme.text};
+`;
+
+export const EventDot = styled.span`
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: ${theme.textBrand};
+  flex-shrink: 0;
+`;
+
+export const EventText = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+`;
+
+export const MoreEvents = styled.span`
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: ${theme.textBrand};
+`;

@@ -19,6 +19,4 @@ export type CalendarMonthResponse = {
   rangeStart: string;
   rangeEnd: string;
   days: CalendarDay[];
-  updatedSince?: string;
-  deletedEventIds?: string[];
 };

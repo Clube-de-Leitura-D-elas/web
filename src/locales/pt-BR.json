@@ -292,6 +292,9 @@
       "thursday": "QUI.",
       "friday": "SEX.",
       "saturday": "SÁB."
-    }
+    },
+    "loading": "Carregando encontros...",
+    "loadError": "Não foi possível carregar os encontros.",
+    "moreEvents": "+{{count}} mais"
   }
 }
