@@ -13,6 +13,7 @@ export type GroupDetails = {
   number: number;
   description: string;
   city: string | null;
+  zone: string | null;
   is_active: boolean;
   active_participants_count: number;
   coordinator_name: string | null;
@@ -40,4 +41,21 @@ export type GroupMeetingHistoryItem = {
   attendance_total: number;
   average_rating: number | null;
   votes_count: number;
+};
+
+export type UpdateGroupLocationInput = {
+  description: string;
+  city_id: string;
+  zone_id: string | null;
+};
+
+export type GroupOption = {
+  id: string;
+  name: string;
+};
+
+export type GroupFormValues = {
+  description: string;
+  city_id: string;
+  zone_id: string | null;
 };
