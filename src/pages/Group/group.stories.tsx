@@ -24,6 +24,7 @@ const group: GroupDetailsData = {
   number: 3,
   description: 'Quinta à noite',
   city: 'Porto Alegre',
+  zone: '',
   is_active: true,
   active_participants_count: 8,
   coordinator_name: 'Joseane Alves',
