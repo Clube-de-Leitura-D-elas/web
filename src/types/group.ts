@@ -17,6 +17,7 @@ export type GroupDetails = {
   active_participants_count: number;
   coordinator_name: string | null;
   coordinator_email: string | null;
+  coordinator_photo: string | null;
   next_meeting: GroupNextMeeting | null;
 };
 
