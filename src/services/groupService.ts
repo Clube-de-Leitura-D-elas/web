@@ -3,12 +3,15 @@ import type { TablePageRequest } from '../components/Table';
 import type {
   GroupDetails,
   GroupMeetingHistoryItem,
+  GroupOption,
   GroupParticipantListItem,
+  UpdateGroupLocationInput,
 } from '../types/group';
 import type { Page } from '../types/participantList';
 import { GroupServiceError } from './groupErrors';
 import { invokeGet } from './invokeGet';
 import { supabase } from './supabaseClient';
+import { locale } from '../locales';
 
 export function getGroupDetails(groupId: string): Promise<GroupDetails> {
   return invokeGet('get-group-details-web', { groupId });
@@ -74,4 +77,52 @@ export async function createGroup(payload: CreateGroupPayload): Promise<CreateGr
   if (!data) throw new Error('create-group returned no data');
 
   return data;
+}
+
+async function getOptions(table: 'cities' | 'zones'): Promise<GroupOption[]> {
+  const { data, error } = await supabase.from(table).select('id, name').order('name');
+  if (error) throw error;
+
+  return (data ?? []) as GroupOption[];
+}
+
+export const getGroupCities = () => getOptions('cities');
+
+export const getGroupZones = () => getOptions('zones');
+
+// Extrai a mensagem `{ error: "..." }` devolvida pela edge function, quando existir.
+async function readFunctionErrorMessage(error: unknown): Promise<string | null> {
+  if (!(error instanceof FunctionsHttpError)) return null;
+
+  try {
+    const body = await error.context.json();
+    return typeof body?.error === 'string' && body.error ? body.error : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateGroupLocation(
+  groupId: string,
+  input: UpdateGroupLocationInput,
+): Promise<void> {
+  const { data, error } = await supabase.functions.invoke('update-group-location-web', {
+    body: {
+      group_id: groupId,
+      description: input.description,
+      city_id: input.city_id,
+      zone_id: input.zone_id,
+    },
+  });
+
+  if (error) {
+    console.error('update-group-location-web error', error);
+    throw new Error(
+      (await readFunctionErrorMessage(error)) ?? locale.group_details.modal.modalError,
+    );
+  }
+
+  if (!data) {
+    throw new Error(locale.group_details.modal.modalError);
+  }
 }

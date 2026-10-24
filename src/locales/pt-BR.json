@@ -240,8 +240,9 @@
     "loadError": "Não foi possível carregar os dados do grupo.",
     "notInformed": "—",
     "header": {
+      "tittle": "Grupo {{number}} — {{description}}",
       "subtitle": "{{city}} • {{count}} participantes ativas",
-      "editGroup": "Editar Grupo",
+      "editLocation": "Editar Localização",
       "closeGroup": "Encerrar Grupo",
       "reopenGroup": "Reativar Grupo"
     },
@@ -299,6 +300,19 @@
         "rating": "AVALIAÇÃO MÉDIA",
         "actions": "AÇÕES"
       }
+    },
+    "modal": {
+      "title": "Editar Localização",
+      "description": "Altere a localização do grupo {{name}}",
+      "city": "Cidade",
+      "placeCity": "Selecione a cidade",
+      "zone": "Zona",
+      "placeZone": "Selecione a zona",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "requiredHint": "Selecione uma cidade da lista para salvar.",
+      "modalError": "Não foi possível atualizar a localização do grupo. Tente novamente.",
+      "optionsError": "Não foi possível carregar as cidades e zonas."
     }
   }
 }
