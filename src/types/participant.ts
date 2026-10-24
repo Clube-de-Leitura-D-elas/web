@@ -10,6 +10,7 @@ export type Participant = {
   city: string | null;
   zone: string | null;
   entryDate: string | null;
+  photo: string | null;
 };
 
 export type ParticipantGroup = {

@@ -13,6 +13,7 @@ type ParticipantResponse = {
   city: string | null;
   zone: string | null;
   created_at?: string | null;
+  photo: string | null;
 };
 
 type ParticipantGroupsResponse = {
@@ -58,6 +59,7 @@ export async function getParticipantById(participantId: string): Promise<Partici
     city: data.city,
     zone: data.zone,
     entryDate: data.created_at ?? null,
+    photo: data.photo ?? null,
   };
 }
 
