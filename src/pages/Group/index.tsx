@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router';
-import { LuCalendar, LuMapPin, LuStar } from 'react-icons/lu';
+import { LuCalendar, LuMapPin, LuStar, LuUserRound } from 'react-icons/lu';
 import { BackButton } from '../../components/BackButton';
 import * as Styled from './styles';
 import { GroupModal } from './GroupModal';
@@ -65,12 +65,6 @@ const formatNextMeetingDate = (iso: string) => {
   const formattedTime = minute === '00' ? `${hour}h` : `${hour}h${minute}`;
   const [d, , month] = day.split(' ');
   return `${d} de ${month.charAt(0).toUpperCase()}${month.slice(1)}, ${formattedTime}`;
-};
-
-const getInitials = (name: string | null) => {
-  if (!name) return '';
-  const [first, second] = name.trim().split(' ');
-  return `${first?.[0] ?? ''}${second?.[0] ?? ''}`.toUpperCase();
 };
 
 export const GroupDetails = () => {
@@ -427,7 +421,13 @@ export const GroupDetails = () => {
         <Styled.Card>
           <Styled.CardLabel>{locale.group_details.coordinator.label}</Styled.CardLabel>
           <Styled.CoordinatorRow>
-            <Styled.Avatar>{getInitials(group.coordinator_name)}</Styled.Avatar>
+            <Styled.Avatar aria-hidden>
+              {group.coordinator_photo ? (
+                <img src={group.coordinator_photo} alt="" />
+              ) : (
+                <LuUserRound />
+              )}
+            </Styled.Avatar>
             <Styled.CoordinatorInfo>
               <Styled.CardValue>
                 {group.coordinator_name || locale.group_details.notInformed}

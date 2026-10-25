@@ -246,6 +246,17 @@ export const Avatar = styled.div`
   color: ${theme.textBrand};
   font-size: 0.85rem;
   font-weight: 700;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  svg {
+    width: 1.5rem;
+    height: 3rem;
+  }
 `;
 
 export const CoordinatorInfo = styled.div`

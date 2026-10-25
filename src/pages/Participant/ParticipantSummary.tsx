@@ -22,7 +22,7 @@ export const ParticipantSummary = ({
 }: ParticipantSummaryProps) => (
   <Styled.ProfileArea>
     <Styled.Avatar aria-hidden>
-      <LuUserRound />
+      {participant.photo ? <img src={participant.photo} alt="" /> : <LuUserRound />}
     </Styled.Avatar>
 
     <Styled.ProfileInfo>

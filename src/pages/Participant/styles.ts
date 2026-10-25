@@ -83,6 +83,13 @@ export const Avatar = styled.div`
   background-color: ${theme.surfaceBrandSoft};
   color: ${theme.textBrand};
 
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
   svg {
     width: 3rem;
     height: 3rem;
