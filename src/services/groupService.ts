@@ -41,7 +41,6 @@ export const updateGroupStatus = async (groupId: string, isActive: boolean): Pro
 };
 
 export type CreateGroupPayload = {
-  name: string;
   cityId: string;
   coordinatorId: string | null;
 };

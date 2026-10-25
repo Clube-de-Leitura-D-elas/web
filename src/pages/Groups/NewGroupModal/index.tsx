@@ -5,6 +5,7 @@ import { Dropdown } from '../../../components/Dropdown';
 import { Input } from '../../../components/Input';
 import { Modal } from '../../../components/Modal';
 import { useLocale } from '../../../hooks/useLocale';
+import { interpolate } from '../../../locales';
 import { GroupServiceError } from '../../../services/groupErrors';
 import {
   getGroupFormOptions,
@@ -15,14 +16,12 @@ import { createGroup } from '../../../services/groupService';
 
 import * as Styled from './styles';
 
-const GROUP_NUMBER = /^(?:grupo\s*)?0*[1-9]\d{0,8}$/i;
-
 type CreateGroupRequest = typeof createGroup;
-type LoadOptionsRequest = () => Promise<[CityOrZoneOption[], CoordinatorOption[]]>;
+type LoadOptionsRequest = () => Promise<[CityOrZoneOption[], CoordinatorOption[], number]>;
 
 const loadOptions = async (): ReturnType<LoadOptionsRequest> => {
-  const { citiesAndZones, coordinators } = await getGroupFormOptions();
-  return [citiesAndZones, coordinators];
+  const { citiesAndZones, coordinators, nextGroupNumber } = await getGroupFormOptions();
+  return [citiesAndZones, coordinators, nextGroupNumber];
 };
 
 export type NewGroupModalProps = {
@@ -66,7 +65,7 @@ const NewGroupForm = ({
   const text = useLocale().groups.newGroupModal;
   const nameId = useId();
 
-  const [name, setName] = useState('');
+  const [nextGroupNumber, setNextGroupNumber] = useState<number | null>(null);
   const [cityId, setCityId] = useState('');
   const [coordinatorId, setCoordinatorId] = useState('');
 
@@ -83,12 +82,13 @@ const NewGroupForm = ({
 
     const load = async () => {
       try {
-        const [citiesAndZones, coordinators] = await loadOptionsRequest();
+        const [citiesAndZones, coordinators, number] = await loadOptionsRequest();
 
         if (!active) return;
 
         setCityOptions(citiesAndZones);
         setCoordinatorOptions(coordinators);
+        setNextGroupNumber(number);
         setLoadError(null);
       } catch (error) {
         console.error('new-group options loading error', error);
@@ -110,14 +110,9 @@ const NewGroupForm = ({
     };
   }, [loadOptionsRequest, text.errors.loadOptions]);
 
-  const trimmedName = name.trim();
-  const isGroupNumberValid = GROUP_NUMBER.test(trimmedName);
-
-  const nameError = trimmedName !== '' && !isGroupNumberValid ? text.name.invalid : undefined;
-
   const validCity = cityOptions.some((option) => option.value === cityId);
 
-  const canSave = isGroupNumberValid && validCity && !isLoading && !loadError && !isSaving;
+  const canSave = nextGroupNumber !== null && validCity && !isLoading && !loadError && !isSaving;
 
   const handleSave = async () => {
     if (!canSave) return;
@@ -127,7 +122,6 @@ const NewGroupForm = ({
 
     try {
       await createGroupRequest({
-        name: trimmedName,
         cityId,
         coordinatorId: coordinatorId || null,
       });
@@ -161,13 +155,16 @@ const NewGroupForm = ({
         <Input
           id={nameId}
           label={text.name.label}
-          placeholder={text.name.placeholder}
+          placeholder={text.name.loading}
           helperText={text.name.helperText}
-          error={nameError}
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          required
-          data-autofocus
+          value={
+            nextGroupNumber === null
+              ? ''
+              : interpolate(text.name.template, {
+                  number: String(nextGroupNumber).padStart(2, '0'),
+                })
+          }
+          disabled
           fullWidth
         />
 
