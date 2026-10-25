@@ -11,6 +11,11 @@ export type GroupCity = {
   name: string;
 };
 
+export type GroupZone = {
+  id: string;
+  name: string;
+};
+
 export type GroupListItem = {
   id: string;
   number: number;

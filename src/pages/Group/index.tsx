@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 import { LuCalendar, LuMapPin, LuStar } from 'react-icons/lu';
 import { BackButton } from '../../components/BackButton';
 import * as Styled from './styles';
+import { GroupModal } from './GroupModal';
 import { Modal } from '../../components/Modal';
 import { Tabs } from '../../components/Tab';
 import {
@@ -14,14 +15,19 @@ import {
 import { useLocale } from '../../hooks/useLocale';
 import { interpolate } from '../../locales';
 import {
+  getGroupCities,
   getGroupDetails,
   getGroupMeetingsPage,
   getGroupParticipantsPage,
+  getGroupZones,
+  updateGroupLocation,
   updateGroupStatus,
 } from '../../services/groupService';
 import type {
   GroupDetails as GroupDetailsData,
+  GroupFormValues,
   GroupMeetingHistoryItem,
+  GroupOption,
   GroupParticipantListItem,
 } from '../../types/group';
 
@@ -77,6 +83,13 @@ export const GroupDetails = () => {
   const [activeTab, setActiveTab] = useState<GroupDetailsTab>('participants');
   const [result, setResult] = useState<{ id: string; group: GroupDetailsData | null } | null>(null);
 
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [savingLocation, setSavingLocation] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [cities, setCities] = useState<GroupOption[]>([]);
+  const [zones, setZones] = useState<GroupOption[]>([]);
+  const [optionsError, setOptionsError] = useState(false);
+
   useEffect(() => {
     let ignore = false;
 
@@ -94,12 +107,83 @@ export const GroupDetails = () => {
     };
   }, [groupId]);
 
+  useEffect(() => {
+    let ignore = false;
+
+    Promise.all([getGroupCities(), getGroupZones()])
+      .then(([citiesData, zonesData]) => {
+        if (ignore) return;
+
+        setCities(citiesData);
+        setZones(zonesData);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!ignore) setOptionsError(true);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   const loading = result?.id !== groupId;
   const group = result?.group ?? null;
 
   const handleOpenModal = () => {
     setStatusError(null);
     setIsCloseModalOpen(true);
+  };
+
+  const handleOpenLocationModal = () => {
+    setLocationError(null);
+    setIsLocationModalOpen(true);
+  };
+
+  const handleCloseLocationModal = () => {
+    // Com um envio em andamento não dá para cancelar; evita perder o resultado/erro.
+    if (savingLocation) return;
+
+    setLocationError(null);
+    setIsLocationModalOpen(false);
+  };
+
+  const handleUpdateLocation = async (values: GroupFormValues) => {
+    if (!group || savingLocation) return;
+
+    setSavingLocation(true);
+    setLocationError(null);
+
+    try {
+      await updateGroupLocation(groupId, values);
+
+      // Deu certo: atualiza a página e só então fecha o modal.
+      const city = cities.find((option) => option.id === values.city_id);
+      const zone = zones.find((option) => option.id === values.zone_id);
+
+      setResult((prev) =>
+        prev && prev.group
+          ? {
+              ...prev,
+              group: {
+                ...prev.group,
+                description: values.description,
+                city: city?.name ?? prev.group.city,
+                zone: zone?.name ?? null,
+              },
+            }
+          : prev,
+      );
+      setIsLocationModalOpen(false);
+    } catch (err) {
+      // Deu erro: mantém o modal aberto e mostra a mensagem.
+      console.error(err);
+      setLocationError(
+        err instanceof Error && err.message ? err.message : locale.group_details.modal.modalError,
+      );
+    } finally {
+      setSavingLocation(false);
+    }
   };
 
   const handleToggleStatus = async () => {
@@ -308,6 +392,10 @@ export const GroupDetails = () => {
 
   const meeting = group.next_meeting;
   const isActive = group.is_active;
+  const groupName = interpolate(locale.group_details.header.tittle, {
+    number: String(group.number).padStart(2, '0'),
+    description: group.description,
+  });
 
   return (
     <Styled.Container>
@@ -315,12 +403,7 @@ export const GroupDetails = () => {
 
       <Styled.Header>
         <Styled.HeaderInfo>
-          <Styled.Title>
-            {interpolate(locale.groups.table.groupName, {
-              number: String(group.number).padStart(2, '0'),
-              description: group.description,
-            })}
-          </Styled.Title>
+          <Styled.Title>{groupName}</Styled.Title>
           <Styled.Subtitle>
             {interpolate(locale.group_details.header.subtitle, {
               city: group.city || locale.group_details.notInformed,
@@ -329,8 +412,8 @@ export const GroupDetails = () => {
           </Styled.Subtitle>
         </Styled.HeaderInfo>
         <Styled.HeaderActions>
-          <Styled.EditButton size="md" variant="secondary">
-            {locale.group_details.header.editGroup}
+          <Styled.EditButton size="md" variant="secondary" onClick={handleOpenLocationModal}>
+            {locale.group_details.header.editLocation}
           </Styled.EditButton>
           <Styled.CloseButton size="md" variant="secondary" onClick={handleOpenModal}>
             {isActive
@@ -405,6 +488,18 @@ export const GroupDetails = () => {
         active={activeTab}
         onChange={(value) => setActiveTab(value as GroupDetailsTab)}
         size="lg"
+      />
+
+      <GroupModal
+        isOpen={isLocationModalOpen}
+        group={group}
+        groupName={groupName}
+        cities={cities}
+        zones={zones}
+        onClose={handleCloseLocationModal}
+        onConfirm={handleUpdateLocation}
+        saving={savingLocation}
+        error={locationError ?? (optionsError ? locale.group_details.modal.optionsError : null)}
       />
 
       <Modal
