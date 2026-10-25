@@ -145,6 +145,9 @@ export const ParticipantLink = styled(Link)`
   ${focusRing}
 `;
 
+// mesmo visual do link de participante, usado na data do histórico de encontros
+export const MeetingLink = styled(ParticipantLink)``;
+
 export const AttendanceList = styled.div`
   display: flex;
   justify-content: center;

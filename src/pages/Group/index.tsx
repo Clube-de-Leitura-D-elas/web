@@ -223,7 +223,7 @@ export const GroupDetails = () => {
             : 0;
 
         return {
-          date,
+          date: <Styled.MeetingLink to={`/eventos/${m.id}`}>{date}</Styled.MeetingLink>,
           book: interpolate(locale.group_details.history.book, {
             title: m.book_title,
             author: m.book_author,
