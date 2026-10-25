@@ -130,6 +130,11 @@
       "book": "Livro",
       "placeAndHost": "Local e anfitriã",
       "photos": "Fotos do evento"
+    },
+    "book": {
+      "empty": "O livro ainda não foi escolhido.",
+      "coverAlt": "Capa do livro {{title}}",
+      "coverUnavailable": "Capa do livro indisponível"
     }
   },
   "participants": {
