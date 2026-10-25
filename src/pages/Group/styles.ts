@@ -136,12 +136,6 @@ export const ParticipantLink = styled(Link)`
   font-weight: 600;
   color: ${theme.text};
   text-decoration: none;
-
-  &:hover {
-    color: ${theme.textBrand};
-    text-decoration: underline;
-  }
-
   ${focusRing}
 `;
 

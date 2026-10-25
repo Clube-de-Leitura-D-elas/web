@@ -78,17 +78,6 @@ export const FiltersBar = styled.section`
 export const TableContainer = styled.div`
   width: 100%;
   overflow-x: auto;
-
-  table {
-    tbody tr {
-      cursor: pointer;
-      transition: background-color 0.15s ease;
-
-      &:hover {
-        background-color: ${theme.surfaceSunken};
-      }
-    }
-  }
 `;
 
 export const GroupInfo = styled.div`

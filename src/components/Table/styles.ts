@@ -64,14 +64,28 @@ export const HeaderCell = styled.th<{ $align: TableAlign }>`
   `}
 `;
 
-export const Row = styled.tr`
-  ${({ theme }) => css`
-    background-color: ${theme.background};
+export const Row = styled.tr<{ $clickable?: boolean }>`
+  ${({ theme, $clickable }) => css`
+   background-color: ${theme.background};
 
-    &:nth-child(even) {
-      background-color: ${theme.backgroundSubtle};
-    }
-  `}
+   &:nth-child(even) {
+     background-color: ${theme.backgroundSubtle};
+   }
+   ${
+         $clickable &&
+         css`
+           cursor: pointer;
+
+           &:hover {
+             background-color: ${theme.surfaceSunken};
+           }
+           &:focus-visible {
+             outline: 0.125rem solid ${theme.primary};
+             outline-offset: -0.125rem;
+           }
+         `
+       }
+ `}
 `;
 
 export const Cell = styled.td<{ $align: TableAlign }>`

@@ -122,10 +122,6 @@ export const ParticipantLink = styled(Link)`
   color: ${theme.text};
   white-space: nowrap;
   text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
 `;
 
 export const Contact = styled.div`

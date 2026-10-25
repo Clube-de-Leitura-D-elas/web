@@ -165,6 +165,7 @@ export const Groups = () => {
           ) : (
             <Tag color="error">{locale.groups.table.statusClosed}</Tag>
           ),
+        rowHref: `/grupos/${group.id}`,
       }));
 
       return { rows, total };

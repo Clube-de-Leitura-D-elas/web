@@ -213,6 +213,7 @@ export const GroupDetails = () => {
         label: locale.group_details.table.columns.actions,
         align: 'right',
         width: '6rem',
+        ignoreRowClick: true,
       },
     ],
     [locale],
@@ -264,6 +265,7 @@ export const GroupDetails = () => {
             ⋮
           </Styled.ActionsButton>
         ),
+        rowHref: `/participantes/${p.id}`,
       }));
 
       return { rows, total };
@@ -284,6 +286,7 @@ export const GroupDetails = () => {
         label: locale.group_details.history.columns.actions,
         align: 'right',
         width: '6rem',
+        ignoreRowClick: true,
       },
     ],
     [locale],
@@ -339,6 +342,7 @@ export const GroupDetails = () => {
               ⋮
             </Styled.ActionsButton>
           ),
+          rowHref: `/eventos/${m.id}`,
         };
       });
 

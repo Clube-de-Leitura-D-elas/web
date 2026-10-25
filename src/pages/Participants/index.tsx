@@ -126,6 +126,7 @@ export const Participants = () => {
                 : locale.participants.table.statusInactive}
             </Styled.StatusBadge>
           ),
+          rowHref: `/participantes/${p.id}`,
         };
       });
 
