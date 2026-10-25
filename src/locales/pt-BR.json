@@ -331,5 +331,21 @@
       "modalError": "Não foi possível atualizar a localização do grupo. Tente novamente.",
       "optionsError": "Não foi possível carregar as cidades e zonas."
     }
+  },
+  "calendar": {
+    "title": "Calendário",
+    "subtitle": "Visualize os encontros de todos os grupos do clube.",
+    "weekdays": {
+      "sunday": "DOM.",
+      "monday": "SEG.",
+      "tuesday": "TER.",
+      "wednesday": "QUA.",
+      "thursday": "QUI.",
+      "friday": "SEX.",
+      "saturday": "SÁB."
+    },
+    "loading": "Carregando encontros...",
+    "loadError": "Não foi possível carregar os encontros.",
+    "moreEvents": "+{{count}} mais"
   }
 }

@@ -7,6 +7,7 @@ import { ParticipantDetails } from './pages/Participant';
 import { Participants } from './pages/Participants';
 import { GroupDetails } from './pages/Group';
 import { Groups } from './pages/Groups';
+import { Calendar } from './pages/Calendar';
 import { EventDetails } from './pages/Event';
 
 export const App = () => (
@@ -18,6 +19,7 @@ export const App = () => (
         <Route path="/participantes/:participantId" element={<ParticipantDetails />} />
         <Route path="/grupos" element={<Groups />} />
         <Route path="/grupos/:groupId" element={<GroupDetails />} />
+        <Route path="/calendario" element={<Calendar />} />
         <Route path="/eventos/:eventId" element={<EventDetails />} />
       </Route>
     </Route>
