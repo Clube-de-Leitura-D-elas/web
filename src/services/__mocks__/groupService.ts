@@ -10,4 +10,7 @@ export const getGroupParticipantsPage = fn<typeof actual.getGroupParticipantsPag
 export const getGroupMeetingsPage =
   fn<typeof actual.getGroupMeetingsPage>().mockName('getGroupMeetingsPage');
 
+export const updateGroupStatus =
+  fn<typeof actual.updateGroupStatus>().mockName('updateGroupStatus');
+
 export const createGroup = fn<typeof actual.createGroup>().mockName('createGroup');

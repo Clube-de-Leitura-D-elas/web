@@ -9,6 +9,7 @@ export type Participant = {
   active: boolean;
   city: string | null;
   zone: string | null;
+  entryDate: string | null;
 };
 
 export type ParticipantGroup = {
@@ -16,6 +17,7 @@ export type ParticipantGroup = {
   number: number;
   city: string | null;
   isCoordinator: boolean;
+  entryDate: string | null;
 };
 
 export type ParticipantGroupsPage = {

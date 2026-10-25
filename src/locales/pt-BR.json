@@ -35,6 +35,9 @@
     "showPassword": "Mostrar senha",
     "hidePassword": "Ocultar senha"
   },
+  "autocomplete": {
+    "noResults": "Nenhuma opção encontrada"
+  },
   "login": {
     "brand": {
       "logoAlt": "Clube de Leitura D'Elas",
@@ -90,9 +93,11 @@
     },
     "groups": {
       "itemLabel": "grupos",
+      "emptyValue": "—",
       "columns": {
         "name": "Grupo",
         "status": "Função",
+        "entryDate": "Data de Entrada",
         "city": "Cidade"
       },
       "roles": {
@@ -106,7 +111,25 @@
       "city": "Cidade",
       "zone": "Zona",
       "birthday": "Aniversário",
+      "entryDate": "Data de Entrada no Sistema",
       "occupation": "Trabalho"
+    }
+  },
+  "event_details": {
+    "loading": "Carregando evento...",
+    "back": "Voltar para grupo",
+    "groupLink": "Ver grupo",
+    "comingSoon": "Em breve",
+    "header": {
+      "subtitle": "{{city}} • {{dateTime}}"
+    },
+    "notFoundTitle": "Evento não encontrado.",
+    "notFoundDescription": "O evento não existe ou você não tem permissão para vê-lo",
+    "sections": {
+      "participation": "Participação",
+      "book": "Livro",
+      "placeAndHost": "Local e anfitriã",
+      "photos": "Fotos do evento"
     }
   },
   "participants": {
@@ -192,7 +215,10 @@
       },
       "city": {
         "label": "Cidade ou Zona *",
-        "placeholder": "Ex: Porto Alegre"
+        "placeholder": "Ex: Porto Alegre",
+        "noResults": "Cidade não encontrada",
+        "loading": "Carregando cidades...",
+        "loadError": "Não foi possível carregar as cidades."
       },
       "coordinator": {
         "label": "Coordenadora inicial",
@@ -226,15 +252,27 @@
     }
   },
   "group_details": {
-    "back": "Voltar para Grupos",
+    "back": "Voltar para grupos",
     "loading": "Carregando grupo...",
     "loadError": "Não foi possível carregar os dados do grupo.",
     "notInformed": "—",
     "header": {
+      "tittle": "Grupo {{number}} — {{description}}",
       "subtitle": "{{city}} • {{count}} participantes ativas",
-      "editGroup": "Editar Grupo",
-      "closeGroup": "Encerrar Grupo"
+      "editLocation": "Editar Localização",
+      "closeGroup": "Encerrar Grupo",
+      "reopenGroup": "Reativar Grupo"
     },
+    "statusModal": {
+      "closeTitle": "Encerrar grupo?",
+      "closeDescription": "Ao encerrar o grupo, os participantes não poderão mais registrar novos encontros ou interagir nele.",
+      "closeConfirm": "Encerrar Grupo",
+      "reopenTitle": "Reativar grupo?",
+      "reopenDescription": "Ao reativar o grupo, as atividades e encontros voltarão a ficar disponíveis.",
+      "reopenConfirm": "Reativar Grupo",
+      "cancel": "Cancelar"
+    },
+    "updateStatusError": "Não foi possível atualizar o status do grupo. Tente novamente.",
     "coordinator": {
       "label": "Coordenadora Responsável",
       "change": "Trocar"
@@ -279,6 +317,19 @@
         "rating": "AVALIAÇÃO MÉDIA",
         "actions": "AÇÕES"
       }
+    },
+    "modal": {
+      "title": "Editar Localização",
+      "description": "Altere a localização do grupo {{name}}",
+      "city": "Cidade",
+      "placeCity": "Selecione a cidade",
+      "zone": "Zona",
+      "placeZone": "Selecione a zona",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "requiredHint": "Selecione uma cidade da lista para salvar.",
+      "modalError": "Não foi possível atualizar a localização do grupo. Tente novamente.",
+      "optionsError": "Não foi possível carregar as cidades e zonas."
     }
   },
   "calendar": {

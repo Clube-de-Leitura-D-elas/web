@@ -1,5 +1,6 @@
 import { interpolate, locale } from '../../locales';
 import type { Participant, ParticipantPresence } from '../../types/participant';
+import { formatEntryDate } from '../../utils/date';
 
 import * as Styled from './styles';
 
@@ -54,15 +55,23 @@ export const ParticipantInfoGrid = ({ participant, presence }: ParticipantInfoGr
       <Styled.Detail>
         <Styled.DetailLabel>{locale.participant_details.details.zone}</Styled.DetailLabel>
 
+        <Styled.DetailValue>{formatBirthDate(participant.birthDate)}</Styled.DetailValue>
+      </Styled.Detail>
+
+      <Styled.Detail>
+        <Styled.DetailLabel>{locale.participant_details.details.entryDate}</Styled.DetailLabel>
+
         <Styled.DetailValue>
-          {participant.zone ?? locale.participant_details.notInformed}
+          {formatEntryDate(participant.entryDate) || locale.participant_details.notInformed}
         </Styled.DetailValue>
       </Styled.Detail>
 
       <Styled.Detail>
-        <Styled.DetailLabel>{locale.participant_details.details.birthday}</Styled.DetailLabel>
+        <Styled.DetailLabel>{locale.participant_details.details.zone}</Styled.DetailLabel>
 
-        <Styled.DetailValue>{formatBirthDate(participant.birthDate)}</Styled.DetailValue>
+        <Styled.DetailValue>
+          {participant.zone ?? locale.participant_details.notInformed}
+        </Styled.DetailValue>
       </Styled.Detail>
 
       <Styled.Detail>

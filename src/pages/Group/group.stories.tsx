@@ -7,6 +7,7 @@ import {
   getGroupDetails,
   getGroupMeetingsPage,
   getGroupParticipantsPage,
+  updateGroupStatus,
 } from '../../services/groupService';
 import type {
   GroupDetails as GroupDetailsData,
@@ -23,6 +24,7 @@ const group: GroupDetailsData = {
   number: 3,
   description: 'Quinta à noite',
   city: 'Porto Alegre',
+  zone: '',
   is_active: true,
   active_participants_count: 8,
   coordinator_name: 'Joseane Alves',
@@ -241,6 +243,7 @@ const meta = {
 
   beforeEach: () => {
     mocked(getGroupDetails).mockResolvedValue(group);
+    mocked(updateGroupStatus).mockResolvedValue(false);
 
     mocked(getGroupParticipantsPage).mockImplementation(async (_groupId, { page, pageSize }) => {
       await wait(REQUEST_DELAY);
@@ -283,5 +286,21 @@ export const EmptyParticipants: Story = {
 export const EmptyHistory: Story = {
   beforeEach: () => {
     mocked(getGroupMeetingsPage).mockResolvedValue({ items: [], total: 0 });
+  },
+};
+
+export const Inactive: Story = {
+  beforeEach: () => {
+    mocked(getGroupDetails).mockResolvedValue({
+      ...group,
+      is_active: false,
+    });
+    mocked(updateGroupStatus).mockResolvedValue(true);
+  },
+};
+
+export const UpdateStatusError: Story = {
+  beforeEach: () => {
+    mocked(updateGroupStatus).mockRejectedValue(new Error('Erro ao atualizar status'));
   },
 };
