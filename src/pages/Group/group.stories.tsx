@@ -29,6 +29,7 @@ const group: GroupDetailsData = {
   active_participants_count: 8,
   coordinator_name: 'Joseane Alves',
   coordinator_email: 'joseane.alves@email.com',
+  coordinator_photo: null,
   next_meeting: {
     date: '2024-08-24T22:30:00Z',
     book_title: 'A Hora da Estrela',
