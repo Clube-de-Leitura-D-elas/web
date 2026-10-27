@@ -1,4 +1,4 @@
-import { formatMeetingDate, formatMonthYear } from './date';
+import { formatEntryDate, formatMeetingDate, formatMonthYear } from './date';
 
 // O jest.config.js fixa o fuso em America/Sao_Paulo (UTC-3).
 
@@ -32,5 +32,22 @@ describe('formatMeetingDate', () => {
 
   it('devolve texto vazio para data inválida', () => {
     expect(formatMeetingDate('')).toBe('');
+  });
+});
+
+describe('formatEntryDate', () => {
+  it('mostra a data sem hora como o próprio dia, sem mudar de fuso', () => {
+    // a API já devolve o dia civil de São Paulo
+    expect(formatEntryDate('2024-03-01')).toBe('01/03/2024');
+  });
+
+  it('converte o timestamp para o dia em São Paulo', () => {
+    // 16/03 às 01h30 UTC ainda é 15/03 em São Paulo
+    expect(formatEntryDate('2025-03-16T01:30:00Z')).toBe('15/03/2025');
+  });
+
+  it('devolve texto vazio quando não há data ou ela é inválida', () => {
+    expect(formatEntryDate(null)).toBe('');
+    expect(formatEntryDate('não é data')).toBe('');
   });
 });
