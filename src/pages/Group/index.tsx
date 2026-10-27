@@ -22,6 +22,7 @@ import {
   getGroupZones,
   updateGroupLocation,
   updateGroupStatus,
+  updateGroupParticipant,
 } from '../../services/groupService';
 import type {
   GroupDetails as GroupDetailsData,
@@ -75,6 +76,13 @@ export const GroupDetails = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<GroupDetailsTab>('participants');
+  const [participantsVersion, setParticipantsVersion] = useState(0);
+  const [selectedParticipant, setSelectedParticipant] = useState<GroupParticipantListItem | null>(
+    null,
+  );
+  const [participantAction, setParticipantAction] = useState<'promote' | 'remove' | null>(null);
+  const [savingParticipant, setSavingParticipant] = useState(false);
+  const [participantError, setParticipantError] = useState<string | null>(null);
   const [result, setResult] = useState<{ id: string; group: GroupDetailsData | null } | null>(null);
 
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
@@ -201,6 +209,25 @@ export const GroupDetails = () => {
     }
   };
 
+  const confirmParticipantAction = async () => {
+    if (!selectedParticipant || !participantAction || savingParticipant) return;
+    setSavingParticipant(true);
+    setParticipantError(null);
+    try {
+      await updateGroupParticipant(groupId, selectedParticipant.id, participantAction);
+      const updatedGroup = await getGroupDetails(groupId);
+      setResult({ id: groupId, group: updatedGroup });
+      setParticipantsVersion((version) => version + 1);
+      setSelectedParticipant(null);
+      setParticipantAction(null);
+    } catch (err) {
+      console.error(err);
+      setParticipantError(locale.group_details.participantActions.error);
+    } finally {
+      setSavingParticipant(false);
+    }
+  };
+
   //aba 1
   const participantColumns: TableColumn[] = useMemo(
     () => [
@@ -220,6 +247,7 @@ export const GroupDetails = () => {
 
   const fetchParticipants = useCallback(
     async (request: TablePageRequest): Promise<TablePage> => {
+      void participantsVersion;
       const { items, total } = await getGroupParticipantsPage(groupId, request);
 
       const rows = items.map((p: GroupParticipantListItem) => ({
@@ -257,18 +285,50 @@ export const GroupDetails = () => {
         ),
         email: p.email || locale.group_details.table.emptyValue,
         actions: (
-          <Styled.ActionsButton
-            type="button"
-            aria-label={interpolate(locale.group_details.table.actionsAriaLabel, { name: p.name })}
-          >
-            ⋮
-          </Styled.ActionsButton>
+          <Styled.ParticipantActions>
+            <Styled.ActionsButton
+              type="button"
+              aria-label={interpolate(locale.group_details.table.actionsAriaLabel, {
+                name: p.name,
+              })}
+              aria-haspopup="menu"
+              onClick={() => setSelectedParticipant((current) => (current?.id === p.id ? null : p))}
+            >
+              ⋮
+            </Styled.ActionsButton>
+            {selectedParticipant?.id === p.id && (
+              <Styled.ParticipantActionMenu role="menu">
+                {!p.is_coordinator && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setParticipantAction('promote');
+                      setParticipantError(null);
+                    }}
+                  >
+                    {locale.group_details.participantActions.promote}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setParticipantAction('remove');
+                    setParticipantError(null);
+                  }}
+                >
+                  {locale.group_details.participantActions.remove}
+                </button>
+              </Styled.ParticipantActionMenu>
+            )}
+          </Styled.ParticipantActions>
         ),
       }));
 
       return { rows, total };
     },
-    [groupId, locale],
+    [groupId, locale, selectedParticipant?.id, participantsVersion],
   );
 
   //aba 2
@@ -489,6 +549,36 @@ export const GroupDetails = () => {
         onChange={(value) => setActiveTab(value as GroupDetailsTab)}
         size="lg"
       />
+
+      <Modal
+        isOpen={participantAction !== null && selectedParticipant !== null}
+        onClose={() => {
+          if (savingParticipant) return;
+          setParticipantAction(null);
+          setParticipantError(null);
+          setSelectedParticipant(null);
+        }}
+        title={
+          participantAction === 'remove'
+            ? locale.group_details.participantActions.removeTitle
+            : locale.group_details.participantActions.promoteTitle
+        }
+        description={interpolate(
+          participantAction === 'remove'
+            ? locale.group_details.participantActions.removeDescription
+            : locale.group_details.participantActions.promoteDescription,
+          { name: selectedParticipant?.name ?? '' },
+        )}
+        confirmText={
+          participantAction === 'remove'
+            ? locale.group_details.participantActions.remove
+            : locale.group_details.participantActions.promote
+        }
+        confirmDisabled={savingParticipant}
+        onConfirm={confirmParticipantAction}
+      >
+        {participantError && <p role="alert">{participantError}</p>}
+      </Modal>
 
       <GroupModal
         isOpen={isLocationModalOpen}

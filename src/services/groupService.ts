@@ -126,3 +126,14 @@ export async function updateGroupLocation(
     throw new Error(locale.group_details.modal.modalError);
   }
 }
+
+export async function updateGroupParticipant(
+  groupId: string,
+  participantId: string,
+  action: 'promote' | 'remove',
+): Promise<void> {
+  const { error } = await supabase.functions.invoke('update-group-participant-web', {
+    body: { groupId, participantId, action },
+  });
+  if (error) throw error;
+}

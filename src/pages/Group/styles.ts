@@ -402,3 +402,36 @@ export const FormError = styled.p`
   font-size: 0.875rem;
   line-height: 1.25rem;
 `;
+
+export const ParticipantActions = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+export const ParticipantActionMenu = styled.div`
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 20;
+  min-width: 11rem;
+  background: ${theme.surface};
+  border: 1px solid ${theme.border};
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.12);
+  padding: 0.25rem;
+
+  & > button {
+    width: 100%;
+    padding: 0.65rem;
+    border: none;
+    background: transparent;
+    text-align: left;
+    color: ${theme.text};
+    cursor: pointer;
+    border-radius: 0.25rem;
+  }
+  & > button:hover,
+  & > button:focus-visible {
+    background: ${theme.backgroundSubtle};
+  }
+`;
