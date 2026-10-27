@@ -30,6 +30,31 @@ export const formatEntryDate = (iso: string | null | undefined): string => {
   return entryDateFormatter.format(date);
 };
 
+const eventDateTimeFormatter = new Intl.DateTimeFormat(LOCALE, {
+  day: 'numeric',
+  month: 'long',
+  hour: 'numeric',
+  minute: '2-digit',
+  hourCycle: 'h23',
+  timeZone: 'America/Sao_Paulo',
+});
+
+// "22 de Agosto, 19h" ou "22 de Agosto, 19h30"; '' se vazio ou inválido
+export const formatEventDateTime = (iso: string): string => {
+  const date = new Date(iso);
+  if (!isValid(date)) return '';
+
+  const parts = eventDateTimeFormatter.formatToParts(date);
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
+
+  const month = get('month');
+  const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+  const minute = get('minute');
+  const time = minute === '00' ? `${get('hour')}h` : `${get('hour')}h${minute}`;
+
+  return `${get('day')} de ${capitalizedMonth}, ${time}`;
+};
+
 // "24 ago, 19h" ou "24 ago, 19h30"
 export const formatMeetingDate = (iso: string): string => {
   const date = new Date(iso);

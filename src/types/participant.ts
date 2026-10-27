@@ -13,6 +13,7 @@ export type Participant = {
   zone: string | null;
   appRole: ParticipantAppRole;
   entryDate: string | null;
+  photo: string | null;
 };
 
 export type ParticipantGroup = {

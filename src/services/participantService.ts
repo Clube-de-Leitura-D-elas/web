@@ -23,6 +23,7 @@ type ParticipantResponse = {
   city: string | null;
   zone: string | null;
   created_at?: string | null;
+  photo: string | null;
 };
 
 type ParticipantGroupsResponse = {
@@ -69,6 +70,7 @@ export async function getParticipantById(participantId: string): Promise<Partici
     zone: data.zone,
     appRole: data.app_role?.toUpperCase() === 'MANAGER' ? 'MANAGER' : 'READER',
     entryDate: data.created_at ?? null,
+    photo: data.photo ?? null,
   };
 }
 

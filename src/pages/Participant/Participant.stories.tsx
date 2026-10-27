@@ -38,6 +38,7 @@ const participant: Participant = {
   job: 'Advogada',
   active: true,
   appRole: 'MANAGER',
+  photo: null,
   // 01:30 UTC de 16/03 ainda é 15/03 em São Paulo
   entryDate: '2025-03-16T01:30:00Z',
 };

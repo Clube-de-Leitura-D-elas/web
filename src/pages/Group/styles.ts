@@ -145,6 +145,9 @@ export const ParticipantLink = styled(Link)`
   ${focusRing}
 `;
 
+// mesmo visual do link de participante, usado na data do histórico de encontros
+export const MeetingLink = styled(ParticipantLink)``;
+
 export const AttendanceList = styled.div`
   display: flex;
   justify-content: center;
@@ -243,6 +246,17 @@ export const Avatar = styled.div`
   color: ${theme.textBrand};
   font-size: 0.85rem;
   font-weight: 700;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  svg {
+    width: 1.5rem;
+    height: 3rem;
+  }
 `;
 
 export const CoordinatorInfo = styled.div`
@@ -332,4 +346,59 @@ export const LocationText = styled.span`
   gap: 0.3rem;
   font-size: 0.85rem;
   color: ${theme.textMuted};
+`;
+
+export const ModalContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+export const ModalTitle = styled.h2`
+  margin: 0;
+  color: ${theme.text};
+  font-size: 1.5rem;
+  font-weight: 700;
+`;
+
+export const ModalDescription = styled.p`
+  margin: 0;
+  color: ${theme.textMuted};
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+`;
+
+export const ModalActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+`;
+
+export const FormRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+
+  @media (max-width: 36rem) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ModalForm = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const FormHint = styled.span`
+  color: ${theme.textMuted};
+  font-size: 0.75rem;
+  line-height: 1rem;
+`;
+
+export const FormError = styled.p`
+  margin: 0;
+  color: ${theme.error};
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 `;
