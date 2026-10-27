@@ -14,3 +14,13 @@ export const updateGroupStatus =
   fn<typeof actual.updateGroupStatus>().mockName('updateGroupStatus');
 
 export const createGroup = fn<typeof actual.createGroup>().mockName('createGroup');
+
+export const getGroupCities = fn<typeof actual.getGroupCities>().mockName('getGroupCities');
+
+export const getGroupZones = fn<typeof actual.getGroupZones>().mockName('getGroupZones');
+
+export const updateGroupLocation =
+  fn<typeof actual.updateGroupLocation>().mockName('updateGroupLocation');
+
+export const updateGroupParticipant =
+  fn<typeof actual.updateGroupParticipant>().mockName('updateGroupParticipant');
