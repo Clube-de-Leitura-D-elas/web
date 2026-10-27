@@ -8,6 +8,14 @@ const entryDateFormatter = new Intl.DateTimeFormat(LOCALE, {
   year: 'numeric',
   timeZone: 'America/Sao_Paulo',
 });
+// Datas sem hora ("2025-03-15") já são o dia civil de São Paulo; em UTC o dia não muda.
+const civilDateFormatter = new Intl.DateTimeFormat(LOCALE, {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
 const isValid = (date: Date) => !Number.isNaN(date.getTime());
 
@@ -27,7 +35,7 @@ export const formatEntryDate = (iso: string | null | undefined): string => {
   const date = new Date(iso);
   if (!isValid(date)) return '';
 
-  return entryDateFormatter.format(date);
+  return (DATE_ONLY.test(iso) ? civilDateFormatter : entryDateFormatter).format(date);
 };
 
 const eventDateTimeFormatter = new Intl.DateTimeFormat(LOCALE, {
