@@ -8,6 +8,7 @@ import { getEventDetails } from '../../services/eventService';
 import type { EventDetails as EventDetailsData } from '../../types/event';
 import { formatEventDateTime } from '../../utils/date';
 import { EventBook } from './EventBook';
+import { EventPlaceAndHost } from './EventPlaceAndHost';
 import * as Styled from './styles';
 
 export const EventDetails = () => {
@@ -50,7 +51,7 @@ export const EventDetails = () => {
 
   const groupPath = `/grupos/${event.group.id}`;
 
-  // seções sem `content` mostram "Em breve"; o conteúdo de cada uma entra nas issues 204 a 207
+  // seções sem `content` mostram "Em breve"; o conteúdo de cada uma entra nas issues 204 e 207
   const sections: { key: string; title: string; content?: ReactNode }[] = [
     { key: 'participation', title: locale.event_details.sections.participation },
     {
@@ -58,7 +59,11 @@ export const EventDetails = () => {
       title: locale.event_details.sections.book,
       content: <EventBook book={event.book} />,
     },
-    { key: 'placeAndHost', title: locale.event_details.sections.placeAndHost },
+    {
+      key: 'placeAndHost',
+      title: locale.event_details.sections.placeAndHost,
+      content: <EventPlaceAndHost location={event.location} host={event.host} />,
+    },
     { key: 'photos', title: locale.event_details.sections.photos },
   ];
 

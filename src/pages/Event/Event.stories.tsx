@@ -4,7 +4,12 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { DefaultLayout } from '../../layouts/DefaultLayout';
 
 import { getEventDetails } from '../../services/eventService';
-import type { EventBook, EventDetails as EventDetailsData } from '../../types/event';
+import type {
+  EventBook,
+  EventDetails as EventDetailsData,
+  EventHost,
+  EventLocation,
+} from '../../types/event';
 
 import { EventDetails } from '.';
 
@@ -19,6 +24,17 @@ const book: EventBook = {
   coverUrl: 'https://picsum.photos/seed/livro-1/400/600',
 };
 
+const location: EventLocation = {
+  name: 'Livraria da Vila — Pinheiros',
+  address: 'Rua Fradique Coutinho, 915 — São Paulo, SP',
+};
+
+const host: EventHost = {
+  id: '5e1f8c37-2b6d-4a09-9c84-7f3e1d5b2a60',
+  name: 'Beatriz Souza',
+  photoUrl: 'https://picsum.photos/seed/anfitria-1/200/200',
+};
+
 const event: EventDetailsData = {
   id: '9f2c1a44-8f3e-4c7a-9a1b-2d6f0e5b7c31',
   startsAt: '2026-08-22T19:00:00-03:00',
@@ -28,6 +44,8 @@ const event: EventDetailsData = {
     city: 'São Paulo',
   },
   book,
+  location,
+  host,
 };
 
 const meta = {
@@ -105,6 +123,65 @@ export const BookLongNames: Story = {
         ...book,
         title: 'Uma História Muito Longa de um Livro com um Título Extraordinariamente Comprido',
         author: 'Autora Com Um Nome Completo Também Bastante Extenso e Composto',
+      },
+    });
+  },
+};
+
+// evento sem local definido: estado vazio só no local, a anfitriã continua aparecendo
+export const WithoutLocation: Story = {
+  beforeEach: () => {
+    mocked(getEventDetails).mockResolvedValue({ ...event, location: null });
+  },
+};
+
+// local cadastrado sem endereço: aparece "Endereço não informado"
+export const LocationWithoutAddress: Story = {
+  beforeEach: () => {
+    mocked(getEventDetails).mockResolvedValue({
+      ...event,
+      location: { ...location, address: null },
+    });
+  },
+};
+
+// evento sem anfitriã definida: estado vazio só na anfitriã
+export const WithoutHost: Story = {
+  beforeEach: () => {
+    mocked(getEventDetails).mockResolvedValue({ ...event, host: null });
+  },
+};
+
+// anfitriã sem foto: aparece o avatar placeholder
+export const HostWithoutPhoto: Story = {
+  beforeEach: () => {
+    mocked(getEventDetails).mockResolvedValue({ ...event, host: { ...host, photoUrl: null } });
+  },
+};
+
+// URL de foto que não carrega: o <img> falha e cai no avatar placeholder
+export const HostBrokenPhoto: Story = {
+  beforeEach: () => {
+    mocked(getEventDetails).mockResolvedValue({
+      ...event,
+      host: { ...host, photoUrl: '/foto-inexistente.jpg' },
+    });
+  },
+};
+
+// nomes e endereços longos quebram dentro do card, sem estourar o layout
+export const PlaceAndHostLongNames: Story = {
+  beforeEach: () => {
+    mocked(getEventDetails).mockResolvedValue({
+      ...event,
+      location: {
+        name: 'Livraria e Café Literário Independente da Vila Madalena e Arredores Associados',
+        address:
+          'Avenida Engenheiro Luís Carlos Berrini, 1.500, Conjunto 101, Edifício Comercial Torre Norte — Cidade Monções, São Paulo, SP',
+      },
+      host: {
+        ...host,
+        name: 'Maria Beatriz de Albuquerque Souza Cavalcanti dos Santos Oliveira Lima',
       },
     });
   },

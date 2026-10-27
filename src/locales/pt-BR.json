@@ -135,6 +135,13 @@
       "empty": "O livro ainda não foi escolhido.",
       "coverAlt": "Capa do livro {{title}}",
       "coverUnavailable": "Capa do livro indisponível"
+    },
+    "placeAndHost": {
+      "locationLabel": "Local",
+      "hostLabel": "Anfitriã",
+      "locationEmpty": "O local ainda não foi definido.",
+      "addressEmpty": "Endereço não informado",
+      "hostEmpty": "A anfitriã ainda não foi definida."
     }
   },
   "participants": {
