@@ -23,18 +23,12 @@ type ParticipantModalProps = {
   error?: string | null;
 };
 
-// O participante só traz o NOME da cidade/zona; o backend precisa do ID.
 const findIdByName = (options: ParticipantOption[], name: string | null) =>
   name ? (options.find((option) => option.name === name)?.id ?? null) : null;
 
 const toAutocompleteOptions = (options: ParticipantOption[]) =>
   options.map(({ id, name }) => ({ value: id, label: name }));
 
-/**
- * O conteúdo só é montado enquanto o modal está aberto. Assim, a cada abertura os campos
- * voltam a refletir o participante atual (sem useEffect), e ao fechar (cancelar, X, Esc ou
- * clique fora) qualquer edição não salva é descartada.
- */
 export const ParticipantModal = (props: ParticipantModalProps) =>
   props.isOpen ? <ParticipantModalContent {...props} /> : null;
 
@@ -49,6 +43,8 @@ const ParticipantModalContent = ({
 }: ParticipantModalProps) => {
   const modalLocale = locale.participant_details.modal;
 
+  const isFounder = participant.appRole === 'FOUNDER';
+
   const [name, setName] = useState(participant.name);
   const [email, setEmail] = useState(participant.email);
   const [phone, setPhone] = useState(participant.phone ?? '');
@@ -57,8 +53,6 @@ const ParticipantModalContent = ({
   const [job, setJob] = useState(participant.job ?? '');
   const [isManager, setIsManager] = useState(participant.appRole === 'MANAGER');
 
-  // `undefined` = o usuário ainda não mexeu; usa a cidade/zona atual do participante.
-  // Isso evita travar em "vazio" caso a lista de opções chegue depois de o modal abrir.
   const [cityChoice, setCityChoice] = useState<string | null | undefined>(undefined);
   const [zoneChoice, setZoneChoice] = useState<string | null | undefined>(undefined);
 
@@ -94,7 +88,7 @@ const ParticipantModalContent = ({
       zone: zone?.name ?? null,
       birthDate,
       job: job.trim(),
-      appRole: isManager ? 'MANAGER' : 'READER',
+      appRole: isFounder ? 'FOUNDER' : isManager ? 'MANAGER' : 'READER',
     });
   };
 
@@ -186,15 +180,17 @@ const ParticipantModalContent = ({
           />
         </Styled.FormRow>
 
-        <Styled.CheckboxField htmlFor="participant-app-role">
-          <Styled.Checkbox
-            id="participant-app-role"
-            type="checkbox"
-            checked={isManager}
-            onChange={(event) => setIsManager(event.target.checked)}
-          />
-          <span>{modalLocale.appRole}</span>
-        </Styled.CheckboxField>
+        {!isFounder && (
+          <Styled.CheckboxField htmlFor="participant-app-role">
+            <Styled.Checkbox
+              id="participant-app-role"
+              type="checkbox"
+              checked={isManager}
+              onChange={(event) => setIsManager(event.target.checked)}
+            />
+            <span>{modalLocale.appRole}</span>
+          </Styled.CheckboxField>
+        )}
 
         {!isValid && <Styled.FormHint>{modalLocale.requiredHint}</Styled.FormHint>}
 

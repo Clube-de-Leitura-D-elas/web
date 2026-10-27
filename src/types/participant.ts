@@ -1,4 +1,4 @@
-export type ParticipantAppRole = 'MANAGER' | 'READER';
+export type ParticipantAppRole = 'MANAGER' | 'READER' | 'FOUNDER';
 
 export type Participant = {
   id: string;

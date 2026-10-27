@@ -68,7 +68,12 @@ export async function getParticipantById(participantId: string): Promise<Partici
     active: data.is_active,
     city: data.city,
     zone: data.zone,
-    appRole: data.app_role?.toUpperCase() === 'MANAGER' ? 'MANAGER' : 'READER',
+    appRole:
+      data.app_role?.toUpperCase() === 'FOUNDER'
+        ? 'FOUNDER'
+        : data.app_role?.toUpperCase() === 'MANAGER'
+          ? 'MANAGER'
+          : 'READER',
     entryDate: data.entry_date ?? null,
     photo: data.photo ?? null,
   };
@@ -125,9 +130,6 @@ export async function updateParticipantStatus(
   return data.is_active;
 }
 
-// Cidades e zonas para os autocompletes do modal de edição.
-// Atenção: lê direto das tabelas `cities` e `zones`; precisa de permissão de SELECT (RLS)
-// para o usuário logado. Se não houver, troque o corpo destas duas funções por uma edge function.
 async function getOptions(table: 'cities' | 'zones'): Promise<ParticipantOption[]> {
   const { data, error } = await supabase.from(table).select('id, name').order('name');
   if (error) throw error;
@@ -139,7 +141,6 @@ export const getCities = () => getOptions('cities');
 
 export const getZones = () => getOptions('zones');
 
-// Extrai a mensagem `{ error: "..." }` devolvida pela edge function, quando existir.
 async function readFunctionErrorMessage(error: unknown): Promise<string | null> {
   if (!(error instanceof FunctionsHttpError)) return null;
 
