@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components';
 import { Tag } from '../Tag';
 import { Table, type TableColumn, type TableFetchPage, type TableRow } from '.';
 import { MemoryRouter } from 'react-router';
+import type { ComponentProps } from 'react';
 
 const GroupName = styled.div`
   display: flex;
@@ -259,7 +260,7 @@ const meta = {
 
 export default meta;
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<ComponentProps<typeof Table>>;
 
 export const Default: Story = {};
 
