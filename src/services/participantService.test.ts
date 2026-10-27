@@ -23,6 +23,8 @@ describe('getParticipantById', () => {
       is_active: true,
       city: 'Porto Alegre',
       zone: null,
+      entry_date: '2025-03-15',
+      photo: 'https://cdn.exemplo.com/jo.jpg',
     });
 
     await expect(getParticipantById('p1')).resolves.toEqual({
@@ -36,6 +38,8 @@ describe('getParticipantById', () => {
       active: true,
       city: 'Porto Alegre',
       zone: null,
+      entryDate: '2025-03-15',
+      photo: 'https://cdn.exemplo.com/jo.jpg',
     });
     expect(invoke).toHaveBeenCalledWith('get-participant?participant_id=p1', { method: 'GET' });
   });
@@ -51,12 +55,18 @@ describe('getParticipantById', () => {
 describe('getParticipantGroups', () => {
   it('pagina e converte os grupos', async () => {
     respond({
-      items: [{ id: 'g1', number: 3, city: 'Canoas', is_coordinator: true }],
+      items: [
+        { id: 'g1', number: 3, city: 'Canoas', is_coordinator: true, entry_date: '2024-03-01' },
+        { id: 'g2', number: 5, city: null, is_coordinator: false },
+      ],
       total: 9,
     });
 
     await expect(getParticipantGroups('p1', 2, 5)).resolves.toEqual({
-      groups: [{ id: 'g1', number: 3, city: 'Canoas', isCoordinator: true }],
+      groups: [
+        { id: 'g1', number: 3, city: 'Canoas', isCoordinator: true, entryDate: '2024-03-01' },
+        { id: 'g2', number: 5, city: null, isCoordinator: false, entryDate: null },
+      ],
       total: 9,
     });
     expect(invoke).toHaveBeenCalledWith(

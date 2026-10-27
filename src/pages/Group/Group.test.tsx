@@ -1,9 +1,12 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { interpolate, locale } from '../../locales';
 import {
+  getGroupCities,
   getGroupDetails,
   getGroupMeetingsPage,
   getGroupParticipantsPage,
+  getGroupZones,
+  updateGroupLocation,
   updateGroupStatus,
 } from '../../services/groupService';
 import { pending, renderWithProviders } from '../../test/render';
@@ -11,9 +14,12 @@ import type { GroupDetails as GroupDetailsData } from '../../types/group';
 import { GroupDetails } from '.';
 
 jest.mock('../../services/groupService', () => ({
+  getGroupCities: jest.fn(),
   getGroupDetails: jest.fn(),
   getGroupMeetingsPage: jest.fn(),
   getGroupParticipantsPage: jest.fn(),
+  getGroupZones: jest.fn(),
+  updateGroupLocation: jest.fn(),
   updateGroupStatus: jest.fn(),
 }));
 
@@ -25,10 +31,12 @@ const group: GroupDetailsData = {
   number: 7,
   description: 'Centro',
   city: 'Canoas',
+  zone: null,
   is_active: true,
   active_participants_count: 12,
   coordinator_name: 'Joana Alves',
   coordinator_email: 'joana@gmail.com',
+  coordinator_photo: 'https://cdn.exemplo.com/joana.jpg',
   next_meeting: {
     date: '2026-08-24T22:00:00Z',
     book_title: 'Torto Arado',
@@ -45,6 +53,11 @@ const renderPage = () =>
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.mocked(getGroupDetails).mockResolvedValue(group);
+  jest.mocked(getGroupCities).mockResolvedValue([
+    { id: 'c1', name: 'Canoas' },
+    { id: 'c2', name: 'Porto Alegre' },
+  ]);
+  jest.mocked(getGroupZones).mockResolvedValue([{ id: 'z1', name: 'Zona Sul' }]);
   jest.mocked(getGroupParticipantsPage).mockResolvedValue({
     items: [
       {
@@ -114,12 +127,21 @@ describe('GroupDetails', () => {
     expect(screen.getByText('Canoas • 12 participantes ativas')).toBeInTheDocument();
   });
 
-  it('mostra a coordenadora com as iniciais', async () => {
-    renderPage();
+  it('mostra a coordenadora com a foto', async () => {
+    const { container } = renderPage();
     await screen.findByText('Joana Alves');
 
-    expect(screen.getByText('JA')).toBeInTheDocument();
     expect(screen.getByText('joana@gmail.com')).toBeInTheDocument();
+    expect(container.querySelector('img')).toHaveAttribute('src', group.coordinator_photo);
+  });
+
+  it('sem foto da coordenadora, mostra um ícone no lugar', async () => {
+    jest.mocked(getGroupDetails).mockResolvedValue({ ...group, coordinator_photo: null });
+
+    const { container } = renderPage();
+    await screen.findByText('Joana Alves');
+
+    expect(container.querySelector('img')).not.toBeInTheDocument();
   });
 
   it('mostra o próximo encontro no horário de Brasília', async () => {
@@ -136,6 +158,7 @@ describe('GroupDetails', () => {
       ...group,
       coordinator_name: null,
       coordinator_email: null,
+      coordinator_photo: null,
       next_meeting: null,
     });
 
@@ -231,5 +254,41 @@ describe('GroupDetails', () => {
         name: interpolate(text.table.actionsAriaLabel, { name: 'Ana Souza' }),
       }),
     ).toBeInTheDocument();
+  });
+
+  it('edita a localização do grupo pelo modal', async () => {
+    jest.mocked(updateGroupLocation).mockResolvedValue();
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: text.header.editLocation }));
+    const dialog = screen.getByRole('dialog', { name: text.modal.title });
+    const city = within(dialog).getByRole('combobox', { name: new RegExp(text.modal.city) });
+    expect(city).toHaveValue('Canoas');
+
+    await user.clear(city);
+    await user.type(city, 'porto');
+    await user.click(screen.getByRole('option', { name: 'Porto Alegre' }));
+    await user.click(within(dialog).getByRole('button', { name: text.modal.save }));
+
+    expect(updateGroupLocation).toHaveBeenCalledWith('g1', {
+      description: 'Porto Alegre',
+      city_id: 'c2',
+      zone_id: null,
+    });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.getByRole('heading', { name: 'Grupo 07 — Porto Alegre' })).toBeInTheDocument();
+    expect(screen.getByText('Porto Alegre • 12 participantes ativas')).toBeInTheDocument();
+  });
+
+  it('mantém o modal aberto e mostra o erro quando a localização não salva', async () => {
+    jest.mocked(updateGroupLocation).mockRejectedValue(new Error(text.modal.modalError));
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: text.header.editLocation }));
+    const dialog = screen.getByRole('dialog', { name: text.modal.title });
+    await user.click(within(dialog).getByRole('button', { name: text.modal.save }));
+
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent(text.modal.modalError);
+    expect(screen.getByRole('heading', { name: 'Grupo 07 — Centro' })).toBeInTheDocument();
   });
 });

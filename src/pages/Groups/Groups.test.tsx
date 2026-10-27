@@ -140,6 +140,7 @@ describe('Groups', () => {
     jest.mocked(getGroupFormOptions).mockResolvedValue({
       citiesAndZones: [{ value: 'c2', label: 'Recife' }],
       coordinators: [],
+      nextGroupNumber: 43,
     });
     jest.mocked(createGroup).mockResolvedValue({} as never);
     const { user } = renderWithProviders(<Groups />);
@@ -147,14 +148,13 @@ describe('Groups', () => {
 
     await user.click(screen.getByRole('button', { name: text.newGroup }));
     const dialog = screen.getByRole('dialog', { name: text.newGroupModal.title });
-    await user.type(within(dialog).getByLabelText(text.newGroupModal.name.label), '43');
     const city = within(dialog).getByRole('combobox', { name: text.newGroupModal.city.label });
     await waitFor(() => expect(city).toBeEnabled());
     await user.type(city, 'rec');
     await user.click(screen.getByRole('option', { name: 'Recife' }));
     await user.click(within(dialog).getByRole('button', { name: text.newGroupModal.save }));
 
-    expect(createGroup).toHaveBeenCalledWith({ name: '43', cityId: 'c2', coordinatorId: null });
+    expect(createGroup).toHaveBeenCalledWith({ cityId: 'c2', coordinatorId: null });
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     await waitFor(() => expect(getGroupGrid).toHaveBeenCalledTimes(2));
   });
