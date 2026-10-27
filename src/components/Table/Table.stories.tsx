@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import styled, { css } from 'styled-components';
 import { Tag } from '../Tag';
 import { Table, type TableColumn, type TableFetchPage, type TableRow } from '.';
+import { MemoryRouter } from 'react-router';
 
 const GroupName = styled.div`
   display: flex;
@@ -52,10 +53,15 @@ const simpleColumns: TableColumn[] = [
 ];
 
 const simpleRows: TableRow[] = [
-  { book: 'Torto Arado', author: 'Itamar Vieira Junior', year: 2019 },
-  { book: 'Quarto de Despejo', author: 'Carolina Maria de Jesus', year: 1960 },
-  { book: 'A Hora da Estrela', author: 'Clarice Lispector', year: 1977 },
-  { book: 'Um Defeito de Cor', author: 'Ana Maria Gonçalves', year: 2006 },
+  { book: 'Torto Arado', author: 'Itamar Vieira Junior', year: 2019, rowHref: '/livros/1' },
+  {
+    book: 'Quarto de Despejo',
+    author: 'Carolina Maria de Jesus',
+    year: 1960,
+    rowHref: '/livros/2',
+  },
+  { book: 'A Hora da Estrela', author: 'Clarice Lispector', year: 1977, rowHref: '/livros/3' },
+  { book: 'Um Defeito de Cor', author: 'Ana Maria Gonçalves', year: 2006, rowHref: '/livros/4' },
 ];
 
 const groupColumns: TableColumn[] = [
@@ -191,6 +197,12 @@ const meta = {
           '/>',
           '```',
           '',
+          '### Linha clicável',
+          '',
+          'Inclua `rowHref` no objeto da linha para ela navegar ao ser clicada. Clique normal abre na mesma aba;',
+          'Ctrl/Cmd + clique abre em nova aba. Botões, links e inputs dentro da linha não disparam a navegação,',
+          'e uma coluna com `ignoreRowClick: true` também não.',
+          '',
           '### Paginação no backend',
           '',
           'Passe `fetchPage` no lugar de `rows`. A tabela chama `fetchPage({ page, pageSize })`',
@@ -222,8 +234,11 @@ const meta = {
     },
   },
   argTypes: {
-    columns: { description: 'Colunas: `key`, `label`, `width?` e `align?`.' },
-    rows: { description: 'Linhas: `{ [column.key]: ReactNode }`. Use `rows` ou `fetchPage`.' },
+    columns: { description: 'Colunas: `key`, `label`, `width?`, `align?` e `ignoreRowClick?`.' },
+    rows: {
+      description:
+        'Linhas: `{ [column.key]: ReactNode }`. Use `rowHref` para tornar a linha clicável. Use `rows` ou `fetchPage`.',
+    },
     fetchPage: {
       control: false,
       description:
@@ -233,6 +248,13 @@ const meta = {
     itemLabel: { control: 'text', description: 'Nome dos itens no resumo do rodapé.' },
   },
   args: { columns: simpleColumns, rows: simpleRows },
+  decorators: [
+    (Story) => (
+      <MemoryRouter>
+        <Story />
+      </MemoryRouter>
+    ),
+  ],
 } satisfies Meta<typeof Table>;
 
 export default meta;
@@ -240,6 +262,23 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const ClickableGroups: Story = {
+  args: {
+    columns: groupColumns.map((column) =>
+      column.key === 'actions' ? { ...column, ignoreRowClick: true } : column,
+    ),
+    rows: groupRows.map((row, index) => ({ ...row, rowHref: `/grupos/${index + 1}` })),
+    itemLabel: 'grupos cadastrados',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'A coluna "Ações" usa `ignoreRowClick`, então clicar nela não navega.',
+      },
+    },
+  },
+};
 
 export const RegisteredGroups: Story = {
   args: {
