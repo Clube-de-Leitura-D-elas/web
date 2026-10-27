@@ -2,6 +2,7 @@ import { FunctionsHttpError } from '@supabase/functions-js';
 import { GroupServiceError } from './groupErrors';
 import {
   createGroup,
+  type CreateGroupPayload,
   getGroupDetails,
   getGroupMeetingsPage,
   getGroupParticipantsPage,
@@ -61,7 +62,7 @@ describe('updateGroupStatus', () => {
 });
 
 describe('createGroup', () => {
-  const payload = { name: 'Grupo 43', cityId: 'poa', coordinatorId: null };
+  const payload: CreateGroupPayload = { cityId: 'poa', coordinatorId: null };
 
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});

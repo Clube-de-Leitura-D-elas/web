@@ -30,6 +30,8 @@ const participant: Participant = {
   birthDate: '1990-10-24',
   job: 'Advogada',
   active: true,
+  entryDate: '2025-03-15',
+  photo: null,
 };
 
 const renderPage = () =>
@@ -47,8 +49,8 @@ beforeEach(() => {
   ]);
   jest.mocked(getParticipantGroups).mockResolvedValue({
     groups: [
-      { id: 'g3', number: 3, city: 'São Paulo', isCoordinator: true },
-      { id: 'g12', number: 12, city: null, isCoordinator: false },
+      { id: 'g3', number: 3, city: 'São Paulo', isCoordinator: true, entryDate: '2024-03-01' },
+      { id: 'g12', number: 12, city: null, isCoordinator: false, entryDate: null },
     ],
     total: 2,
   });
@@ -112,7 +114,7 @@ describe('ParticipantDetails', () => {
     ]);
   });
 
-  it('mostra presença, cidade, zona, aniversário e trabalho', async () => {
+  it('mostra presença, cidade, zona, aniversário, entrada e trabalho', async () => {
     renderPage();
     await screen.findByText('Joseane Alves');
 
@@ -124,20 +126,50 @@ describe('ParticipantDetails', () => {
     expect(screen.getByText('Porto Alegre')).toBeInTheDocument();
     expect(screen.getByText('Zona Leste')).toBeInTheDocument();
     expect(screen.getByText('24/10')).toBeInTheDocument();
+    expect(screen.getByText('15/03/2025')).toBeInTheDocument();
     expect(screen.getByText('Advogada')).toBeInTheDocument();
+
+    // cada dado com o próprio rótulo ("Cidade" também é coluna da tabela de grupos)
+    expect(screen.getByText(text.details.zone)).toBeInTheDocument();
+    expect(screen.getByText(text.details.birthday)).toBeInTheDocument();
+    expect(screen.getByText(text.details.entryDate)).toBeInTheDocument();
+    expect(screen.getByText(text.details.occupation)).toBeInTheDocument();
+  });
+
+  it('mostra a foto da participante, ou um ícone quando não tem', async () => {
+    jest
+      .mocked(getParticipantById)
+      .mockResolvedValue({ ...participant, photo: 'https://cdn.exemplo.com/joseane.jpg' });
+
+    const { container, unmount } = renderPage();
+    await screen.findByText('Joseane Alves');
+    expect(container.querySelector('img')).toHaveAttribute(
+      'src',
+      'https://cdn.exemplo.com/joseane.jpg',
+    );
+    unmount();
+
+    jest.mocked(getParticipantById).mockResolvedValue(participant);
+    const view = renderPage();
+    await screen.findByText('Joseane Alves');
+    expect(view.container.querySelector('img')).not.toBeInTheDocument();
   });
 
   it('usa "não informado" para os dados vazios', async () => {
-    jest
-      .mocked(getParticipantById)
-      .mockResolvedValue({ ...participant, zone: null, birthDate: null, job: null });
+    jest.mocked(getParticipantById).mockResolvedValue({
+      ...participant,
+      zone: null,
+      birthDate: null,
+      entryDate: null,
+      job: null,
+    });
     jest.mocked(getParticipantGroups).mockResolvedValue({ groups: [], total: 0 });
 
     renderPage();
     await screen.findByText('Joseane Alves');
 
-    // zona, aniversário e trabalho
-    expect(screen.getAllByText(text.notInformed)).toHaveLength(3);
+    // zona, aniversário, data de entrada e trabalho
+    expect(screen.getAllByText(text.notInformed)).toHaveLength(4);
   });
 
   it('lista os grupos com a função da participante', async () => {
@@ -146,9 +178,11 @@ describe('ParticipantDetails', () => {
     const coordinatorRow = (await screen.findByText('3')).closest('tr')!;
     expect(within(coordinatorRow).getByText(text.groups.roles.coordinator)).toBeInTheDocument();
     expect(within(coordinatorRow).getByText('São Paulo')).toBeInTheDocument();
+    expect(within(coordinatorRow).getByText('01/03/2024')).toBeInTheDocument();
 
     const memberRow = screen.getByText('12').closest('tr')!;
     expect(within(memberRow).getByText(text.groups.roles.member)).toBeInTheDocument();
+    expect(within(memberRow).getByText(text.groups.emptyValue)).toBeInTheDocument();
     expect(getParticipantGroups).toHaveBeenCalledWith('p1', 1, 5);
   });
 

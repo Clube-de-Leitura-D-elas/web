@@ -16,6 +16,7 @@ describe('getGroupFormOptions', () => {
           { id: 'poa-sul', name: 'Zona Sul', cityId: 'poa' },
         ],
         coordinators: [{ id: 'u1', name: 'Joana Alves' }],
+        nextGroupNumber: 43,
       },
       error: null,
     });
@@ -29,6 +30,7 @@ describe('getGroupFormOptions', () => {
       { value: 'sp-oeste', label: 'São Paulo — Zona Oeste' },
     ]);
     expect(options.coordinators).toEqual([{ value: 'u1', label: 'Joana Alves' }]);
+    expect(options.nextGroupNumber).toBe(43);
     expect(invoke).toHaveBeenCalledWith('get-group-form-options');
   });
 
@@ -38,6 +40,7 @@ describe('getGroupFormOptions', () => {
         cities: [{ id: 'poa', name: 'Porto Alegre' }],
         zones: [{ id: 'orfa', name: 'Zona Norte', cityId: 'inexistente' }],
         coordinators: [],
+        nextGroupNumber: 1,
       },
       error: null,
     });
@@ -45,6 +48,15 @@ describe('getGroupFormOptions', () => {
     const options = await getGroupFormOptions();
 
     expect(options.citiesAndZones).toEqual([{ value: 'poa', label: 'Porto Alegre' }]);
+  });
+
+  it.each([0, -1, 4.5, null])('rejeita o próximo número inválido %p', async (nextGroupNumber) => {
+    invoke.mockResolvedValue({
+      data: { cities: [], zones: [], coordinators: [], nextGroupNumber },
+      error: null,
+    });
+
+    await expect(getGroupFormOptions()).rejects.toThrow('invalid nextGroupNumber');
   });
 
   it('repassa o erro da function', async () => {

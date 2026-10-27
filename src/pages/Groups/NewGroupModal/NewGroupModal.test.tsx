@@ -16,7 +16,7 @@ const renderModal = (props: Partial<NewGroupModalProps> = {}) => {
   const onClose = jest.fn();
   const onSave = jest.fn();
   const createGroupRequest = jest.fn().mockResolvedValue({ id: 'g43' });
-  const loadOptionsRequest = jest.fn().mockResolvedValue([cities, coordinators]);
+  const loadOptionsRequest = jest.fn().mockResolvedValue([cities, coordinators, 43]);
   const view = renderWithProviders(
     <NewGroupModal
       isOpen
@@ -32,9 +32,9 @@ const renderModal = (props: Partial<NewGroupModalProps> = {}) => {
 
 const saveButton = () => screen.getByRole('button', { name: text.save });
 const cityInput = () => screen.getByRole('combobox', { name: text.city.label });
+const nameInput = () => screen.getByLabelText(text.name.label);
 
-const fillForm = async (user: ReturnType<typeof renderModal>['user'], name = 'Grupo 43') => {
-  await user.type(screen.getByLabelText(text.name.label), name);
+const fillForm = async (user: ReturnType<typeof renderModal>['user']) => {
   await waitFor(() => expect(cityInput()).toBeEnabled());
   await user.type(cityInput(), 'zona');
   await user.click(screen.getByRole('option', { name: 'Porto Alegre — Zona Sul' }));
@@ -53,6 +53,8 @@ describe('NewGroupModal', () => {
     expect(screen.getByRole('dialog', { name: text.title })).toBeInTheDocument();
     expect(cityInput()).toBeDisabled();
     expect(cityInput()).toHaveAccessibleDescription(text.city.loading);
+    expect(nameInput()).toHaveValue('');
+    expect(nameInput()).toHaveAttribute('placeholder', text.name.loading);
     expect(saveButton()).toBeDisabled();
   });
 
@@ -64,35 +66,23 @@ describe('NewGroupModal', () => {
     expect(cityInput()).toBeDisabled();
   });
 
-  it('foca o campo do número ao abrir', () => {
+  it('preenche o nome com o próximo número, sem deixar editar', async () => {
     renderModal();
 
-    expect(screen.getByLabelText(text.name.label)).toHaveFocus();
+    await waitFor(() => expect(nameInput()).toHaveValue('Grupo - 43'));
+    expect(nameInput()).toBeDisabled();
+    expect(nameInput()).toHaveAccessibleDescription(text.name.helperText);
   });
 
-  it.each(['abc', 'Grupo', '0', 'Grupo 4a'])('rejeita o número "%s"', async (name) => {
-    const { user } = renderModal();
+  it('completa números de um dígito com zero à esquerda', async () => {
+    renderModal({ loadOptionsRequest: () => Promise.resolve([cities, coordinators, 7]) });
 
-    await user.type(screen.getByLabelText(text.name.label), name);
-
-    expect(screen.getByLabelText(text.name.label)).toHaveAccessibleDescription(text.name.invalid);
+    await waitFor(() => expect(nameInput()).toHaveValue('Grupo - 07'));
   });
 
-  it.each(['43', 'Grupo 43', 'grupo43', '043'])('aceita o número "%s"', async (name) => {
-    const { user } = renderModal();
-
-    await user.type(screen.getByLabelText(text.name.label), name);
-
-    expect(screen.getByLabelText(text.name.label)).toHaveAccessibleDescription(
-      text.name.helperText,
-    );
-  });
-
-  it('só libera o salvar com número válido e cidade escolhida', async () => {
+  it('só libera o salvar com a cidade escolhida', async () => {
     const { user } = renderModal();
     await waitFor(() => expect(cityInput()).toBeEnabled());
-
-    await user.type(screen.getByLabelText(text.name.label), '43');
     expect(saveButton()).toBeDisabled();
 
     await user.type(cityInput(), 'porto');
@@ -105,11 +95,10 @@ describe('NewGroupModal', () => {
   it('cria o grupo sem coordenadora', async () => {
     const { user, createGroupRequest, onSave } = renderModal();
 
-    await fillForm(user, '  Grupo 43  ');
+    await fillForm(user);
     await user.click(saveButton());
 
     expect(createGroupRequest).toHaveBeenCalledWith({
-      name: 'Grupo 43',
       cityId: 'poa-sul',
       coordinatorId: null,
     });
@@ -129,7 +118,7 @@ describe('NewGroupModal', () => {
     );
   });
 
-  it('avisa quando o número já existe', async () => {
+  it('avisa quando o número gerado já foi usado', async () => {
     const { user, onSave } = renderModal({
       createGroupRequest: () => Promise.reject(new GroupServiceError('duplicate_number')),
     });
