@@ -35,17 +35,6 @@ export type ParticipantPresence = {
   present: boolean;
 };
 
-export type UpdateParticipantData = {
-  name: string;
-  email: string;
-  phone: string;
-  instagram: string;
-  city: string;
-  zone: string;
-  birthday: string;
-  profession: string;
-};
-
 /** Item de cidade/zona usado nos autocompletes do modal. */
 export type ParticipantOption = {
   id: string;

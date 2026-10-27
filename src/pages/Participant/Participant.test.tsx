@@ -30,6 +30,7 @@ const participant: Participant = {
   birthDate: '1990-10-24',
   job: 'Advogada',
   active: true,
+  appRole: 'READER',
   entryDate: '2025-03-15',
   photo: null,
 };
