@@ -21,7 +21,6 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const participant: Participant = {
   id: '11111111-1111-1111-1111-111111111111',
   name: 'Joseane Alves',
-  photo: null,
   email: 'joseane.alves@gmail.com',
   instagram: '@joseane_alves',
   phone: '(51) 91234-5678',

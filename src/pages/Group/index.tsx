@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router';
 import { LuCalendar, LuMapPin, LuStar, LuUserRound } from 'react-icons/lu';
 import { BackButton } from '../../components/BackButton';
+import { ActionMenu } from '../../components/ActionMenu';
 import * as Styled from './styles';
 import { GroupModal } from './GroupModal';
 import { Modal } from '../../components/Modal';
@@ -285,50 +286,40 @@ export const GroupDetails = () => {
         ),
         email: p.email || locale.group_details.table.emptyValue,
         actions: (
-          <Styled.ParticipantActions>
-            <Styled.ActionsButton
-              type="button"
-              aria-label={interpolate(locale.group_details.table.actionsAriaLabel, {
-                name: p.name,
-              })}
-              aria-haspopup="menu"
-              onClick={() => setSelectedParticipant((current) => (current?.id === p.id ? null : p))}
-            >
-              ⋮
-            </Styled.ActionsButton>
-            {selectedParticipant?.id === p.id && (
-              <Styled.ParticipantActionMenu role="menu">
-                {!p.is_coordinator && (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      setParticipantAction('promote');
-                      setParticipantError(null);
-                    }}
-                  >
-                    {locale.group_details.participantActions.promote}
-                  </button>
-                )}
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setParticipantAction('remove');
-                    setParticipantError(null);
-                  }}
-                >
-                  {locale.group_details.participantActions.remove}
-                </button>
-              </Styled.ParticipantActionMenu>
-            )}
-          </Styled.ParticipantActions>
+          <ActionMenu
+            ariaLabel={interpolate(locale.group_details.table.actionsAriaLabel, {
+              name: p.name,
+            })}
+            items={[
+              ...(!p.is_coordinator
+                ? [
+                    {
+                      label: locale.group_details.participantActions.promote,
+                      onClick: () => {
+                        setSelectedParticipant(p);
+                        setParticipantAction('promote');
+                        setParticipantError(null);
+                      },
+                    },
+                  ]
+                : []),
+              {
+                label: locale.group_details.participantActions.remove,
+                variant: 'danger' as const,
+                onClick: () => {
+                  setSelectedParticipant(p);
+                  setParticipantAction('remove');
+                  setParticipantError(null);
+                },
+              },
+            ]}
+          />
         ),
       }));
 
       return { rows, total };
     },
-    [groupId, locale, selectedParticipant?.id, participantsVersion],
+    [groupId, locale, participantsVersion],
   );
 
   //aba 2
