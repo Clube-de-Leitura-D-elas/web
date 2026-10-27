@@ -30,6 +30,7 @@ const participant: Participant = {
   birthDate: '1990-10-24',
   job: 'Advogada',
   active: true,
+  photo: null,
   // 01:30 UTC de 16/03 ainda é 15/03 em São Paulo
   entryDate: '2025-03-16T01:30:00Z',
 };

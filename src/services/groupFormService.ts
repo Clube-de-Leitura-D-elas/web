@@ -5,6 +5,7 @@ export type CityOrZoneOption = DropdownItemList;
 export type CoordinatorOption = DropdownItemList;
 
 type GroupFormOptionsResponse = {
+  nextGroupNumber: number;
   cities: { id: string; name: string }[];
   zones: { id: string; name: string; cityId: string }[];
   coordinators: { id: string; name: string }[];
@@ -13,6 +14,7 @@ type GroupFormOptionsResponse = {
 export async function getGroupFormOptions(): Promise<{
   citiesAndZones: CityOrZoneOption[];
   coordinators: CoordinatorOption[];
+  nextGroupNumber: number;
 }> {
   const { data, error } =
     await supabase.functions.invoke<GroupFormOptionsResponse>('get-group-form-options');
@@ -20,7 +22,11 @@ export async function getGroupFormOptions(): Promise<{
   if (error) throw error;
   if (!data) throw new Error('get-group-form-options returned no data');
 
-  const { cities, zones, coordinators } = data;
+  const { cities, zones, coordinators, nextGroupNumber } = data;
+  if (!Number.isInteger(nextGroupNumber) || nextGroupNumber < 1) {
+    throw new Error('get-group-form-options returned an invalid nextGroupNumber');
+  }
+
   const cityNameById = new Map(cities.map((city) => [city.id, city.name]));
 
   const cityOptions: CityOrZoneOption[] = cities.map((city) => ({
@@ -35,6 +41,7 @@ export async function getGroupFormOptions(): Promise<{
   }));
 
   return {
+    nextGroupNumber,
     citiesAndZones: cityOptions.flatMap((city) => [
       city,
       ...zoneOptions.filter((zone) => {
