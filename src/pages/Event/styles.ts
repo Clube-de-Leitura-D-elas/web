@@ -252,6 +252,86 @@ export const HostAvatar = styled.div`
   }
 `;
 
+// mesmo avatar da anfitriã, menor para caber nas listas de participantes
+export const ParticipantAvatar = styled(HostAvatar)`
+  width: 2.25rem;
+  height: 2.25rem;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+`;
+
+export const ParticipationRoot = styled.div`
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const ParticipationSummary = styled.p`
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: ${theme.text};
+`;
+
+export const ParticipationEmpty = styled.p`
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${theme.text};
+`;
+
+export const ParticipantLists = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+
+  @media ${MOBILE_QUERY} {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`;
+
+export const ParticipantGroup = styled.div`
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+export const ParticipantGroupTitle = styled.h3`
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: ${theme.textMuted};
+`;
+
+export const ParticipantList = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 16rem;
+  overflow-y: auto;
+`;
+
+export const ParticipantItem = styled.li`
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+export const ParticipantName = styled.span`
+  font-size: 0.9375rem;
+  color: ${theme.text};
+  overflow-wrap: anywhere;
+`;
+
 export const HostName = styled.span`
   font-size: 1rem;
   font-weight: 700;
