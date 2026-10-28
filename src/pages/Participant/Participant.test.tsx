@@ -15,6 +15,8 @@ jest.mock('../../services/participantService', () => ({
   getParticipantGroups: jest.fn(),
   getParticipantPresence: jest.fn(),
   updateParticipantStatus: jest.fn(),
+  getCities: jest.fn().mockResolvedValue([]),
+  getZones: jest.fn().mockResolvedValue([]),
 }));
 
 const text = locale.participant_details;
