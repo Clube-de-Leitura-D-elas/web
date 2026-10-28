@@ -1,5 +1,5 @@
 import { screen, within } from '@testing-library/react';
-import { locale } from '../../locales';
+import { interpolate, locale } from '../../locales';
 import { getEventDetails } from '../../services/eventService';
 import { pending, renderWithProviders } from '../../test/render';
 import type { EventDetails as EventDetailsData } from '../../types/event';
@@ -22,6 +22,11 @@ const event: EventDetailsData = {
     address: 'Rua Fradique Coutinho, 915 — São Paulo, SP',
   },
   host: { id: 'u1', name: 'Beatriz Souza', photoUrl: null },
+  attendance: { present: 1, absent: 1, total: 2 },
+  participants: [
+    { id: 'p1', name: 'Joseane Alves', photoUrl: null, attended: true },
+    { id: 'p2', name: 'Camila Ferreira', photoUrl: null, attended: false },
+  ],
 };
 
 const renderPage = () =>
@@ -88,12 +93,41 @@ describe('EventDetails', () => {
       expect(section.getByText(text.placeAndHost.hostEmpty)).toBeInTheDocument();
     });
 
-    it('mantém "Em breve" nas seções que ainda não existem', async () => {
+    it('mantém "Em breve" na seção que ainda não existe', async () => {
       renderPage();
       await screen.findByText(event.group.name);
 
-      // participação e fotos (CLU-204 e CLU-207)
-      expect(screen.getAllByText(text.comingSoon)).toHaveLength(2);
+      // só a de fotos (CLU-207)
+      expect(screen.getAllByText(text.comingSoon)).toHaveLength(1);
+    });
+  });
+
+  describe('seção Participação', () => {
+    it('mostra o resumo e as listas de presentes e ausentes', async () => {
+      renderPage();
+      await screen.findByText(event.group.name);
+
+      const section = within(screen.getByRole('region', { name: text.sections.participation }));
+      expect(
+        section.getByText(
+          interpolate(text.participation.summary, { present: 1, total: 2, percent: 50 }),
+        ),
+      ).toBeInTheDocument();
+      expect(section.getByText('Joseane Alves')).toBeInTheDocument();
+      expect(section.getByText('Camila Ferreira')).toBeInTheDocument();
+      expect(section.queryByText(text.comingSoon)).not.toBeInTheDocument();
+    });
+
+    it('mostra o estado vazio quando a presença não foi registrada', async () => {
+      jest
+        .mocked(getEventDetails)
+        .mockResolvedValue({ ...event, attendance: null, participants: [] });
+
+      renderPage();
+      await screen.findByText(event.group.name);
+
+      const section = within(screen.getByRole('region', { name: text.sections.participation }));
+      expect(section.getByText(text.participation.empty)).toBeInTheDocument();
     });
   });
 
