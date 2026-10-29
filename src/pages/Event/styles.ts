@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import styled from 'styled-components';
 import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
 import { theme } from '../../theme/theme';
@@ -136,4 +137,123 @@ export const BookEmpty = styled.p`
   margin: 0;
   font-size: 0.875rem;
   color: ${theme.text};
+`;
+
+export const PlaceHostList = styled.div`
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const PlaceHostItem = styled.div`
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+export const PlaceHostLabel = styled.span`
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: ${theme.textMuted};
+`;
+
+export const PlaceHostEmpty = styled.p`
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${theme.text};
+`;
+
+export const PlaceRow = styled.div`
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const roundIcon = `
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background-color: ${theme.surfaceBrandSoft};
+  color: ${theme.textBrand};
+`;
+
+export const PlaceIcon = styled.div`
+  ${roundIcon}
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+`;
+
+export const PlaceInfo = styled.div`
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+export const PlaceName = styled.span`
+  font-size: 1rem;
+  font-weight: 700;
+  color: ${theme.text};
+  overflow-wrap: anywhere;
+`;
+
+export const PlaceAddress = styled.span`
+  font-size: 0.875rem;
+  color: ${theme.textMuted};
+  overflow-wrap: anywhere;
+`;
+
+export const HostLink = styled(Link)`
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: ${theme.text};
+  text-decoration: none;
+
+  &:hover span {
+    color: ${theme.textBrand};
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${theme.focusRing};
+    outline-offset: 0.25rem;
+    border-radius: 0.25rem;
+  }
+`;
+
+export const HostAvatar = styled.div`
+  ${roundIcon}
+  overflow: hidden;
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+export const HostName = styled.span`
+  font-size: 1rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
 `;
