@@ -67,7 +67,7 @@ export const HeaderCell = styled.th<{ $align: TableAlign }>`
 
 export const RowLink = styled(Link)`
   color: inherit;
-  gifont: inherit;
+  font: inherit;
   text-decoration: none;
 
   &::after {

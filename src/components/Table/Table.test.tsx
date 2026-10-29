@@ -153,3 +153,32 @@ describe('Table com fetchPage', () => {
     expect(screen.getByText('Atual')).toBeInTheDocument();
   });
 });
+
+describe('Table com linhas clicáveis', () => {
+  const linkedRows: TableRow[] = [
+    { name: 'Pessoa 1', city: 'Canoas', rowHref: '/participantes/p1' },
+    { name: 'Pessoa 2', city: 'Canoas' },
+  ];
+
+  it('a linha com rowHref vira um único link para o destino', () => {
+    renderWithProviders(<Table columns={columns} rows={linkedRows} />);
+
+    const [first, second] = bodyRows();
+    const links = within(first).getAllByRole('link');
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAttribute('href', '/participantes/p1');
+    expect(links[0]).toHaveTextContent('Pessoa 1');
+    expect(within(second).queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('navega ao clicar no link da linha', async () => {
+    const { user } = renderWithProviders(<Table columns={columns} rows={linkedRows} />, {
+      route: '/participantes',
+      path: '/participantes',
+    });
+
+    await user.click(screen.getByRole('link', { name: 'Pessoa 1' }));
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/participantes/p1');
+  });
+});

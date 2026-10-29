@@ -183,7 +183,7 @@ describe('GroupDetails', () => {
   it('lista as participantes do grupo', async () => {
     renderPage();
 
-    const link = await screen.findByRole('link', { name: 'Ana Souza' });
+    const link = await screen.findByRole('link', { name: /^Ana Souza/ });
     expect(link).toHaveAttribute('href', '/participantes/p1');
     expect(getGroupParticipantsPage).toHaveBeenCalledWith('g1', firstPage);
 
@@ -257,7 +257,7 @@ describe('GroupDetails', () => {
 
   it('o botão de ações de cada linha cita a participante', async () => {
     renderPage();
-    await screen.findByRole('link', { name: 'Ana Souza' });
+    await screen.findByRole('link', { name: /^Ana Souza/ });
 
     expect(
       screen.getByRole('button', {
@@ -308,7 +308,7 @@ describe('GroupDetails', () => {
 
     it('coordenadora não tem a opção de tornar coordenadora', async () => {
       const { user } = renderPage();
-      await screen.findByRole('link', { name: 'Ana Souza' });
+      await screen.findByRole('link', { name: /^Ana Souza/ });
 
       await user.click(actions('Ana Souza'));
 
