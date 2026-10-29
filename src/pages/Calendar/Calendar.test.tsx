@@ -10,6 +10,7 @@ jest.mock('../../services/calendarService', () => ({
 }));
 
 const text = locale.calendar;
+const nav = text.navigation;
 
 const renderPage = () => renderWithProviders(<Calendar />);
 
@@ -60,11 +61,11 @@ describe('Calendar', () => {
   it('avança para o próximo mês', async () => {
     const { user } = renderPage();
 
-    await screen.findByRole('button', { name: 'Próximo mês' });
+    await screen.findByRole('button', { name: nav.nextMonth });
 
     const initialCallCount = jest.mocked(getCalendarMonth).mock.calls.length;
 
-    await user.click(screen.getByRole('button', { name: 'Próximo mês' }));
+    await user.click(screen.getByRole('button', { name: nav.nextMonth }));
 
     await waitFor(() => {
       expect(getCalendarMonth).toHaveBeenCalledTimes(initialCallCount + 1);
@@ -82,11 +83,11 @@ describe('Calendar', () => {
   it('volta para o mês anterior', async () => {
     const { user } = renderPage();
 
-    await screen.findByRole('button', { name: 'Mês anterior' });
+    await screen.findByRole('button', { name: nav.previousMonth });
 
     const initialCallCount = jest.mocked(getCalendarMonth).mock.calls.length;
 
-    await user.click(screen.getByRole('button', { name: 'Mês anterior' }));
+    await user.click(screen.getByRole('button', { name: nav.previousMonth }));
 
     await waitFor(() => {
       expect(getCalendarMonth).toHaveBeenCalledTimes(initialCallCount + 1);
@@ -113,7 +114,7 @@ describe('Calendar', () => {
 
     await user.click(monthButton);
 
-    expect(screen.getByRole('listbox', { name: 'Selecionar mês' })).toBeInTheDocument();
+    expect(screen.getByRole('listbox', { name: nav.selectMonth })).toBeInTheDocument();
 
     expect(screen.getAllByRole('option')).toHaveLength(12);
   });
@@ -136,15 +137,15 @@ describe('Calendar', () => {
       expect(getCalendarMonth).toHaveBeenLastCalledWith(new Date().getFullYear(), 3);
     });
 
-    expect(screen.queryByRole('listbox', { name: 'Selecionar mês' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('listbox', { name: nav.selectMonth })).not.toBeInTheDocument();
   });
 
   it('permite editar o ano', async () => {
     const { user } = renderPage();
 
-    await user.click(await screen.findByRole('button', { name: 'Editar ano' }));
+    await user.click(await screen.findByRole('button', { name: nav.editYear }));
 
-    const yearInput = screen.getByRole('textbox', { name: 'Ano' });
+    const yearInput = screen.getByRole('textbox', { name: nav.year });
 
     expect(yearInput).toBeInTheDocument();
 
@@ -162,16 +163,46 @@ describe('Calendar', () => {
 
     const currentYear = new Date().getFullYear();
 
-    await user.click(await screen.findByRole('button', { name: 'Editar ano' }));
+    await user.click(await screen.findByRole('button', { name: nav.editYear }));
 
-    const yearInput = screen.getByRole('textbox', { name: 'Ano' });
+    const yearInput = screen.getByRole('textbox', { name: nav.year });
 
     await user.clear(yearInput);
     await user.type(yearInput, '2030');
     await user.keyboard('{Escape}');
 
-    expect(screen.getByRole('button', { name: 'Editar ano' })).toHaveTextContent(
+    expect(screen.getByRole('button', { name: nav.editYear })).toHaveTextContent(
       String(currentYear),
     );
+  });
+
+  it('ignora um ano com menos de 4 dígitos', async () => {
+    const { user } = renderPage();
+    const currentYear = new Date().getFullYear();
+
+    await user.click(await screen.findByRole('button', { name: nav.editYear }));
+    const yearInput = screen.getByRole('textbox', { name: nav.year });
+    await user.clear(yearInput);
+    await user.type(yearInput, '26');
+    await user.keyboard('{Enter}');
+
+    expect(screen.getByRole('button', { name: nav.editYear })).toHaveTextContent(
+      String(currentYear),
+    );
+    expect(getCalendarMonth).not.toHaveBeenCalledWith(26, expect.any(Number));
+    expect(getCalendarMonth).not.toHaveBeenCalledWith(1926, expect.any(Number));
+  });
+
+  it('volta para o mês atual pelo botão Hoje', async () => {
+    const { user } = renderPage();
+    const now = new Date();
+
+    await user.click(await screen.findByRole('button', { name: nav.nextMonth }));
+    await user.click(screen.getByRole('button', { name: nav.nextMonth }));
+    await user.click(screen.getByRole('button', { name: nav.today }));
+
+    await waitFor(() => {
+      expect(getCalendarMonth).toHaveBeenLastCalledWith(now.getFullYear(), now.getMonth() + 1);
+    });
   });
 });

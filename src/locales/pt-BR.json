@@ -351,7 +351,16 @@
     },
     "loading": "Carregando encontros...",
     "loadError": "Não foi possível carregar os encontros.",
-    "moreEvents": "+{{count}} mais"
+    "moreEvents": "+{{count}} mais",
+    "navigation": {
+      "today": "Hoje",
+      "previousMonth": "Mês anterior",
+      "nextMonth": "Próximo mês",
+      "selectMonth": "Selecionar mês",
+      "monthYearSeparator": "de",
+      "year": "Ano",
+      "editYear": "Editar ano"
+    }
   },
   "landing": {
     "skipToContent": "Pular para o conteúdo",

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
+import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 
 import * as Styled from './styles';
 
@@ -11,6 +12,9 @@ import { Input } from '../../components/Input';
 
 const MAX_VISIBLE_EVENTS = 3;
 const TIME_ZONE = 'America/Sao_Paulo';
+// mesmo intervalo aceito pela edge function calendar-month
+const MIN_YEAR = 1000;
+const MAX_YEAR = 9998;
 
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, index) => ({
   label: new Intl.DateTimeFormat('pt-BR', {
@@ -35,6 +39,7 @@ const formatTime = (value: string): string =>
 
 export const Calendar = () => {
   const locale = useLocale();
+  const navigationText = locale.calendar.navigation;
 
   const today = new Date();
 
@@ -74,7 +79,8 @@ export const Calendar = () => {
   const handleYearCommit = () => {
     const parsedYear = Number(yearDraft);
 
-    if (!/^\d{1,4}$/.test(yearDraft) || parsedYear < 1 || parsedYear > 9999) {
+    // só 4 dígitos: `new Date(26, …)` viraria 1926
+    if (!/^\d{4}$/.test(yearDraft) || parsedYear < MIN_YEAR || parsedYear > MAX_YEAR) {
       setYearDraft(String(selectedDate.getFullYear()));
       setIsEditingYear(false);
       return;
@@ -86,9 +92,9 @@ export const Calendar = () => {
   };
 
   const handleToday = () => {
-    const today = new Date();
+    const now = new Date();
 
-    setSelectedDate(new Date(today.getFullYear(), today.getMonth(), 1));
+    setSelectedDate(new Date(now.getFullYear(), now.getMonth(), 1));
   };
 
   useEffect(() => {
@@ -151,11 +157,6 @@ export const Calendar = () => {
 
   const eventsByDate = new Map(calendarData?.days.map((day) => [day.date, day.events]) ?? []);
 
-  const monthLabel = new Intl.DateTimeFormat('pt-BR', {
-    month: 'long',
-    year: 'numeric',
-  }).format(selectedDate);
-
   const weekdays = [
     locale.calendar.weekdays.sunday,
     locale.calendar.weekdays.monday,
@@ -180,24 +181,24 @@ export const Calendar = () => {
 
       <Styled.MonthNavigation>
         <Styled.TodayButton type="button" onClick={handleToday}>
-          Hoje
+          {navigationText.today}
         </Styled.TodayButton>
 
         <Styled.MonthNavigationButtons>
           <Styled.MonthNavigationButton
             type="button"
-            aria-label="Mês anterior"
+            aria-label={navigationText.previousMonth}
             onClick={handlePreviousMonth}
           >
-            ←
+            <LuChevronLeft aria-hidden />
           </Styled.MonthNavigationButton>
 
           <Styled.MonthNavigationButton
             type="button"
-            aria-label="Próximo mês"
+            aria-label={navigationText.nextMonth}
             onClick={handleNextMonth}
           >
-            →
+            <LuChevronRight aria-hidden />
           </Styled.MonthNavigationButton>
 
           <Styled.MonthSelector ref={monthSelectorRef}>
@@ -207,11 +208,11 @@ export const Calendar = () => {
               aria-expanded={isMonthDropdownOpen}
               onClick={() => setIsMonthDropdownOpen((current) => !current)}
             >
-              {monthLabel.split(' ')[0]}
+              {MONTH_OPTIONS[month - 1].label}
             </Styled.MonthSelectorTrigger>
 
             {isMonthDropdownOpen && (
-              <Styled.MonthOptions role="listbox" aria-label="Selecionar mês">
+              <Styled.MonthOptions role="listbox" aria-label={navigationText.selectMonth}>
                 {MONTH_OPTIONS.map((option) => (
                   <Styled.MonthOption
                     key={option.value}
@@ -227,13 +228,13 @@ export const Calendar = () => {
               </Styled.MonthOptions>
             )}
           </Styled.MonthSelector>
-          <Styled.MonthSeparator>de</Styled.MonthSeparator>
+          <Styled.MonthSeparator>{navigationText.monthYearSeparator}</Styled.MonthSeparator>
 
           {isEditingYear ? (
             <Styled.YearInputContainer>
               <Input
                 id="calendar-year"
-                label="Ano"
+                label={navigationText.year}
                 type="text"
                 inputMode="numeric"
                 maxLength={4}
@@ -259,7 +260,7 @@ export const Calendar = () => {
           ) : (
             <Styled.YearButton
               type="button"
-              aria-label="Editar ano"
+              aria-label={navigationText.editYear}
               onClick={() => {
                 setYearDraft(String(selectedDate.getFullYear()));
                 setIsEditingYear(true);
