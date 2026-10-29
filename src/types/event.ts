@@ -16,6 +16,20 @@ export type EventHost = {
   photoUrl: string | null;
 };
 
+export type EventAttendance = {
+  present: number;
+  absent: number;
+  total: number;
+};
+
+export type EventParticipant = {
+  id: string;
+  name: string;
+  photoUrl: string | null;
+  // null = presença ainda não registrada (não é o mesmo que "faltou")
+  attended: boolean | null;
+};
+
 export type EventDetails = {
   id: string;
   startsAt: string;
@@ -27,4 +41,6 @@ export type EventDetails = {
   book: EventBook | null;
   location: EventLocation | null;
   host: EventHost | null;
+  attendance: EventAttendance | null;
+  participants: EventParticipant[];
 };

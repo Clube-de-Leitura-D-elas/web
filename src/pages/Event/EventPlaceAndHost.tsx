@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { LuMapPin, LuUserRound } from 'react-icons/lu';
+import { LuMapPin } from 'react-icons/lu';
 import { locale } from '../../locales';
 import type { EventHost, EventLocation } from '../../types/event';
+import { EventAvatar } from './EventAvatar';
 import * as Styled from './styles';
 
 type EventPlaceAndHostProps = {
@@ -10,11 +10,7 @@ type EventPlaceAndHostProps = {
 };
 
 export const EventPlaceAndHost = ({ location, host }: EventPlaceAndHostProps) => {
-  // guarda a URL que falhou (e não um booleano): se a foto mudar, a nova URL volta a ser tentada
-  const [failedPhotoUrl, setFailedPhotoUrl] = useState<string | null>(null);
-
   const text = locale.event_details.placeAndHost;
-  const photoUrl = host?.photoUrl ?? null;
 
   return (
     <Styled.PlaceHostList>
@@ -42,18 +38,7 @@ export const EventPlaceAndHost = ({ location, host }: EventPlaceAndHostProps) =>
 
         {host ? (
           <Styled.HostLink to={`/participantes/${host.id}`}>
-            <Styled.HostAvatar aria-hidden>
-              {photoUrl && photoUrl !== failedPhotoUrl ? (
-                <img
-                  src={photoUrl}
-                  alt=""
-                  loading="lazy"
-                  onError={() => setFailedPhotoUrl(photoUrl)}
-                />
-              ) : (
-                <LuUserRound />
-              )}
-            </Styled.HostAvatar>
+            <EventAvatar photoUrl={host.photoUrl} size="md" />
 
             <Styled.HostName>{host.name}</Styled.HostName>
           </Styled.HostLink>
