@@ -5,12 +5,21 @@ import { DefaultLayout } from '../../layouts/DefaultLayout';
 
 import { locale } from '../../locales';
 import {
+  getCities,
   getParticipantById,
   getParticipantGroups,
   getParticipantPresence,
+  getZones,
+  updateParticipant,
   updateParticipantStatus,
 } from '../../services/participantService';
-import type { Participant, ParticipantGroup, ParticipantPresence } from '../../types/participant';
+import type {
+  Participant,
+  ParticipantGroup,
+  ParticipantOption,
+  ParticipantPresence,
+  ParticipantZoneOption,
+} from '../../types/participant';
 
 import { ParticipantDetails } from '.';
 
@@ -29,10 +38,35 @@ const participant: Participant = {
   birthDate: '1990-10-24',
   job: 'Advogada',
   active: true,
+  appRole: 'MANAGER',
   photo: null,
   // 01:30 UTC de 16/03 ainda é 15/03 em São Paulo
   entryDate: '2025-03-16T01:30:00Z',
 };
+
+const cities: ParticipantOption[] = [
+  { id: '41111111-1111-1111-1111-111111111111', name: 'Porto Alegre' },
+  { id: '42222222-2222-2222-2222-222222222222', name: 'São Paulo' },
+  { id: '43333333-3333-3333-3333-333333333333', name: 'Canoas' },
+];
+
+const zones: ParticipantZoneOption[] = [
+  {
+    id: '51111111-1111-1111-1111-111111111111',
+    name: 'Zona Leste',
+    cityId: '41111111-1111-1111-1111-111111111111',
+  },
+  {
+    id: '52222222-2222-2222-2222-222222222222',
+    name: 'Zona Sul',
+    cityId: '41111111-1111-1111-1111-111111111111',
+  },
+  {
+    id: '53333333-3333-3333-3333-333333333333',
+    name: 'Zona Sul',
+    cityId: '42222222-2222-2222-2222-222222222222',
+  },
+];
 
 const groups: ParticipantGroup[] = [
   {
@@ -143,6 +177,14 @@ const meta = {
 
       return active;
     });
+
+    mocked(getCities).mockResolvedValue(cities);
+
+    mocked(getZones).mockResolvedValue(zones);
+
+    mocked(updateParticipant).mockImplementation(async () => {
+      await wait(REQUEST_DELAY);
+    });
   },
 } satisfies Meta<typeof ParticipantDetails>;
 
@@ -203,5 +245,44 @@ export const ChangeStatus: Story = {
         name: locale.participant_details.status.activate,
       }),
     ).toBeInTheDocument();
+  },
+};
+
+export const EditParticipantClose: Story = {
+  play: async ({ canvas, userEvent }) => {
+    await canvas.findByText(participant.name);
+
+    await userEvent.click(
+      canvas.getByRole('button', { name: locale.participant_details.editButton }),
+    );
+
+    await expect(await canvas.findByRole('dialog')).toBeInTheDocument();
+
+    await userEvent.keyboard('{Escape}');
+
+    await expect(canvas.queryByRole('dialog')).not.toBeInTheDocument();
+  },
+};
+
+export const EditParticipantError: Story = {
+  beforeEach: () => {
+    mocked(updateParticipant).mockRejectedValue(new Error('could not update participant'));
+  },
+  play: async ({ canvas, userEvent }) => {
+    await canvas.findByText(participant.name);
+
+    await userEvent.click(
+      canvas.getByRole('button', { name: locale.participant_details.editButton }),
+    );
+
+    await userEvent.click(
+      await canvas.findByRole('button', { name: locale.participant_details.modal.save }),
+    );
+
+    // O erro aparece e o modal continua aberto.
+    await expect(await canvas.findByRole('alert')).toHaveTextContent(
+      'could not update participant',
+    );
+    await expect(canvas.getByRole('dialog')).toBeInTheDocument();
   },
 };

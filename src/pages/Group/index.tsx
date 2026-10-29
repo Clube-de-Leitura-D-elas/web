@@ -28,6 +28,7 @@ import type {
   GroupFormValues,
   GroupMeetingHistoryItem,
   GroupOption,
+  GroupZoneOption,
   GroupParticipantListItem,
 } from '../../types/group';
 
@@ -81,7 +82,7 @@ export const GroupDetails = () => {
   const [savingLocation, setSavingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [cities, setCities] = useState<GroupOption[]>([]);
-  const [zones, setZones] = useState<GroupOption[]>([]);
+  const [zones, setZones] = useState<GroupZoneOption[]>([]);
   const [optionsError, setOptionsError] = useState(false);
 
   useEffect(() => {

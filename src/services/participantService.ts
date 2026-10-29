@@ -1,4 +1,14 @@
-import type { Participant, ParticipantGroupsPage, ParticipantPresence } from '../types/participant';
+import { FunctionsHttpError } from '@supabase/supabase-js';
+
+import { locale } from '../locales';
+import type {
+  Participant,
+  ParticipantGroupsPage,
+  ParticipantOption,
+  ParticipantPresence,
+  ParticipantZoneOption,
+  UpdateParticipantInput,
+} from '../types/participant';
 import { supabase } from './supabaseClient';
 
 type ParticipantResponse = {
@@ -10,6 +20,7 @@ type ParticipantResponse = {
   birth_date: string | null;
   job: string | null;
   is_active: boolean;
+  app_role: string | null;
   city: string | null;
   zone: string | null;
   entry_date?: string | null;
@@ -58,6 +69,12 @@ export async function getParticipantById(participantId: string): Promise<Partici
     active: data.is_active,
     city: data.city,
     zone: data.zone,
+    appRole:
+      data.app_role?.toUpperCase() === 'FOUNDER'
+        ? 'FOUNDER'
+        : data.app_role?.toUpperCase() === 'MANAGER'
+          ? 'MANAGER'
+          : 'READER',
     entryDate: data.entry_date ?? null,
     photo: data.photo ?? null,
   };
@@ -112,4 +129,56 @@ export async function updateParticipantStatus(
   if (!data) throw new Error('update-participant-status returned no data');
 
   return data.is_active;
+}
+
+export async function getCities(): Promise<ParticipantOption[]> {
+  const { data, error } = await supabase.from('cities').select('id, name').order('name');
+  if (error) throw error;
+
+  return (data ?? []) as ParticipantOption[];
+}
+
+export async function getZones(): Promise<ParticipantZoneOption[]> {
+  const { data, error } = await supabase.from('zones').select('id, name, city_id').order('name');
+  if (error) throw error;
+
+  return (data ?? []).map(({ id, name, city_id }) => ({ id, name, cityId: city_id }));
+}
+
+async function readFunctionErrorMessage(error: unknown): Promise<string | null> {
+  if (!(error instanceof FunctionsHttpError)) return null;
+
+  try {
+    const body = await error.context.json();
+    return typeof body?.error === 'string' && body.error ? body.error : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateParticipant(
+  participantId: string,
+  input: UpdateParticipantInput,
+): Promise<void> {
+  const { error } = await supabase.functions.invoke('update-participant-web', {
+    body: {
+      participant_id: participantId,
+      name: input.name,
+      email: input.email,
+      phone: input.phone,
+      instagram: input.instagram,
+      city_id: input.cityId,
+      zone_id: input.zoneId,
+      birth_date: input.birthDate,
+      job: input.job,
+      app_role: input.appRole,
+    },
+  });
+
+  if (error) {
+    console.error('update-participant-web error', error);
+    throw new Error(
+      (await readFunctionErrorMessage(error)) ?? locale.participant_details.modal.saveError,
+    );
+  }
 }

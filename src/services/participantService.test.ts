@@ -21,6 +21,7 @@ describe('getParticipantById', () => {
       birth_date: '1990-10-24',
       job: 'Advogada',
       is_active: true,
+      app_role: 'READER',
       city: 'Porto Alegre',
       zone: null,
       entry_date: '2025-03-15',
@@ -30,6 +31,7 @@ describe('getParticipantById', () => {
     await expect(getParticipantById('p1')).resolves.toEqual({
       id: 'p1',
       name: 'Joseane',
+      appRole: 'READER',
       phone: '51999999999',
       instagram: '@jo',
       email: 'jo@gmail.com',
