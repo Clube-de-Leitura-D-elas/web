@@ -24,6 +24,13 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  // Testes e utilitários de teste não passam pelo fast refresh do Vite.
+  {
+    files: ['**/*.test.{ts,tsx}', 'src/test/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
   // Regras específicas de arquivos de story.
   ...storybook.configs['flat/recommended'],
   // Keep last: turns off every rule that would fight Prettier.

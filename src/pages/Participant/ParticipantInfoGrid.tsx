@@ -53,7 +53,7 @@ export const ParticipantInfoGrid = ({ participant, presence }: ParticipantInfoGr
       </Styled.Detail>
 
       <Styled.Detail>
-        <Styled.DetailLabel>{locale.participant_details.details.zone}</Styled.DetailLabel>
+        <Styled.DetailLabel>{locale.participant_details.details.birthday}</Styled.DetailLabel>
 
         <Styled.DetailValue>{formatBirthDate(participant.birthDate)}</Styled.DetailValue>
       </Styled.Detail>
