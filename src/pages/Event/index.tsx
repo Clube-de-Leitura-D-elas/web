@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { BackButton } from '../../components/BackButton';
 import { Button } from '../../components/Button';
@@ -7,6 +7,9 @@ import { interpolate, locale } from '../../locales';
 import { getEventDetails } from '../../services/eventService';
 import type { EventDetails as EventDetailsData } from '../../types/event';
 import { formatEventDateTime } from '../../utils/date';
+import { EventBook } from './EventBook';
+import { EventParticipation } from './EventParticipation';
+import { EventPlaceAndHost } from './EventPlaceAndHost';
 import * as Styled from './styles';
 
 export const EventDetails = () => {
@@ -49,11 +52,25 @@ export const EventDetails = () => {
 
   const groupPath = `/grupos/${event.group.id}`;
 
-  // containers das seções; o conteúdo de cada uma entra nas issues 204 a 207
-  const sections = [
-    { key: 'participation', title: locale.event_details.sections.participation },
-    { key: 'book', title: locale.event_details.sections.book },
-    { key: 'placeAndHost', title: locale.event_details.sections.placeAndHost },
+  // seções sem `content` mostram "Em breve"; o conteúdo das que faltam entra na issue 207
+  const sections: { key: string; title: string; content?: ReactNode }[] = [
+    {
+      key: 'participation',
+      title: locale.event_details.sections.participation,
+      content: (
+        <EventParticipation attendance={event.attendance} participants={event.participants} />
+      ),
+    },
+    {
+      key: 'book',
+      title: locale.event_details.sections.book,
+      content: <EventBook book={event.book} />,
+    },
+    {
+      key: 'placeAndHost',
+      title: locale.event_details.sections.placeAndHost,
+      content: <EventPlaceAndHost location={event.location} host={event.host} />,
+    },
     { key: 'photos', title: locale.event_details.sections.photos },
   ];
 
@@ -84,10 +101,14 @@ export const EventDetails = () => {
       </Styled.Header>
 
       <Styled.Sections>
-        {sections.map(({ key, title }) => (
-          <Styled.Section key={key} aria-labelledby={`event-section-${key}`}>
+        {sections.map(({ key, title, content }) => (
+          <Styled.Section
+            key={key}
+            $filled={Boolean(content)}
+            aria-labelledby={`event-section-${key}`}
+          >
             <Styled.SectionTitle id={`event-section-${key}`}>{title}</Styled.SectionTitle>
-            <Styled.ComingSoon>{locale.event_details.comingSoon}</Styled.ComingSoon>
+            {content ?? <Styled.ComingSoon>{locale.event_details.comingSoon}</Styled.ComingSoon>}
           </Styled.Section>
         ))}
       </Styled.Sections>

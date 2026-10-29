@@ -119,22 +119,20 @@ export const Groups = () => {
 
       const rows = items.map((group: GroupListItem) => ({
         name: (
-          <Styled.GroupLink to={`/grupos/${group.id}`}>
-            <Styled.GroupInfo>
-              <Styled.GroupName>
-                {interpolate(locale.groups.table.groupName, {
-                  number: String(group.number).padStart(2, '0'),
-                  description: group.description,
-                })}
-              </Styled.GroupName>
+          <Styled.GroupInfo>
+            <Styled.GroupName>
+              {interpolate(locale.groups.table.groupName, {
+                number: String(group.number).padStart(2, '0'),
+                description: group.description,
+              })}
+            </Styled.GroupName>
 
-              <Styled.GroupCreatedAt>
-                {interpolate(locale.groups.table.createdAt, {
-                  date: formatMonthYear(group.createdAt),
-                })}
-              </Styled.GroupCreatedAt>
-            </Styled.GroupInfo>
-          </Styled.GroupLink>
+            <Styled.GroupCreatedAt>
+              {interpolate(locale.groups.table.createdAt, {
+                date: formatMonthYear(group.createdAt),
+              })}
+            </Styled.GroupCreatedAt>
+          </Styled.GroupInfo>
         ),
 
         city: group.city?.name ?? locale.groups.table.emptyCity,

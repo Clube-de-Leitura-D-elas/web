@@ -106,9 +106,7 @@ export const Participants = () => {
       const rows = items.map((p: ParticipantListItem) => {
         const groupCount = p.group_users?.length ?? 0;
         return {
-          name: (
-            <Styled.ParticipantLink to={`/participantes/${p.id}`}>{p.name}</Styled.ParticipantLink>
-          ),
+          name: <Styled.ParticipantName>{p.name}</Styled.ParticipantName>,
           groups: (
             <Tag color="neutral">
               {groupCount === 1

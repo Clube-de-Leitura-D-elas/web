@@ -32,3 +32,6 @@ storybook-static
 
 # Cloudflare Wrangler
 .wrangler
+
+# Testes
+coverage

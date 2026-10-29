@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router';
 import { LuCalendar, LuMapPin, LuStar, LuUserRound } from 'react-icons/lu';
 import { BackButton } from '../../components/BackButton';
+import { ActionMenu } from '../../components/ActionMenu';
 import * as Styled from './styles';
 import { GroupModal } from './GroupModal';
 import { Modal } from '../../components/Modal';
@@ -22,12 +23,14 @@ import {
   getGroupZones,
   updateGroupLocation,
   updateGroupStatus,
+  updateGroupParticipant,
 } from '../../services/groupService';
 import type {
   GroupDetails as GroupDetailsData,
   GroupFormValues,
   GroupMeetingHistoryItem,
   GroupOption,
+  GroupZoneOption,
   GroupParticipantListItem,
 } from '../../types/group';
 
@@ -75,13 +78,20 @@ export const GroupDetails = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<GroupDetailsTab>('participants');
+  const [participantsVersion, setParticipantsVersion] = useState(0);
+  const [selectedParticipant, setSelectedParticipant] = useState<GroupParticipantListItem | null>(
+    null,
+  );
+  const [participantAction, setParticipantAction] = useState<'promote' | 'remove' | null>(null);
+  const [savingParticipant, setSavingParticipant] = useState(false);
+  const [participantError, setParticipantError] = useState<string | null>(null);
   const [result, setResult] = useState<{ id: string; group: GroupDetailsData | null } | null>(null);
 
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [cities, setCities] = useState<GroupOption[]>([]);
-  const [zones, setZones] = useState<GroupOption[]>([]);
+  const [zones, setZones] = useState<GroupZoneOption[]>([]);
   const [optionsError, setOptionsError] = useState(false);
 
   useEffect(() => {
@@ -201,6 +211,25 @@ export const GroupDetails = () => {
     }
   };
 
+  const confirmParticipantAction = async () => {
+    if (!selectedParticipant || !participantAction || savingParticipant) return;
+    setSavingParticipant(true);
+    setParticipantError(null);
+    try {
+      await updateGroupParticipant(groupId, selectedParticipant.id, participantAction);
+      const updatedGroup = await getGroupDetails(groupId);
+      setResult({ id: groupId, group: updatedGroup });
+      setParticipantsVersion((version) => version + 1);
+      setSelectedParticipant(null);
+      setParticipantAction(null);
+    } catch (err) {
+      console.error(err);
+      setParticipantError(locale.group_details.participantActions.error);
+    } finally {
+      setSavingParticipant(false);
+    }
+  };
+
   //aba 1
   const participantColumns: TableColumn[] = useMemo(
     () => [
@@ -221,12 +250,13 @@ export const GroupDetails = () => {
 
   const fetchParticipants = useCallback(
     async (request: TablePageRequest): Promise<TablePage> => {
+      void participantsVersion;
       const { items, total } = await getGroupParticipantsPage(groupId, request);
 
       const rows = items.map((p: GroupParticipantListItem) => ({
         name: (
           <Styled.NameCell>
-            <Styled.ParticipantLink to={`/participantes/${p.id}`}>{p.name}</Styled.ParticipantLink>
+            <Styled.ParticipantName>{p.name}</Styled.ParticipantName>
             {p.is_coordinator && (
               <Styled.CoordinatorTag>
                 {locale.group_details.table.coordinatorTag}
@@ -258,19 +288,41 @@ export const GroupDetails = () => {
         ),
         email: p.email || locale.group_details.table.emptyValue,
         actions: (
-          <Styled.ActionsButton
-            type="button"
-            aria-label={interpolate(locale.group_details.table.actionsAriaLabel, { name: p.name })}
-          >
-            ⋮
-          </Styled.ActionsButton>
+          <ActionMenu
+            ariaLabel={interpolate(locale.group_details.table.actionsAriaLabel, {
+              name: p.name,
+            })}
+            items={[
+              ...(!p.is_coordinator
+                ? [
+                    {
+                      label: locale.group_details.participantActions.promote,
+                      onClick: () => {
+                        setSelectedParticipant(p);
+                        setParticipantAction('promote');
+                        setParticipantError(null);
+                      },
+                    },
+                  ]
+                : []),
+              {
+                label: locale.group_details.participantActions.remove,
+                variant: 'danger' as const,
+                onClick: () => {
+                  setSelectedParticipant(p);
+                  setParticipantAction('remove');
+                  setParticipantError(null);
+                },
+              },
+            ]}
+          />
         ),
         rowHref: `/participantes/${p.id}`,
       }));
 
       return { rows, total };
     },
-    [groupId, locale],
+    [groupId, locale, participantsVersion],
   );
 
   //aba 2
@@ -304,7 +356,7 @@ export const GroupDetails = () => {
             : 0;
 
         return {
-          date: <Styled.MeetingLink to={`/eventos/${m.id}`}>{date}</Styled.MeetingLink>,
+          date: date,
           book: interpolate(locale.group_details.history.book, {
             title: m.book_title,
             author: m.book_author,
@@ -493,6 +545,36 @@ export const GroupDetails = () => {
         onChange={(value) => setActiveTab(value as GroupDetailsTab)}
         size="lg"
       />
+
+      <Modal
+        isOpen={participantAction !== null && selectedParticipant !== null}
+        onClose={() => {
+          if (savingParticipant) return;
+          setParticipantAction(null);
+          setParticipantError(null);
+          setSelectedParticipant(null);
+        }}
+        title={
+          participantAction === 'remove'
+            ? locale.group_details.participantActions.removeTitle
+            : locale.group_details.participantActions.promoteTitle
+        }
+        description={interpolate(
+          participantAction === 'remove'
+            ? locale.group_details.participantActions.removeDescription
+            : locale.group_details.participantActions.promoteDescription,
+          { name: selectedParticipant?.name ?? '' },
+        )}
+        confirmText={
+          participantAction === 'remove'
+            ? locale.group_details.participantActions.remove
+            : locale.group_details.participantActions.promote
+        }
+        confirmDisabled={savingParticipant}
+        onConfirm={confirmParticipantAction}
+      >
+        {participantError && <p role="alert">{participantError}</p>}
+      </Modal>
 
       <GroupModal
         isOpen={isLocationModalOpen}

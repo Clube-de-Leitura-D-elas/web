@@ -55,6 +55,9 @@ export type GroupOption = {
   name: string;
 };
 
+/** Zona com a cidade a que pertence: "Zona Sul" existe em mais de uma cidade. */
+export type GroupZoneOption = GroupOption & { cityId: string };
+
 export type GroupFormValues = {
   description: string;
   city_id: string;

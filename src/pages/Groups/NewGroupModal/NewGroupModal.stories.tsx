@@ -13,7 +13,7 @@ import { NewGroupModal } from '.';
 
 const text = locale.groups.newGroupModal;
 
-const GROUP_NAME = 'Grupo 43';
+const GROUP_NAME = 'Grupo - 43';
 
 const CITY = {
   value: 'city-1',
@@ -40,9 +40,10 @@ const LOCATION_OPTIONS = [CITY, ZONE_NORTH, ZONE_SOUTH, CITY_SAO_PAULO];
 const COORDINATOR = MOCK_COORDINATOR_OPTIONS[0];
 
 const loadMockOptions = async () =>
-  [LOCATION_OPTIONS, MOCK_COORDINATOR_OPTIONS] as [
+  [LOCATION_OPTIONS, MOCK_COORDINATOR_OPTIONS, 43] as [
     typeof LOCATION_OPTIONS,
     typeof MOCK_COORDINATOR_OPTIONS,
+    number,
   ];
 
 const meta = {
@@ -59,7 +60,7 @@ const meta = {
           'Na aplicação real, são carregadas pelo serviço de grupos.',
           '',
           'A pesquisa começa a partir de 3 caracteres e ignora acentos e caixa.',
-          'O salvamento exige número de grupo válido e localização selecionada.',
+          'O nome é gerado automaticamente, sem edição; o salvamento exige localização selecionada.',
           'A coordenadora é opcional.',
         ].join('\n'),
       },
@@ -123,10 +124,6 @@ const waitForLocations = async (context: PlayContext) => {
   await waitFor(() => expect(getCityInput(context)).toBeEnabled());
 };
 
-const fillGroupName = async (context: PlayContext) => {
-  await context.userEvent.type(getNameInput(context), GROUP_NAME);
-};
-
 const selectLocation = async (
   context: PlayContext,
   search: string,
@@ -141,7 +138,6 @@ const selectLocation = async (
 };
 
 const fillRequiredFields = async (context: PlayContext) => {
-  await fillGroupName(context);
   await selectLocation(context, 'porto', CITY);
 };
 
@@ -164,6 +160,8 @@ export const SaveWithCity: Story = {
 
     await fillRequiredFields(context);
 
+    await expect(getNameInput(context)).toHaveValue(GROUP_NAME);
+    await expect(getNameInput(context)).toBeDisabled();
     await expect(getCityInput(context)).toHaveValue(CITY.label);
     await expect(getSaveButton(context)).toBeEnabled();
 
@@ -171,7 +169,6 @@ export const SaveWithCity: Story = {
 
     await waitFor(() =>
       expect(args.createGroupRequest).toHaveBeenCalledWith({
-        name: GROUP_NAME,
         cityId: CITY.value,
         coordinatorId: null,
       }),
@@ -185,7 +182,6 @@ export const SaveWithZone: Story = {
   play: async (context) => {
     const { args, userEvent } = context;
 
-    await fillGroupName(context);
     await selectLocation(context, 'porto', ZONE_SOUTH);
 
     await expect(getCityInput(context)).toHaveValue(ZONE_SOUTH.label);
@@ -194,7 +190,6 @@ export const SaveWithZone: Story = {
 
     await waitFor(() =>
       expect(args.createGroupRequest).toHaveBeenCalledWith({
-        name: GROUP_NAME,
         cityId: ZONE_SOUTH.value,
         coordinatorId: null,
       }),
@@ -221,7 +216,6 @@ export const CityNotFound: Story = {
   play: async (context) => {
     const { canvas, userEvent } = context;
 
-    await fillGroupName(context);
     await waitForLocations(context);
 
     await userEvent.type(getCityInput(context), 'cidade inexistente');
@@ -234,7 +228,6 @@ export const CityNotFound: Story = {
 
 export const TextWithoutSelection: Story = {
   play: async (context) => {
-    await fillGroupName(context);
     await waitForLocations(context);
 
     await context.userEvent.type(getCityInput(context), 'Porto Alegre');
@@ -255,25 +248,30 @@ export const ChangeInvalidatesSelection: Story = {
   },
 };
 
-export const NameAloneDoesNotEnableSave: Story = {
+export const GeneratedNameAloneDoesNotEnableSave: Story = {
   play: async (context) => {
-    await fillGroupName(context);
-
+    await waitForLocations(context);
+    await expect(getNameInput(context)).toHaveValue(GROUP_NAME);
     await expect(getSaveButton(context)).toBeDisabled();
   },
 };
 
-export const InvalidGroupNumberDoesNotEnableSave: Story = {
+export const FirstGroupUsesLeadingZero: Story = {
+  args: {
+    loadOptionsRequest: fn().mockResolvedValue([LOCATION_OPTIONS, MOCK_COORDINATOR_OPTIONS, 1]),
+  },
   play: async (context) => {
-    const { canvas, userEvent } = context;
+    await waitForLocations(context);
+    await expect(getNameInput(context)).toHaveValue('Grupo - 01');
+  },
+};
 
-    await userEvent.type(getNameInput(context), 'Grupo 43 — Moinhos de Vento');
+export const GeneratedNameCannotBeEdited: Story = {
+  play: async (context) => {
+    await waitForLocations(context);
 
-    await selectLocation(context, 'porto', CITY);
-
-    await expect(getSaveButton(context)).toBeDisabled();
-
-    await expect(canvas.getByText(text.name.invalid)).toBeInTheDocument();
+    await expect(getNameInput(context)).toHaveValue(GROUP_NAME);
+    await expect(getNameInput(context)).toBeDisabled();
   },
 };
 
@@ -295,7 +293,6 @@ export const SaveWithCoordinator: Story = {
 
     await waitFor(() =>
       expect(args.createGroupRequest).toHaveBeenCalledWith({
-        name: GROUP_NAME,
         cityId: CITY.value,
         coordinatorId: COORDINATOR.value,
       }),
@@ -307,7 +304,6 @@ export const KeyboardOnly: Story = {
   play: async (context) => {
     const { canvas, userEvent } = context;
 
-    await fillGroupName(context);
     await waitForLocations(context);
 
     const cityInput = getCityInput(context);

@@ -4,6 +4,7 @@ import type {
   GroupDetails,
   GroupMeetingHistoryItem,
   GroupOption,
+  GroupZoneOption,
   GroupParticipantListItem,
   UpdateGroupLocationInput,
 } from '../types/group';
@@ -44,7 +45,6 @@ export const updateGroupStatus = async (groupId: string, isActive: boolean): Pro
 };
 
 export type CreateGroupPayload = {
-  name: string;
   cityId: string;
   coordinatorId: string | null;
 };
@@ -79,16 +79,19 @@ export async function createGroup(payload: CreateGroupPayload): Promise<CreateGr
   return data;
 }
 
-async function getOptions(table: 'cities' | 'zones'): Promise<GroupOption[]> {
-  const { data, error } = await supabase.from(table).select('id, name').order('name');
+export async function getGroupCities(): Promise<GroupOption[]> {
+  const { data, error } = await supabase.from('cities').select('id, name').order('name');
   if (error) throw error;
 
   return (data ?? []) as GroupOption[];
 }
 
-export const getGroupCities = () => getOptions('cities');
+export async function getGroupZones(): Promise<GroupZoneOption[]> {
+  const { data, error } = await supabase.from('zones').select('id, name, city_id').order('name');
+  if (error) throw error;
 
-export const getGroupZones = () => getOptions('zones');
+  return (data ?? []).map(({ id, name, city_id }) => ({ id, name, cityId: city_id }));
+}
 
 // Extrai a mensagem `{ error: "..." }` devolvida pela edge function, quando existir.
 async function readFunctionErrorMessage(error: unknown): Promise<string | null> {
@@ -125,4 +128,15 @@ export async function updateGroupLocation(
   if (!data) {
     throw new Error(locale.group_details.modal.modalError);
   }
+}
+
+export async function updateGroupParticipant(
+  groupId: string,
+  participantId: string,
+  action: 'promote' | 'remove',
+): Promise<void> {
+  const { error } = await supabase.functions.invoke('update-group-participant-web', {
+    body: { groupId, participantId, action },
+  });
+  if (error) throw error;
 }

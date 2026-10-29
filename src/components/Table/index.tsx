@@ -1,8 +1,7 @@
-import { useEffect, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { interpolate, locale } from '../../locales';
 import { Button } from '../Button';
 import * as Styled from './styles';
-import { useNavigate } from 'react-router';
 
 export type TableAlign = 'left' | 'center' | 'right';
 
@@ -57,8 +56,6 @@ type PageCache = {
 const DEFAULT_PAGE_SIZE = 6;
 const MAX_VISIBLE_PAGES = 3;
 const SKELETON_WIDTHS = ['70%', '45%', '60%', '35%', '55%'];
-const INTERACTIVE_SELECTOR =
-  'a, button, input, select, textarea, label, [role="button"], [role="menuitem"],[data-row-ignore]';
 
 const createCache = (fetchPage: TableFetchPage | undefined, pageSize: number): PageCache => ({
   fetchPage,
@@ -81,7 +78,6 @@ export const Table = ({
   pageSize = DEFAULT_PAGE_SIZE,
   itemLabel = locale.table.defaultItemLabel,
 }: TableProps) => {
-  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [cache, setCache] = useState(() => createCache(fetchPage, pageSize));
 
@@ -148,31 +144,6 @@ export const Table = ({
     itemLabel,
   });
 
-  const openRow = (href: string, newTab: boolean) => {
-    if (newTab) {
-      window.open(href, '_blank', 'noopener');
-      return;
-    }
-    navigate(href);
-  };
-
-  const handleRowClick = (event: MouseEvent<HTMLTableRowElement>, href: string) => {
-    const target = event.target as HTMLElement;
-    if (!event.currentTarget.contains(target)) return;
-
-    if (target.closest(INTERACTIVE_SELECTOR)) return;
-
-    if (window.getSelection()?.toString()) return;
-
-    openRow(href, event.metaKey || event.ctrlKey);
-  };
-
-  const handleRowKeyDown = (event: KeyboardEvent<HTMLTableRowElement>, href: string) => {
-    if (event.target !== event.currentTarget) return;
-
-    if (event.key === 'Enter') openRow(href, event.metaKey || event.ctrlKey);
-  };
-
   const renderRow = (
     key: number,
     renderCell: (column: TableColumn, columnIndex: number) => ReactNode,
@@ -182,15 +153,10 @@ export const Table = ({
     const isClickable = href !== undefined;
 
     return (
-      <Styled.Row
-        key={key}
-        $clickable={isClickable}
-        tabIndex={isClickable ? 0 : undefined}
-        onClick={isClickable ? (event) => handleRowClick(event, href) : undefined}
-        onKeyDown={isClickable ? (event) => handleRowKeyDown(event, href) : undefined}
-      >
+      <Styled.Row key={key} $clickable={isClickable}>
         {columns.map((column, columnIndex) => {
           const align = column.align ?? 'center';
+          const content = renderCell(column, columnIndex);
           return (
             <Styled.Cell
               key={column.key}
@@ -198,7 +164,13 @@ export const Table = ({
               data-row-ignore={column.ignoreRowClick ? '' : undefined}
             >
               <Styled.CellContent $align={align}>
-                {renderCell(column, columnIndex)}
+                {isClickable && columnIndex === 0 ? (
+                  <Styled.RowLink to={href} data-row-link>
+                    {content}
+                  </Styled.RowLink>
+                ) : (
+                  content
+                )}
               </Styled.CellContent>
             </Styled.Cell>
           );

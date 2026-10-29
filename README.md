@@ -10,16 +10,17 @@ Plataforma web responsiva para gestão e organização do Clube de Leitura D'Ela
 Você não precisa dominar tudo isso agora. A lista serve para você saber o nome das coisas quando
 for pesquisar.
 
-| Ferramenta                                                       | Para que serve no projeto                                  |
-| ---------------------------------------------------------------- | ---------------------------------------------------------- |
-| [React](https://react.dev/)                                      | Monta a tela em pedaços reutilizáveis (os "componentes")   |
-| [TypeScript](https://www.typescriptlang.org/)                    | JavaScript com tipos: o editor avisa o erro antes de rodar |
-| [Vite](https://vite.dev/)                                        | Servidor de desenvolvimento e empacotador                  |
-| [React Router](https://reactrouter.com/)                         | Controla qual página aparece em cada endereço              |
-| [styled-components](https://styled-components.com/)              | Escreve o CSS dentro do TypeScript                         |
-| [Storybook](https://storybook.js.org/)                           | Catálogo onde você vê e testa cada componente sozinho      |
-| [ESLint](https://eslint.org/) + [Prettier](https://prettier.io/) | Apontam erros e formatam o código no padrão do time        |
-| [Yarn](https://classic.yarnpkg.com/)                             | Instala as bibliotecas do projeto                          |
+| Ferramenta                                                                   | Para que serve no projeto                                  |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| [React](https://react.dev/)                                                  | Monta a tela em pedaços reutilizáveis (os "componentes")   |
+| [TypeScript](https://www.typescriptlang.org/)                                | JavaScript com tipos: o editor avisa o erro antes de rodar |
+| [Vite](https://vite.dev/)                                                    | Servidor de desenvolvimento e empacotador                  |
+| [React Router](https://reactrouter.com/)                                     | Controla qual página aparece em cada endereço              |
+| [styled-components](https://styled-components.com/)                          | Escreve o CSS dentro do TypeScript                         |
+| [Storybook](https://storybook.js.org/)                                       | Catálogo onde você vê e testa cada componente sozinho      |
+| [ESLint](https://eslint.org/) + [Prettier](https://prettier.io/)             | Apontam erros e formatam o código no padrão do time        |
+| [Jest](https://jestjs.io/) + [Testing Library](https://testing-library.com/) | Testes automatizados dos componentes, telas e services     |
+| [Yarn](https://classic.yarnpkg.com/)                                         | Instala as bibliotecas do projeto                          |
 
 ---
 
@@ -106,23 +107,52 @@ parte dos casos —, faça um novo commit e tente de novo.
 Quando o PR é aberto, **quem abriu vira assignee** (GitHub Action) e o time **AGES III** é
 solicitado como reviewer (`.github/CODEOWNERS`) — tudo automático.
 
+A cada push no PR, a GitHub Action **CI** (`.github/workflows/ci.yml`) roda de novo o
+`typecheck`, o `lint` e o `format:check` e também **todos os testes** (`yarn test`). O resultado
+aparece no fim do PR; se ficar vermelho, clique em **Details** para ver o que falhou. O relatório
+de cobertura fica nos artefatos da execução.
+
 > Em uma emergência dá para pular os hooks com `git commit --no-verify` ou `git push --no-verify`.
 > O problema não some, só aparece mais tarde na revisão — use apenas se souber o que está fazendo.
 
 ## Todos os scripts
 
-| Comando             | Descrição                                            |
-| ------------------- | ---------------------------------------------------- |
-| `yarn dev`          | Inicia o servidor de desenvolvimento com hot reload  |
-| `yarn docs`         | Inicia o Storybook (catálogo de componentes)         |
-| `yarn docs:build`   | Gera o Storybook estático em `storybook-static/`     |
-| `yarn build`        | Checa os tipos e gera o build de produção em `dist/` |
-| `yarn preview`      | Serve localmente o build de produção                 |
-| `yarn typecheck`    | Roda o compilador TypeScript sem gerar arquivos      |
-| `yarn lint`         | Analisa o código com ESLint                          |
-| `yarn lint:fix`     | Corrige automaticamente o que o ESLint conseguir     |
-| `yarn format`       | Formata todos os arquivos com Prettier               |
-| `yarn format:check` | Verifica a formatação sem alterar arquivos           |
+| Comando              | Descrição                                            |
+| -------------------- | ---------------------------------------------------- |
+| `yarn dev`           | Inicia o servidor de desenvolvimento com hot reload  |
+| `yarn docs`          | Inicia o Storybook (catálogo de componentes)         |
+| `yarn docs:build`    | Gera o Storybook estático em `storybook-static/`     |
+| `yarn build`         | Checa os tipos e gera o build de produção em `dist/` |
+| `yarn preview`       | Serve localmente o build de produção                 |
+| `yarn typecheck`     | Roda o compilador TypeScript sem gerar arquivos      |
+| `yarn lint`          | Analisa o código com ESLint                          |
+| `yarn lint:fix`      | Corrige automaticamente o que o ESLint conseguir     |
+| `yarn format`        | Formata todos os arquivos com Prettier               |
+| `yarn format:check`  | Verifica a formatação sem alterar arquivos           |
+| `yarn test`          | Roda todos os testes uma vez                         |
+| `yarn test:watch`    | Roda os testes de novo a cada arquivo salvo          |
+| `yarn test:coverage` | Roda os testes e gera o relatório em `coverage/`     |
+
+## Testes
+
+Cada teste fica **ao lado do arquivo que ele testa**, com o mesmo nome da story e final
+`.test.ts(x)`: `src/components/Button/Button.test.tsx`, `src/services/groupService.test.ts`.
+
+- **Componentes e telas**: renderize com `renderWithProviders` (de `src/test/render.tsx`), que já
+  coloca o tema e o router. Ele devolve um `user` para clicar e digitar como a usuária faria.
+  Procure os elementos pelo que aparece na tela (`getByRole`, `getByLabelText`), e os textos pelo
+  `locale`, nunca por classe CSS.
+- **Telas que chamam o backend**: mocke o service com `jest.mock('../../services/groupService', () => ({ ... }))`
+  e defina a resposta com `jest.mocked(getGroupDetails).mockResolvedValue(...)`. Veja
+  `src/pages/Group/Group.test.tsx`. Passe sempre a função de fábrica (o segundo argumento): sem
+  ela, o Jest usaria os mocks de `services/__mocks__`, que são do Storybook.
+- **Services**: o `supabaseClient` já é trocado por um stub em todos os testes
+  (`src/test/supabaseClientMock.ts`). Defina o que a function responde com
+  `jest.mocked(supabase.functions.invoke).mockResolvedValue({ data, error: null })` e confira a
+  chamada. Veja `src/services/groupService.test.ts`.
+
+Os mocks são zerados antes de cada teste, e o fuso é fixo em `America/Sao_Paulo`, para as datas
+darem o mesmo resultado em qualquer máquina.
 
 ---
 
@@ -137,6 +167,7 @@ src/
 ├── layouts/         # moldura das telas (ex.: menu lateral + conteúdo)
 ├── pages/           # uma pasta por tela do sistema
 ├── services/        # conversa com o backend (chamadas de API)
+├── test/            # configuração e utilitários dos testes (Jest)
 ├── theme/           # cores do tema, estilos globais e provider
 ├── types/           # tipos TypeScript usados em vários lugares
 ├── App.tsx          # lista de rotas: qual endereço mostra qual página

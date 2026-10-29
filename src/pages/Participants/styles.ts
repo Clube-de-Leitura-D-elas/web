@@ -1,4 +1,3 @@
-import { Link } from 'react-router';
 import styled from 'styled-components';
 import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
 import { theme } from '../../theme/theme';
@@ -115,13 +114,6 @@ export const ParticipantName = styled.span`
   font-weight: 600;
   color: ${theme.text};
   white-space: nowrap;
-`;
-
-export const ParticipantLink = styled(Link)`
-  font-weight: 600;
-  color: ${theme.text};
-  white-space: nowrap;
-  text-decoration: none;
 `;
 
 export const Contact = styled.div`

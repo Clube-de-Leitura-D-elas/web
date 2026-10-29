@@ -1,5 +1,6 @@
 import styled, { css, keyframes } from 'styled-components';
 import type { TableAlign } from '.';
+import { Link } from 'react-router';
 
 const justifyByAlign: Record<TableAlign, string> = {
   left: 'flex-start',
@@ -64,28 +65,62 @@ export const HeaderCell = styled.th<{ $align: TableAlign }>`
   `}
 `;
 
-const clickableRow = css`
-  cursor: pointer;
-  transition: background-color 0.15s ease;
+export const RowLink = styled(Link)`
+  color: inherit;
+  gifont: inherit;
+  text-decoration: none;
 
-  &:hover {
-    background-color: ${({ theme }) => theme.surfaceSunken};
-  }
-
-  &:focus-visible {
-    outline: 0.125rem solid ${({ theme }) => theme.primary};
-    outline-offset: -0.125rem;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
   }
 `;
 
+const clickableRow = css`
+  ${({ theme }) => css`
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: ${theme.surfaceSunken};
+    }
+
+    &:has(a[data-row-link]:focus-visible) {
+      outline: 0.125rem solid ${theme.primary};
+      outline-offset: -0.125rem;
+    }
+
+    a[data-row-link]:focus-visible {
+      outline: none;
+    }
+
+    button,
+    input,
+    select,
+    textarea,
+    label,
+    [role='button'],
+    [role='menuitem'],
+    a:not([data-row-link]),
+    td[data-row-ignore] {
+      position: relative;
+      z-index: 1;
+    }
+  `}
+`;
+
 export const Row = styled.tr<{ $clickable?: boolean }>`
-  background-color: ${({ theme }) => theme.background};
+  ${({ theme, $clickable }) => css`
+    background-color: ${theme.background};
 
-  &:nth-child(even) {
-    background-color: ${({ theme }) => theme.backgroundSubtle};
-  }
+    &:nth-child(even) {
+      background-color: ${theme.backgroundSubtle};
+    }
 
-  ${({ $clickable }) => $clickable && clickableRow}
+    ${$clickable && clickableRow}
+  `}
 `;
 
 export const Cell = styled.td<{ $align: TableAlign }>`
