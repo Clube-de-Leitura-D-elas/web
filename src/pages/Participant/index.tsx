@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router';
 import { BackButton } from '../../components/BackButton';
+import { useParams, useLocation, useNavigate } from 'react-router';
 import { Table, type TableColumn, type TableFetchPage } from '../../components/Table';
 import { Tag } from '../../components/Tag';
 import { locale } from '../../locales';
@@ -82,6 +82,14 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
   const [statusError, setStatusError] = useState<string | null>(null);
 
   const [savingStatus, setSavingStatus] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (location.key === 'default') navigate('/participantes');
+    else navigate(-1);
+  };
 
   useEffect(() => {
     if (!participantId) return;
@@ -251,7 +259,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
 
   return (
     <Styled.Page>
-      <BackButton label={locale.participant_details.back} />
+      <BackButton label={locale.participant_details.back} onClick={handleBack} />
 
       <Styled.PageHeader>
         <Styled.PageTitle>{locale.participant_details.title}</Styled.PageTitle>

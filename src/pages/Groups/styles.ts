@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
 import { theme } from '../../theme/theme';
-import { Link } from 'react-router';
 
 export const Container = styled.div`
   width: 100%;
@@ -78,17 +77,6 @@ export const FiltersBar = styled.section`
 export const TableContainer = styled.div`
   width: 100%;
   overflow-x: auto;
-
-  table {
-    tbody tr {
-      cursor: pointer;
-      transition: background-color 0.15s ease;
-
-      &:hover {
-        background-color: ${theme.surfaceSunken};
-      }
-    }
-  }
 `;
 
 export const GroupInfo = styled.div`
@@ -105,13 +93,4 @@ export const GroupName = styled.span`
 export const GroupCreatedAt = styled.span`
   color: ${theme.textMuted};
   font-size: 0.75rem;
-`;
-
-export const GroupLink = styled(Link)`
-  color: inherit;
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: none;
-  }
 `;

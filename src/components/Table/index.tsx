@@ -10,9 +10,10 @@ export type TableColumn = {
   label: ReactNode;
   width?: string;
   align?: TableAlign;
+  ignoreRowClick?: boolean;
 };
 
-export type TableRow = Record<string, ReactNode>;
+export type TableRow = Record<string, ReactNode> & { rowHref?: string };
 
 export type TablePageRequest = {
   page: number;
@@ -146,20 +147,37 @@ export const Table = ({
   const renderRow = (
     key: number,
     renderCell: (column: TableColumn, columnIndex: number) => ReactNode,
-  ) => (
-    <Styled.Row key={key}>
-      {columns.map((column, columnIndex) => {
-        const align = column.align ?? 'center';
-        return (
-          <Styled.Cell key={column.key} $align={align}>
-            <Styled.CellContent $align={align}>
-              {renderCell(column, columnIndex)}
-            </Styled.CellContent>
-          </Styled.Cell>
-        );
-      })}
-    </Styled.Row>
-  );
+    row?: TableRow,
+  ) => {
+    const href = row?.rowHref;
+    const isClickable = href !== undefined;
+
+    return (
+      <Styled.Row key={key} $clickable={isClickable}>
+        {columns.map((column, columnIndex) => {
+          const align = column.align ?? 'center';
+          const content = renderCell(column, columnIndex);
+          return (
+            <Styled.Cell
+              key={column.key}
+              $align={align}
+              data-row-ignore={column.ignoreRowClick ? '' : undefined}
+            >
+              <Styled.CellContent $align={align}>
+                {isClickable && columnIndex === 0 ? (
+                  <Styled.RowLink to={href} data-row-link>
+                    {content}
+                  </Styled.RowLink>
+                ) : (
+                  content
+                )}
+              </Styled.CellContent>
+            </Styled.Cell>
+          );
+        })}
+      </Styled.Row>
+    );
+  };
 
   const renderBody = () => {
     if (isLoading) {
@@ -193,7 +211,7 @@ export const Table = ({
     }
 
     return pageRows.map((row, rowIndex) =>
-      renderRow(startIndex + rowIndex, (column) => row[column.key]),
+      renderRow(startIndex + rowIndex, (column) => row[column.key], row),
     );
   };
 

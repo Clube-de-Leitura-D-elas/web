@@ -1,4 +1,3 @@
-import { Link } from 'react-router';
 import styled from 'styled-components';
 import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
 import { theme } from '../../theme/theme';
@@ -132,21 +131,10 @@ export const TableContainer = styled.div`
   overflow: hidden;
 `;
 
-export const ParticipantLink = styled(Link)`
+export const ParticipantName = styled.span`
   font-weight: 600;
   color: ${theme.text};
-  text-decoration: none;
-
-  &:hover {
-    color: ${theme.textBrand};
-    text-decoration: underline;
-  }
-
-  ${focusRing}
 `;
-
-// mesmo visual do link de participante, usado na data do histórico de encontros
-export const MeetingLink = styled(ParticipantLink)``;
 
 export const AttendanceList = styled.div`
   display: flex;
