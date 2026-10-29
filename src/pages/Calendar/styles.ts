@@ -41,9 +41,190 @@ export const MonthTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
   color: ${theme.text};
-  margin: 0 0 1rem;
+  margin: 0;
   text-transform: capitalize;
   flex-shrink: 0;
+`;
+
+export const MonthNavigation = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+`;
+
+export const MonthNavigationButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid ${theme.border};
+  border-radius: 0.5rem;
+  background-color: ${theme.surface};
+  color: ${theme.text};
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${theme.surfaceSunken};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${theme.textBrand};
+    outline-offset: 2px;
+  }
+`;
+
+export const MonthNavigationButtons = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+`;
+
+export const MonthSelector = styled.div`
+  position: relative;
+`;
+
+export const MonthSelectorTrigger = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: ${theme.text};
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${theme.surfaceSunken};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${theme.textBrand};
+    outline-offset: 2px;
+  }
+`;
+
+export const MonthOptions = styled.div`
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  z-index: 20;
+  width: 10rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding: 0.25rem;
+  border: 1px solid ${theme.border};
+  border-radius: 0.5rem;
+  background: ${theme.surface};
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+`;
+
+export const MonthOption = styled.button<{ $isSelected: boolean }>`
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: ${({ $isSelected }) => ($isSelected ? theme.surfaceBrandSoft : 'transparent')};
+  color: ${({ $isSelected }) => ($isSelected ? theme.textBrand : theme.text)};
+  text-align: left;
+  text-transform: capitalize;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: ${theme.surfaceBrandSoft};
+    color: ${theme.textBrand};
+    outline: none;
+  }
+`;
+
+export const YearInputContainer = styled.div`
+  width: 6rem;
+  flex: 0 0 6rem;
+  display: flex;
+  align-items: center;
+
+  > div {
+    width: 100%;
+    max-width: none;
+  }
+
+  > div > label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  input {
+    text-align: center;
+  }
+`;
+
+export const YearButton = styled.button`
+  border: none;
+  background: transparent;
+  color: ${theme.text};
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${theme.surfaceSunken};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${theme.textBrand};
+    outline-offset: 2px;
+  }
+`;
+
+export const TodayButton = styled.button`
+  padding: 0.5rem 0.875rem;
+  border: 1px solid ${theme.border};
+  border-radius: 0.5rem;
+  background-color: ${theme.surface};
+  color: ${theme.text};
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: ${theme.surfaceSunken};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${theme.textBrand};
+    outline-offset: 2px;
+  }
+`;
+
+export const MonthSeparator = styled.span`
+  color: ${theme.text};
+  font-size: 1.25rem;
+  font-weight: 700;
 `;
 
 export const CalendarScroll = styled.div`
