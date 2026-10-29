@@ -56,4 +56,38 @@ describe('ActionMenu', () => {
 
     expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
   });
+
+  describe('posição', () => {
+    const rect = (top: number) =>
+      ({ top, bottom: top + 32, left: 900, right: 932, width: 32, height: 32 }) as DOMRect;
+
+    beforeEach(() => {
+      Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1000 });
+      jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(100);
+    });
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it('abre abaixo do botão quando cabe', async () => {
+      const { user, trigger } = renderMenu();
+      jest.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(rect(100));
+
+      await user.click(trigger);
+
+      expect(screen.getAllByRole('menuitem')[0].parentElement).toHaveStyle({
+        top: '136px',
+        right: '68px',
+      });
+    });
+
+    it('abre acima do botão quando não cabe abaixo (ex.: última linha da tabela)', async () => {
+      const { user, trigger } = renderMenu();
+      jest.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(rect(740));
+
+      await user.click(trigger);
+
+      expect(screen.getAllByRole('menuitem')[0].parentElement).toHaveStyle({ top: '636px' });
+    });
+  });
 });
