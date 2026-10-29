@@ -19,6 +19,7 @@ import type {
   ParticipantFormValues,
   ParticipantOption,
   ParticipantPresence,
+  ParticipantZoneOption,
 } from '../../types/participant';
 
 import { ParticipantContacts } from './ParticipantContacts';
@@ -71,7 +72,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
   const [savingParticipant, setSavingParticipant] = useState(false);
 
   const [cities, setCities] = useState<ParticipantOption[]>([]);
-  const [zones, setZones] = useState<ParticipantOption[]>([]);
+  const [zones, setZones] = useState<ParticipantZoneOption[]>([]);
   const [optionsError, setOptionsError] = useState(false);
 
   const [loadError, setLoadError] = useState<string | null>(

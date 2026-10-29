@@ -57,7 +57,7 @@ beforeEach(() => {
     { id: 'c1', name: 'Canoas' },
     { id: 'c2', name: 'Porto Alegre' },
   ]);
-  jest.mocked(getGroupZones).mockResolvedValue([{ id: 'z1', name: 'Zona Sul' }]);
+  jest.mocked(getGroupZones).mockResolvedValue([{ id: 'z1', name: 'Zona Sul', cityId: 'c1' }]);
   jest.mocked(getGroupParticipantsPage).mockResolvedValue({
     items: [
       {

@@ -8,6 +8,7 @@ import type {
   Participant,
   ParticipantFormValues,
   ParticipantOption,
+  ParticipantZoneOption,
 } from '../../types/participant';
 
 import * as Styled from './styles';
@@ -16,7 +17,7 @@ type ParticipantModalProps = {
   isOpen: boolean;
   participant: Participant;
   cities: ParticipantOption[];
-  zones: ParticipantOption[];
+  zones: ParticipantZoneOption[];
   onClose: () => void;
   onConfirm: (values: ParticipantFormValues) => void;
   saving?: boolean;
@@ -56,11 +57,25 @@ const ParticipantModalContent = ({
   const [cityChoice, setCityChoice] = useState<string | null | undefined>(undefined);
   const [zoneChoice, setZoneChoice] = useState<string | null | undefined>(undefined);
 
-  const cityId = cityChoice === undefined ? findIdByName(cities, participant.city) : cityChoice;
-  const zoneId = zoneChoice === undefined ? findIdByName(zones, participant.zone) : zoneChoice;
+  const initialCityId = findIdByName(cities, participant.city);
+  const cityId = cityChoice === undefined ? initialCityId : cityChoice;
+
+  // só as zonas da cidade escolhida: "Zona Sul" existe em mais de uma cidade
+  const cityZones = useMemo(() => zones.filter((zone) => zone.cityId === cityId), [zones, cityId]);
+  const zoneId =
+    zoneChoice !== undefined
+      ? zoneChoice
+      : cityId === initialCityId
+        ? findIdByName(cityZones, participant.zone)
+        : null;
 
   const cityOptions = useMemo(() => toAutocompleteOptions(cities), [cities]);
-  const zoneOptions = useMemo(() => toAutocompleteOptions(zones), [zones]);
+  const zoneOptions = useMemo(() => toAutocompleteOptions(cityZones), [cityZones]);
+
+  const handleCityChange = (value: string | null) => {
+    setCityChoice(value);
+    setZoneChoice(null);
+  };
 
   const isValid =
     Boolean(name.trim()) &&
@@ -75,7 +90,7 @@ const ParticipantModalContent = ({
     const city = cities.find((option) => option.id === cityId);
     if (!city) return;
 
-    const zone = zoneId ? zones.find((option) => option.id === zoneId) : undefined;
+    const zone = zoneId ? cityZones.find((option) => option.id === zoneId) : undefined;
 
     onConfirm({
       name: name.trim(),
@@ -145,7 +160,7 @@ const ParticipantModalContent = ({
             placeholder={modalLocale.placeCity}
             options={cityOptions}
             value={cityId}
-            onChange={setCityChoice}
+            onChange={handleCityChange}
             minCharacters={1}
             helperText={modalLocale.cityHint}
             required

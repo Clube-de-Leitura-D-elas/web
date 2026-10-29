@@ -41,6 +41,9 @@ export type ParticipantOption = {
   name: string;
 };
 
+/** Zona com a cidade a que pertence: "Zona Sul" existe em mais de uma cidade. */
+export type ParticipantZoneOption = ParticipantOption & { cityId: string };
+
 /** Valores que o modal de edição entrega para a página. */
 export type ParticipantFormValues = {
   name: string;

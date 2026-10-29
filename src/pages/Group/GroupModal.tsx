@@ -4,7 +4,12 @@ import { Autocomplete } from '../../components/Autocomplete';
 import { Modal } from '../../components/Modal';
 import { useLocale } from '../../hooks/useLocale';
 import { interpolate } from '../../locales';
-import type { GroupDetails, GroupFormValues, GroupOption } from '../../types/group';
+import type {
+  GroupDetails,
+  GroupFormValues,
+  GroupOption,
+  GroupZoneOption,
+} from '../../types/group';
 
 import * as Styled from './styles';
 
@@ -13,7 +18,7 @@ type GroupModalProps = {
   group: GroupDetails;
   groupName: string;
   cities: GroupOption[];
-  zones: GroupOption[];
+  zones: GroupZoneOption[];
   onClose: () => void;
   onConfirm: (values: GroupFormValues) => void;
   saving?: boolean;
@@ -45,11 +50,25 @@ const GroupModalContent = ({
   const [cityChoice, setCityChoice] = useState<string | null | undefined>(undefined);
   const [zoneChoice, setZoneChoice] = useState<string | null | undefined>(undefined);
 
-  const cityId = cityChoice === undefined ? findIdByName(cities, group.city) : cityChoice;
-  const zoneId = zoneChoice === undefined ? findIdByName(zones, group.zone) : zoneChoice;
+  const initialCityId = findIdByName(cities, group.city);
+  const cityId = cityChoice === undefined ? initialCityId : cityChoice;
+
+  // só as zonas da cidade escolhida: "Zona Sul" existe em mais de uma cidade
+  const cityZones = useMemo(() => zones.filter((zone) => zone.cityId === cityId), [zones, cityId]);
+  const zoneId =
+    zoneChoice !== undefined
+      ? zoneChoice
+      : cityId === initialCityId
+        ? findIdByName(cityZones, group.zone)
+        : null;
 
   const cityOptions = useMemo(() => toAutocompleteOptions(cities), [cities]);
-  const zoneOptions = useMemo(() => toAutocompleteOptions(zones), [zones]);
+  const zoneOptions = useMemo(() => toAutocompleteOptions(cityZones), [cityZones]);
+
+  const handleCityChange = (value: string | null) => {
+    setCityChoice(value);
+    setZoneChoice(null);
+  };
 
   const handleConfirm = () => {
     if (cityId === null || saving) return;
@@ -83,7 +102,7 @@ const GroupModalContent = ({
             placeholder={modalLocale.placeCity}
             options={cityOptions}
             value={cityId}
-            onChange={setCityChoice}
+            onChange={handleCityChange}
             minCharacters={1}
             required
           />

@@ -6,6 +6,7 @@ import type {
   ParticipantGroupsPage,
   ParticipantOption,
   ParticipantPresence,
+  ParticipantZoneOption,
   UpdateParticipantInput,
 } from '../types/participant';
 import { supabase } from './supabaseClient';
@@ -130,16 +131,19 @@ export async function updateParticipantStatus(
   return data.is_active;
 }
 
-async function getOptions(table: 'cities' | 'zones'): Promise<ParticipantOption[]> {
-  const { data, error } = await supabase.from(table).select('id, name').order('name');
+export async function getCities(): Promise<ParticipantOption[]> {
+  const { data, error } = await supabase.from('cities').select('id, name').order('name');
   if (error) throw error;
 
   return (data ?? []) as ParticipantOption[];
 }
 
-export const getCities = () => getOptions('cities');
+export async function getZones(): Promise<ParticipantZoneOption[]> {
+  const { data, error } = await supabase.from('zones').select('id, name, city_id').order('name');
+  if (error) throw error;
 
-export const getZones = () => getOptions('zones');
+  return (data ?? []).map(({ id, name, city_id }) => ({ id, name, cityId: city_id }));
+}
 
 async function readFunctionErrorMessage(error: unknown): Promise<string | null> {
   if (!(error instanceof FunctionsHttpError)) return null;

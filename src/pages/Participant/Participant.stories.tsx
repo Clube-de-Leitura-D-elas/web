@@ -18,6 +18,7 @@ import type {
   ParticipantGroup,
   ParticipantOption,
   ParticipantPresence,
+  ParticipantZoneOption,
 } from '../../types/participant';
 
 import { ParticipantDetails } from '.';
@@ -49,9 +50,22 @@ const cities: ParticipantOption[] = [
   { id: '43333333-3333-3333-3333-333333333333', name: 'Canoas' },
 ];
 
-const zones: ParticipantOption[] = [
-  { id: '51111111-1111-1111-1111-111111111111', name: 'Zona Leste' },
-  { id: '52222222-2222-2222-2222-222222222222', name: 'Zona Sul' },
+const zones: ParticipantZoneOption[] = [
+  {
+    id: '51111111-1111-1111-1111-111111111111',
+    name: 'Zona Leste',
+    cityId: '41111111-1111-1111-1111-111111111111',
+  },
+  {
+    id: '52222222-2222-2222-2222-222222222222',
+    name: 'Zona Sul',
+    cityId: '41111111-1111-1111-1111-111111111111',
+  },
+  {
+    id: '53333333-3333-3333-3333-333333333333',
+    name: 'Zona Sul',
+    cityId: '42222222-2222-2222-2222-222222222222',
+  },
 ];
 
 const groups: ParticipantGroup[] = [
