@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useParams } from 'react-router';
+import { useParams, useLocation, useNavigate } from 'react-router';
 import { LuCalendar, LuMapPin, LuStar, LuUserRound } from 'react-icons/lu';
 import { BackButton } from '../../components/BackButton';
 import { ActionMenu } from '../../components/ActionMenu';
@@ -93,6 +93,13 @@ export const GroupDetails = () => {
   const [cities, setCities] = useState<GroupOption[]>([]);
   const [zones, setZones] = useState<GroupZoneOption[]>([]);
   const [optionsError, setOptionsError] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const handleBack = () => {
+    if (location.key === 'default') navigate('/grupos');
+    else navigate(-1);
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -449,7 +456,7 @@ export const GroupDetails = () => {
 
   return (
     <Styled.Container>
-      <BackButton label={locale.group_details.back} />
+      <BackButton label={locale.group_details.back} onClick={handleBack} />
 
       <Styled.Header>
         <Styled.HeaderInfo>
