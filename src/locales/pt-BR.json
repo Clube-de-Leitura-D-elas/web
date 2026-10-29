@@ -377,6 +377,15 @@
       "requiredHint": "Selecione uma cidade da lista para salvar.",
       "modalError": "Não foi possível atualizar a localização do grupo. Tente novamente.",
       "optionsError": "Não foi possível carregar as cidades e zonas."
+    },
+    "participantActions": {
+      "promote": "Tornar coordenadora",
+      "remove": "Remover do grupo",
+      "promoteTitle": "Tornar coordenadora?",
+      "removeTitle": "Remover participante?",
+      "promoteDescription": "Deseja tornar {{name}} coordenadora deste grupo? As coordenadoras atuais serão mantidas.",
+      "removeDescription": "Deseja remover {{name}} do grupo? O cadastro e o histórico serão preservados.",
+      "error": "Não foi possível atualizar a participante. Tente novamente."
     }
   },
   "calendar": {

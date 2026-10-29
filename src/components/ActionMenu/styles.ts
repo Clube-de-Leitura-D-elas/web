@@ -24,9 +24,7 @@ export const TriggerButton = styled.button`
 `;
 
 export const MenuDropdown = styled.div`
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
+  position: fixed;
   z-index: 50;
   background-color: ${theme.background};
   min-width: 220px;

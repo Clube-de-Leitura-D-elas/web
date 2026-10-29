@@ -7,6 +7,7 @@ import {
   getGroupParticipantsPage,
   getGroupZones,
   updateGroupLocation,
+  updateGroupParticipant,
   updateGroupStatus,
 } from '../../services/groupService';
 import { pending, renderWithProviders } from '../../test/render';
@@ -20,6 +21,7 @@ jest.mock('../../services/groupService', () => ({
   getGroupParticipantsPage: jest.fn(),
   getGroupZones: jest.fn(),
   updateGroupLocation: jest.fn(),
+  updateGroupParticipant: jest.fn(),
   updateGroupStatus: jest.fn(),
 }));
 
@@ -68,8 +70,16 @@ beforeEach(() => {
         email: null,
         is_coordinator: true,
       },
+      {
+        id: 'p2',
+        name: 'Bia Lima',
+        entry_date: '2024-05-01',
+        attendance: ['P', 'P', 'P'],
+        email: null,
+        is_coordinator: false,
+      },
     ],
-    total: 1,
+    total: 2,
   });
   jest.mocked(getGroupMeetingsPage).mockResolvedValue({
     items: [
@@ -290,5 +300,63 @@ describe('GroupDetails', () => {
 
     expect(await within(dialog).findByRole('alert')).toHaveTextContent(text.modal.modalError);
     expect(screen.getByRole('heading', { name: 'Grupo 07 — Centro' })).toBeInTheDocument();
+  });
+
+  describe('ações da participante', () => {
+    const actions = (name: string) =>
+      screen.getByRole('button', { name: interpolate(text.table.actionsAriaLabel, { name }) });
+
+    it('coordenadora não tem a opção de tornar coordenadora', async () => {
+      const { user } = renderPage();
+      await screen.findByRole('link', { name: 'Ana Souza' });
+
+      await user.click(actions('Ana Souza'));
+
+      expect(
+        screen.queryByRole('menuitem', { name: text.participantActions.promote }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('menuitem', { name: text.participantActions.remove }),
+      ).toBeInTheDocument();
+    });
+
+    it('torna coordenadora após confirmar e recarrega a lista', async () => {
+      jest.mocked(updateGroupParticipant).mockResolvedValue();
+      const { user } = renderPage();
+      await screen.findByRole('link', { name: 'Bia Lima' });
+      const fetches = jest.mocked(getGroupParticipantsPage).mock.calls.length;
+
+      await user.click(actions('Bia Lima'));
+      await user.click(screen.getByRole('menuitem', { name: text.participantActions.promote }));
+      const dialog = screen.getByRole('dialog', { name: text.participantActions.promoteTitle });
+      expect(dialog).toHaveTextContent('Bia Lima');
+      await user.click(
+        within(dialog).getByRole('button', { name: text.participantActions.promote }),
+      );
+
+      expect(updateGroupParticipant).toHaveBeenCalledWith('g1', 'p2', 'promote');
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+      await waitFor(() =>
+        expect(jest.mocked(getGroupParticipantsPage).mock.calls.length).toBeGreaterThan(fetches),
+      );
+    });
+
+    it('remove do grupo e mantém o modal aberto com erro quando falha', async () => {
+      jest.mocked(updateGroupParticipant).mockRejectedValue(new Error('boom'));
+      const { user } = renderPage();
+      await screen.findByRole('link', { name: 'Bia Lima' });
+
+      await user.click(actions('Bia Lima'));
+      await user.click(screen.getByRole('menuitem', { name: text.participantActions.remove }));
+      const dialog = screen.getByRole('dialog', { name: text.participantActions.removeTitle });
+      await user.click(
+        within(dialog).getByRole('button', { name: text.participantActions.remove }),
+      );
+
+      expect(updateGroupParticipant).toHaveBeenCalledWith('g1', 'p2', 'remove');
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+        text.participantActions.error,
+      );
+    });
   });
 });
