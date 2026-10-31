@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Revisor automático dos PRs. As regras do repositório ficam no AGENTS.md;
+# este arquivo só liga o bot e aponta para elas.
+language: pt-BR
+tone_instructions: >-
+  Revise como uma pessoa sênior do time: direta, em pt-BR, explicando o porquê e
+  sugerindo a correção. O time está aprendendo; aponte o que importa, sem nits de gosto.
+reviews:
+  profile: chill
+  auto_approvals:
+    enabled: true
+    allow_author_approval: false
+    max_merge_risk: moderate
+  high_level_summary: true
+  poem: false
+  in_progress_fortune: false
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: true
+    base_branches:
+      - '^main$'
+  path_filters:
+    - '!yarn.lock'
+  tools:
+    biome:
+      enabled: false
+    oxc:
+      enabled: false
+  path_instructions:
+    - path: '**/*'
+      instructions: >-
+        Use o AGENTS.md da raiz como critério de review: as seções "Regras" e
+        "Checklist de review" valem como regras do repositório. Uma regra quebrada é
+        achado, mesmo que o código funcione. As regras valem para o código novo ou
+        alterado no PR: não peça refactor de código legado que o PR não tocou.
+    - path: 'src/components/**'
+      instructions: >-
+        Aplique a seção "Componentes" do AGENTS.md: styles.ts importado como Styled,
+        export const (exceto export default meta nas stories), cor só pelo tema, prop de estilo com cifrão, story por variante.
+        Aponte componente novo que duplica um existente.
+    - path: 'src/pages/**'
+      instructions: >-
+        Aplique "Páginas e rotas" e "Textos" do AGENTS.md. Página não importa o
+        supabaseClient, todo texto vem do locale e os estados de carregamento, vazio e
+        erro estão tratados.
+    - path: 'src/services/**'
+      instructions: >-
+        Aplique "Comunicação com o backend" do AGENTS.md. O nome da function, o método,
+        o body e o formato da resposta precisam bater com a Edge Function do repositório
+        backend (Clube-de-Leitura-D-elas/backend, supabase/functions/<nome>/index.ts).
+        supabase.from só para cities, zones e users. Ao renomear uma function, aponte
+        referências ao nome antigo que sobraram.
+    - path: '**/*.test.{ts,tsx}'
+      instructions: >-
+        Aplique "Testes" do AGENTS.md: renderWithProviders, consultas por role/label/
+        texto do locale, jest.mock sempre com função de fábrica, e o teste precisa
+        falhar se o comportamento quebrar.
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - AGENTS.md
