@@ -2,6 +2,8 @@
 
 Plataforma web responsiva para gestão e organização do Clube de Leitura D'Elas.
 
+> Regras de código e de review (para pessoas, agentes de IA e o CodeRabbit): [`AGENTS.md`](AGENTS.md).
+
 > **É a sua primeira vez com desenvolvimento web?** Comece por aqui e siga na ordem.
 > Qualquer dúvida, chame a liderança técnica — é para isso que ela existe.
 
