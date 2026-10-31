@@ -390,3 +390,25 @@ export const FormError = styled.p`
   font-size: 0.875rem;
   line-height: 1.25rem;
 `;
+
+export const SkeletonTabs = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border-bottom: 1px solid ${theme.border};
+  padding-bottom: 0.75rem;
+`;
+
+export const SkeletonTable = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const SkeletonTableRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid ${theme.border};
+`;
