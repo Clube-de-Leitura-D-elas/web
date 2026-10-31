@@ -34,12 +34,12 @@ export function getGroupMeetingsPage(
 
 export const updateGroupStatus = async (groupId: string, isActive: boolean): Promise<boolean> => {
   const { data, error } = await supabase.functions.invoke<{ is_active: boolean }>(
-    'update-group-status',
+    'update-group-status-web',
     { body: { group_id: groupId, is_active: isActive } },
   );
 
   if (error) throw error;
-  if (!data) throw new Error('update-group-status returned no data');
+  if (!data) throw new Error('update-group-status-web returned no data');
 
   return data.is_active;
 };

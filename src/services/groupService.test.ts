@@ -49,7 +49,7 @@ describe('updateGroupStatus', () => {
     respond({ is_active: false });
 
     await expect(updateGroupStatus('g1', false)).resolves.toBe(false);
-    expect(invoke).toHaveBeenCalledWith('update-group-status', {
+    expect(invoke).toHaveBeenCalledWith('update-group-status-web', {
       body: { group_id: 'g1', is_active: false },
     });
   });
