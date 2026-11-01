@@ -229,3 +229,10 @@ export const PageButton = styled.button<{ $active?: boolean }>`
     }
   `}
 `;
+export const SkeletonWrapper = styled.div<{ $align: TableAlign }>`
+  display: flex;
+  align-items: center;
+  justify-content: ${({ $align }) => justifyByAlign[$align]};
+  width: 100%;
+  margin-block: 0.25rem;
+`;

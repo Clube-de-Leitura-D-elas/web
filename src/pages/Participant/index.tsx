@@ -55,13 +55,10 @@ const columns: TableColumn[] = [
 const ParticipantDetailsSkeleton = () => {
   return (
     <Styled.Card>
-      {/* Perfil e contatos */}
       <Styled.ProfileHeader>
         <Styled.SkeletonProfile>
-          {/* Foto */}
           <Skeleton width="4.5rem" height="4.5rem" variant="circular" />
 
-          {/* Nome, status e botões */}
           <Styled.SkeletonProfileInfo>
             <Skeleton width="12rem" height="1.5rem" />
 
@@ -73,7 +70,6 @@ const ParticipantDetailsSkeleton = () => {
           </Styled.SkeletonProfileInfo>
         </Styled.SkeletonProfile>
 
-        {/* Contatos */}
         <Styled.SkeletonContacts>
           <Skeleton width="14rem" height="1rem" />
           <Skeleton width="10rem" height="1rem" />
@@ -81,7 +77,6 @@ const ParticipantDetailsSkeleton = () => {
         </Styled.SkeletonContacts>
       </Styled.ProfileHeader>
 
-      {/* Tabela de grupos */}
       <Styled.TableArea>
         <Styled.SkeletonTable>
           {Array.from({ length: 5 }).map((_, index) => (
@@ -95,7 +90,6 @@ const ParticipantDetailsSkeleton = () => {
         </Styled.SkeletonTable>
       </Styled.TableArea>
 
-      {/* Informações adicionais */}
       <Styled.SkeletonDetails>
         {Array.from({ length: 6 }).map((_, index) => (
           <Styled.SkeletonDetail key={index}>
@@ -322,7 +316,12 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
         <Styled.PageTitle>{locale.participant_details.title}</Styled.PageTitle>
       </Styled.PageHeader>
 
-      {loading && <ParticipantDetailsSkeleton />}
+      {loading && (
+        <div role="status">
+          <span className="sr-only">{locale.participant_details.loading}</span>
+          <ParticipantDetailsSkeleton />
+        </div>
+      )}
 
       {!loading && loadError && <Styled.Message $error>{loadError}</Styled.Message>}
 

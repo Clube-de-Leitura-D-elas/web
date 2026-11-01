@@ -116,11 +116,9 @@ describe('GroupDetails', () => {
   it('mostra o skeleton enquanto carrega os dados do grupo', () => {
     jest.mocked(getGroupDetails).mockReturnValue(pending());
 
-    const { container } = renderPage();
+    renderPage();
 
-    expect(container.querySelectorAll('span[aria-hidden="true"]').length).toBeGreaterThan(0);
-
-    expect(screen.queryByText(text.loading)).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(text.loading);
   });
 
   it('mostra o erro quando o grupo não carrega', async () => {

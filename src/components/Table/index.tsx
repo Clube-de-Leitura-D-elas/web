@@ -183,8 +183,10 @@ export const Table = ({
   const renderBody = () => {
     if (isLoading) {
       return Array.from({ length: skeletonRowCount }, (_, rowIndex) =>
-        renderRow(rowIndex, (_column, columnIndex) => (
-          <Skeleton key={columnIndex} width={SKELETON_WIDTHS[rowIndex % SKELETON_WIDTHS.length]} />
+        renderRow(rowIndex, (column, columnIndex) => (
+          <Styled.SkeletonWrapper $align={column.align ?? 'center'}>
+            <Skeleton width={SKELETON_WIDTHS[(rowIndex + columnIndex) % SKELETON_WIDTHS.length]} />
+          </Styled.SkeletonWrapper>
         )),
       );
     }

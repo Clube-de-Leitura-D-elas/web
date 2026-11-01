@@ -74,10 +74,8 @@ const formatNextMeetingDate = (iso: string) => {
 const GroupDetailsSkeleton = () => {
   return (
     <Styled.Container>
-      {/* Botão de voltar */}
       <Skeleton width="5rem" height="0.875rem" />
 
-      {/* Cabeçalho */}
       <Styled.Header>
         <Styled.HeaderInfo>
           <Skeleton width="13rem" height="2rem" />
@@ -90,9 +88,7 @@ const GroupDetailsSkeleton = () => {
         </Styled.HeaderActions>
       </Styled.Header>
 
-      {/* Cards de informações */}
       <Styled.CardsRow>
-        {/* Card da coordenadora */}
         <Styled.Card>
           <Skeleton width="8rem" height="1.25rem" />
 
@@ -108,7 +104,6 @@ const GroupDetailsSkeleton = () => {
           <Skeleton width="6rem" height="1.75rem" />
         </Styled.Card>
 
-        {/* Card da próxima reunião */}
         <Styled.Card>
           <Styled.MeetingHeader>
             <Skeleton width="9rem" height="1.25rem" />
@@ -126,13 +121,11 @@ const GroupDetailsSkeleton = () => {
           </Styled.MeetingBody>
         </Styled.Card>
       </Styled.CardsRow>
-      {/* Abas */}
       <Styled.SkeletonTabs>
         <Skeleton width="6rem" height="2rem" />
         <Skeleton width="7rem" height="2rem" />
       </Styled.SkeletonTabs>
 
-      {/* Tabela de participantes */}
       <Styled.TableContainer>
         <Styled.SkeletonTable>
           {Array.from({ length: 5 }).map((_, rowIndex) => (
@@ -523,7 +516,15 @@ export const GroupDetails = () => {
     [locale, participantColumns, fetchParticipants, meetingColumns, fetchMeetings],
   );
 
-  if (loading) return <GroupDetailsSkeleton />;
+  if (loading) {
+    return (
+      <div role="status">
+        <span className="sr-only">{locale.group_details.loading}</span>
+        <GroupDetailsSkeleton />
+      </div>
+    );
+  }
+
   if (!group) {
     return <Styled.Message>{locale.group_details.loadError}</Styled.Message>;
   }
