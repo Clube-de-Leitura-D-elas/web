@@ -5,7 +5,7 @@ import logoDelas from '../../assets/logo-delas.png';
 import { Sidebar } from '../../components/Sidebar/Sidebar';
 import { useLocale } from '../../hooks/useLocale';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { getCurrentUserName, signOut } from '../../services/authService';
+import { getCurrentUserProfile, signOut } from '../../services/authService';
 import * as Styled from './styles';
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop';
@@ -19,12 +19,17 @@ export const DefaultLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [prevBreakpoint, setPrevBreakpoint] = useState(breakpoint);
   const [userName, setUserName] = useState('');
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const { layout: text, sidebar: sidebarText } = useLocale();
   useEffect(() => {
     async function loadUserName() {
       try {
-        const name = await getCurrentUserName();
-        setUserName(name ?? '');
+        const profile = await getCurrentUserProfile();
+
+        console.log('Perfil retornado:', profile);
+
+        setUserName(profile?.name ?? '');
+        setPhotoUrl(profile?.photoUrl ?? null);
       } catch (error) {
         console.error('Erro ao carregar nome do usuário:', error);
       }
@@ -88,7 +93,7 @@ export const DefaultLayout = () => {
 
       <Styled.SidebarSlot $open={drawerOpen} inert={isMobile && !menuOpen}>
         <Sidebar
-          user={{ name: userName }}
+          user={{ name: userName, photoUrl }}
           collapsed={isMobile ? false : collapsed}
           onToggleCollapse={isMobile ? closeMenu : () => setCollapsed((value) => !value)}
           onNavigate={closeMenu}

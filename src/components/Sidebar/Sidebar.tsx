@@ -30,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
 export type SidebarUser = {
   name: string;
   initial?: string;
+  photoUrl?: string | null;
 };
 
 export type SidebarProps = {
@@ -117,7 +118,13 @@ export const Sidebar = ({
 
       <Styled.UserArea>
         <Styled.User>
-          <Styled.Avatar aria-hidden>{user.initial ?? user.name.trim().charAt(0)}</Styled.Avatar>
+          <Styled.Avatar aria-hidden>
+            {user.photoUrl ? (
+              <Styled.AvatarImage src={user.photoUrl} alt="" />
+            ) : (
+              (user.initial ?? user.name.trim().charAt(0))
+            )}
+          </Styled.Avatar>
 
           <Styled.UserInfo $collapsed={isCollapsed}>{userDetails}</Styled.UserInfo>
         </Styled.User>
