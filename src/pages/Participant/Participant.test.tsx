@@ -67,9 +67,10 @@ describe('ParticipantDetails', () => {
     jest.mocked(getCities).mockReturnValue(pending());
     jest.mocked(getZones).mockReturnValue(pending());
 
-    renderPage();
+    const { container } = renderPage();
 
     expect(screen.getByRole('status')).toHaveTextContent(text.loading);
+    expect(container.querySelectorAll('[aria-hidden="true"]').length).toBeGreaterThan(0);
   });
 
   it('mostra o erro quando os dados não carregam', async () => {

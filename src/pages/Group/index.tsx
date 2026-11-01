@@ -519,7 +519,7 @@ export const GroupDetails = () => {
   if (loading) {
     return (
       <div role="status">
-        <span className="sr-only">{locale.group_details.loading}</span>
+        <Styled.VisuallyHidden>{locale.group_details.loading}</Styled.VisuallyHidden>
         <GroupDetailsSkeleton />
       </div>
     );

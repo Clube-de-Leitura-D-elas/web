@@ -318,7 +318,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
 
       {loading && (
         <div role="status">
-          <span className="sr-only">{locale.participant_details.loading}</span>
+          <Styled.VisuallyHidden>{locale.participant_details.loading}</Styled.VisuallyHidden>
           <ParticipantDetailsSkeleton />
         </div>
       )}
