@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import { Route, Routes } from 'react-router';
 import { locale } from '../../locales';
 import { getCurrentUserProfile, signOut } from '../../services/authService';
@@ -53,9 +53,15 @@ describe('DefaultLayout', () => {
     jest.mocked(getCurrentUserProfile).mockResolvedValue(null);
 
     renderLayout();
-
     await waitFor(() => expect(getCurrentUserProfile).toHaveBeenCalled());
-    expect(screen.getByRole('complementary', { name: locale.sidebar.label })).toBeInTheDocument();
+    await act(async () => {});
+
+    const sidebar = screen.getByRole('complementary', { name: locale.sidebar.label });
+    const userName = within(sidebar).getByRole('button', {
+      name: locale.sidebar.logout,
+    }).previousElementSibling;
+    expect(userName).toBeEmptyDOMElement();
+    expect(sidebar.querySelector('img[alt=""]')).not.toBeInTheDocument();
     expect(screen.getByText('conteúdo da página')).toBeInTheDocument();
   });
 
