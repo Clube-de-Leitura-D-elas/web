@@ -75,3 +75,30 @@ export async function getCurrentUserRole(): Promise<AppRole | null> {
 export function hasAdminRole(appRole?: AppRole | null) {
   return !!appRole && ADMIN_ROLES.has(appRole);
 }
+
+export async function getCurrentUserName(): Promise<string | null> {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) {
+    throw toAuthServiceError(userError);
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('name')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (error) {
+    throw toAuthServiceError(error);
+  }
+
+  return data?.name ?? null;
+}

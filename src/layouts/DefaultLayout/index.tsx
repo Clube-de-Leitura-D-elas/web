@@ -2,13 +2,11 @@ import { useEffect, useState } from 'react';
 import { LuMenu } from 'react-icons/lu';
 import { Outlet, useNavigate } from 'react-router';
 import logoDelas from '../../assets/logo-delas.png';
-import { Sidebar, type SidebarUser } from '../../components/Sidebar/Sidebar';
+import { Sidebar } from '../../components/Sidebar/Sidebar';
 import { useLocale } from '../../hooks/useLocale';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { signOut } from '../../services/authService';
+import { getCurrentUserName, signOut } from '../../services/authService';
 import * as Styled from './styles';
-
-const CURRENT_USER: SidebarUser = { name: 'Claudine' };
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop';
 
@@ -20,7 +18,20 @@ export const DefaultLayout = () => {
   const [collapsed, setCollapsed] = useState(breakpoint === 'tablet');
   const [menuOpen, setMenuOpen] = useState(false);
   const [prevBreakpoint, setPrevBreakpoint] = useState(breakpoint);
+  const [userName, setUserName] = useState('');
   const { layout: text, sidebar: sidebarText } = useLocale();
+  useEffect(() => {
+    async function loadUserName() {
+      try {
+        const name = await getCurrentUserName();
+        setUserName(name ?? '');
+      } catch (error) {
+        console.error('Erro ao carregar nome do usuário:', error);
+      }
+    }
+
+    loadUserName();
+  }, []);
 
   if (breakpoint !== prevBreakpoint) {
     setPrevBreakpoint(breakpoint);
@@ -77,7 +88,7 @@ export const DefaultLayout = () => {
 
       <Styled.SidebarSlot $open={drawerOpen} inert={isMobile && !menuOpen}>
         <Sidebar
-          user={CURRENT_USER}
+          user={{ name: userName }}
           collapsed={isMobile ? false : collapsed}
           onToggleCollapse={isMobile ? closeMenu : () => setCollapsed((value) => !value)}
           onNavigate={closeMenu}
