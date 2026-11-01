@@ -5,6 +5,7 @@ import { Table, type TableColumn, type TableFetchPage } from '../../components/T
 import { Tag } from '../../components/Tag';
 import { locale } from '../../locales';
 import { formatEntryDate } from '../../utils/date';
+import { Skeleton } from '../../components/Skeleton';
 import {
   getCities,
   getParticipantById,
@@ -50,6 +51,62 @@ const columns: TableColumn[] = [
     align: 'left',
   },
 ];
+
+const ParticipantDetailsSkeleton = () => {
+  return (
+    <Styled.Card>
+      {/* Perfil e contatos */}
+      <Styled.ProfileHeader>
+        <Styled.SkeletonProfile>
+          {/* Foto */}
+          <Skeleton width="4.5rem" height="4.5rem" variant="circular" />
+
+          {/* Nome, status e botões */}
+          <Styled.SkeletonProfileInfo>
+            <Skeleton width="12rem" height="1.5rem" />
+
+            <Styled.SkeletonStatus>
+              <Skeleton width="5rem" height="1.75rem" />
+              <Skeleton width="7rem" height="2rem" />
+              <Skeleton width="6rem" height="2rem" />
+            </Styled.SkeletonStatus>
+          </Styled.SkeletonProfileInfo>
+        </Styled.SkeletonProfile>
+
+        {/* Contatos */}
+        <Styled.SkeletonContacts>
+          <Skeleton width="14rem" height="1rem" />
+          <Skeleton width="10rem" height="1rem" />
+          <Skeleton width="12rem" height="1rem" />
+        </Styled.SkeletonContacts>
+      </Styled.ProfileHeader>
+
+      {/* Tabela de grupos */}
+      <Styled.TableArea>
+        <Styled.SkeletonTable>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Styled.SkeletonTableRow key={index}>
+              <Skeleton width="25%" height="1rem" />
+              <Skeleton width="15%" height="1rem" />
+              <Skeleton width="20%" height="1rem" />
+              <Skeleton width="15%" height="1rem" />
+            </Styled.SkeletonTableRow>
+          ))}
+        </Styled.SkeletonTable>
+      </Styled.TableArea>
+
+      {/* Informações adicionais */}
+      <Styled.SkeletonDetails>
+        {Array.from({ length: 6 }).map((_, index) => (
+          <Styled.SkeletonDetail key={index}>
+            <Skeleton width="6rem" height="0.875rem" />
+            <Skeleton width="8rem" height="1.25rem" />
+          </Styled.SkeletonDetail>
+        ))}
+      </Styled.SkeletonDetails>
+    </Styled.Card>
+  );
+};
 
 export const ParticipantDetails = () => {
   const { participantId } = useParams<{
@@ -265,7 +322,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
         <Styled.PageTitle>{locale.participant_details.title}</Styled.PageTitle>
       </Styled.PageHeader>
 
-      {loading && <Styled.Message>{locale.participant_details.loading}</Styled.Message>}
+      {loading && <ParticipantDetailsSkeleton />}
 
       {!loading && loadError && <Styled.Message $error>{loadError}</Styled.Message>}
 

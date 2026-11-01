@@ -1,6 +1,8 @@
 import { screen, within } from '@testing-library/react';
 import { interpolate, locale } from '../../locales';
 import {
+  getCities,
+  getZones,
   getParticipantById,
   getParticipantGroups,
   getParticipantPresence,
@@ -60,12 +62,16 @@ beforeEach(() => {
 });
 
 describe('ParticipantDetails', () => {
-  it('mostra o carregamento', () => {
+  it('mostra o skeleton enquanto carrega os dados da participante', () => {
     jest.mocked(getParticipantById).mockReturnValue(pending());
+    jest.mocked(getCities).mockReturnValue(pending());
+    jest.mocked(getZones).mockReturnValue(pending());
 
-    renderPage();
+    const { container } = renderPage();
 
-    expect(screen.getByText(text.loading)).toBeInTheDocument();
+    expect(container.querySelectorAll('span[aria-hidden="true"]').length).toBeGreaterThan(0);
+
+    expect(screen.queryByText(text.loading)).not.toBeInTheDocument();
   });
 
   it('mostra o erro quando os dados não carregam', async () => {

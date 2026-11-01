@@ -286,3 +286,70 @@ export const FormError = styled.p`
   font-size: 0.875rem;
   line-height: 1.25rem;
 `;
+
+export const SkeletonProfile = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  min-width: 0;
+`;
+
+export const SkeletonProfileInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+`;
+
+export const SkeletonContacts = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+export const SkeletonStatus = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+`;
+
+export const SkeletonDetails = styled.div`
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2rem;
+  width: 100%;
+
+  @media (max-width: 75rem) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 48rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 36rem) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`;
+
+export const SkeletonDetail = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+`;
+
+export const SkeletonTable = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const SkeletonTableRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid ${theme.border};
+`;
