@@ -229,6 +229,7 @@ export const PageButton = styled.button<{ $active?: boolean }>`
     }
   `}
 `;
+
 export const SkeletonWrapper = styled.div<{ $align: TableAlign }>`
   display: flex;
   align-items: center;

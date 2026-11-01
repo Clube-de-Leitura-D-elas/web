@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { interpolate, locale } from '../../locales';
 import { Button } from '../Button';
-import * as Styled from './styles';
 import { Skeleton } from '../Skeleton';
+import * as Styled from './styles';
 
 export type TableAlign = 'left' | 'center' | 'right';
 

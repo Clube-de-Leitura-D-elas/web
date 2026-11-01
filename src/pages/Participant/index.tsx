@@ -317,12 +317,13 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
       </Styled.PageHeader>
 
       {loading && (
-        <div role="status">
+        <>
           <Styled.VisuallyHidden role="status">
             {locale.participant_details.loading}
           </Styled.VisuallyHidden>
+
           <ParticipantDetailsSkeleton />
-        </div>
+        </>
       )}
 
       {!loading && loadError && <Styled.Message $error>{loadError}</Styled.Message>}
