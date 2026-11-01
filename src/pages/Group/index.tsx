@@ -518,10 +518,11 @@ export const GroupDetails = () => {
 
   if (loading) {
     return (
-      <div role="status">
-        <Styled.VisuallyHidden>{locale.group_details.loading}</Styled.VisuallyHidden>
+      <>
+        <Styled.VisuallyHidden role="status">{locale.group_details.loading}</Styled.VisuallyHidden>
+
         <GroupDetailsSkeleton />
-      </div>
+      </>
     );
   }
 
