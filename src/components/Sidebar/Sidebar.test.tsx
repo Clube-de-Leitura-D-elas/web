@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { locale } from '../../locales';
 import { renderWithProviders } from '../../test/render';
 import { Sidebar } from './Sidebar';
@@ -69,6 +69,25 @@ describe('Sidebar', () => {
     renderWithProviders(<Sidebar user={user} />);
 
     expect(screen.getByText('Claudine')).toBeInTheDocument();
+    expect(screen.getByText('C')).toBeInTheDocument();
+  });
+
+  it('mostra a foto no avatar quando há photoUrl', () => {
+    const { container } = renderWithProviders(
+      <Sidebar user={{ name: 'Claudine', photoUrl: 'https://exemplo.test/foto.jpg' }} />,
+    );
+
+    expect(container.querySelector('img[src="https://exemplo.test/foto.jpg"]')).toBeInTheDocument();
+    expect(screen.queryByText('C')).not.toBeInTheDocument();
+  });
+
+  it('volta a mostrar a inicial quando a foto não carrega', () => {
+    const { container } = renderWithProviders(
+      <Sidebar user={{ name: 'Claudine', photoUrl: 'https://exemplo.test/quebrada.jpg' }} />,
+    );
+
+    fireEvent.error(container.querySelector('img[src="https://exemplo.test/quebrada.jpg"]')!);
+
     expect(screen.getByText('C')).toBeInTheDocument();
   });
 

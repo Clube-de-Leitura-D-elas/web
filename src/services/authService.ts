@@ -75,3 +75,23 @@ export async function getCurrentUserRole(): Promise<AppRole | null> {
 export function hasAdminRole(appRole?: AppRole | null) {
   return !!appRole && ADMIN_ROLES.has(appRole);
 }
+
+export async function getCurrentUserProfile(): Promise<{
+  name: string;
+  photoUrl: string | null;
+} | null> {
+  const { data, error } = await supabase.functions.invoke('get-user-profile-web');
+
+  if (error) {
+    throw toAuthServiceError(error);
+  }
+
+  if (!data?.success || !data.profile) {
+    return null;
+  }
+
+  return {
+    name: data.profile.name ?? '',
+    photoUrl: data.profile.photoUrl ?? null,
+  };
+}
