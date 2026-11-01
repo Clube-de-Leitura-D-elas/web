@@ -390,6 +390,7 @@ export const LogoutLabel = styled.span`
     }
   }
 `;
+
 export const AvatarImage = styled.img`
   width: 100%;
   height: 100%;

@@ -51,6 +51,7 @@ export const Sidebar = ({
   onNavigate,
 }: SidebarProps) => {
   const [selfCollapsed, setSelfCollapsed] = useState(defaultCollapsed);
+  const [failedPhotoUrl, setFailedPhotoUrl] = useState<string | null>(null);
   const { sidebar: text } = useLocale();
 
   const isCollapsed = collapsed ?? selfCollapsed;
@@ -119,8 +120,12 @@ export const Sidebar = ({
       <Styled.UserArea>
         <Styled.User>
           <Styled.Avatar aria-hidden>
-            {user.photoUrl ? (
-              <Styled.AvatarImage src={user.photoUrl} alt="" />
+            {user.photoUrl && user.photoUrl !== failedPhotoUrl ? (
+              <Styled.AvatarImage
+                src={user.photoUrl}
+                alt=""
+                onError={() => setFailedPhotoUrl(user.photoUrl ?? null)}
+              />
             ) : (
               (user.initial ?? user.name.trim().charAt(0))
             )}

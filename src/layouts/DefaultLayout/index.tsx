@@ -21,21 +21,23 @@ export const DefaultLayout = () => {
   const [userName, setUserName] = useState('');
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const { layout: text, sidebar: sidebarText } = useLocale();
+
   useEffect(() => {
-    async function loadUserName() {
-      try {
-        const profile = await getCurrentUserProfile();
+    let cancelled = false;
 
-        console.log('Perfil retornado:', profile);
-
+    getCurrentUserProfile()
+      .then((profile) => {
+        if (cancelled) return;
         setUserName(profile?.name ?? '');
         setPhotoUrl(profile?.photoUrl ?? null);
-      } catch (error) {
-        console.error('Erro ao carregar nome do usuário:', error);
-      }
-    }
+      })
+      .catch((error: unknown) => {
+        console.error('Erro ao carregar o perfil da usuária:', error);
+      });
 
-    loadUserName();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (breakpoint !== prevBreakpoint) {

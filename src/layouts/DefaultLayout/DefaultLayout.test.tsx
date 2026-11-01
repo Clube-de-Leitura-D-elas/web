@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import { Route, Routes } from 'react-router';
 import { locale } from '../../locales';
-import { signOut } from '../../services/authService';
+import { getCurrentUserProfile, signOut } from '../../services/authService';
 import { setMatchMedia } from '../../test/matchMedia';
 import { LocationDisplay, renderWithProviders } from '../../test/render';
 import { DefaultLayout } from '.';
@@ -10,6 +10,7 @@ import { MOBILE_QUERY, TABLET_QUERY } from './styles';
 jest.mock('../../services/authService', () => ({
   ...jest.requireActual('../../services/authService'),
   signOut: jest.fn(),
+  getCurrentUserProfile: jest.fn(),
 }));
 
 const renderLayout = () =>
@@ -24,11 +25,48 @@ const renderLayout = () =>
   );
 
 describe('DefaultLayout', () => {
+  beforeEach(() => {
+    jest.mocked(getCurrentUserProfile).mockResolvedValue(null);
+  });
+
   it('renderiza a página da rota ao lado do menu', () => {
     renderLayout();
 
     expect(screen.getByText('conteúdo da página')).toBeInTheDocument();
     expect(screen.getByRole('complementary', { name: locale.sidebar.label })).toBeInTheDocument();
+  });
+
+  it('mostra o nome e a foto do perfil da usuária no menu', async () => {
+    jest
+      .mocked(getCurrentUserProfile)
+      .mockResolvedValue({ name: 'Marina', photoUrl: 'https://exemplo.test/marina.jpg' });
+
+    const { container } = renderLayout();
+
+    expect(await screen.findByText('Marina')).toBeInTheDocument();
+    expect(
+      container.querySelector('img[src="https://exemplo.test/marina.jpg"]'),
+    ).toBeInTheDocument();
+  });
+
+  it('mostra o menu sem nome quando a usuária não tem perfil', async () => {
+    jest.mocked(getCurrentUserProfile).mockResolvedValue(null);
+
+    renderLayout();
+
+    await waitFor(() => expect(getCurrentUserProfile).toHaveBeenCalled());
+    expect(screen.getByRole('complementary', { name: locale.sidebar.label })).toBeInTheDocument();
+    expect(screen.getByText('conteúdo da página')).toBeInTheDocument();
+  });
+
+  it('continua funcionando se o perfil não carregar', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.mocked(getCurrentUserProfile).mockRejectedValue(new Error('falhou'));
+
+    renderLayout();
+
+    await waitFor(() => expect(console.error).toHaveBeenCalled());
+    expect(screen.getByText('conteúdo da página')).toBeInTheDocument();
   });
 
   it('vai para o login depois de sair', async () => {
