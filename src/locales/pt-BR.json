@@ -75,8 +75,8 @@
   },
   "participant_details": {
     "title": "Participante",
+    "loading": "Carregando informações da participante...",
     "back": "Voltar para participantes",
-    "loading": "Carregando participante...",
     "loadError": "Não foi possível carregar os dados da participante.",
     "updateStatusError": "Não foi possível atualizar o status da participante.",
     "notInformed": "Não informado",
@@ -300,7 +300,7 @@
   },
   "group_details": {
     "back": "Voltar para grupos",
-    "loading": "Carregando grupo...",
+    "loading": "Carregando informações do grupo...",
     "loadError": "Não foi possível carregar os dados do grupo.",
     "notInformed": "—",
     "header": {

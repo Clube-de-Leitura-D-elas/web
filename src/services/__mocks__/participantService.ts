@@ -12,3 +12,10 @@ export const getParticipantPresence =
 
 export const updateParticipantStatus =
   fn<typeof actual.updateParticipantStatus>().mockName('updateParticipantStatus');
+
+export const getCities = fn<typeof actual.getCities>().mockName('getCities');
+
+export const getZones = fn<typeof actual.getZones>().mockName('getZones');
+
+export const updateParticipant =
+  fn<typeof actual.updateParticipant>().mockName('updateParticipant');

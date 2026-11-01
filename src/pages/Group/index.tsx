@@ -7,6 +7,7 @@ import * as Styled from './styles';
 import { GroupModal } from './GroupModal';
 import { Modal } from '../../components/Modal';
 import { Tabs } from '../../components/Tab';
+import { Skeleton } from '../../components/Skeleton';
 import {
   Table,
   type TableColumn,
@@ -68,6 +69,77 @@ const formatNextMeetingDate = (iso: string) => {
   const formattedTime = minute === '00' ? `${hour}h` : `${hour}h${minute}`;
   const [d, , month] = day.split(' ');
   return `${d} de ${month.charAt(0).toUpperCase()}${month.slice(1)}, ${formattedTime}`;
+};
+
+const GroupDetailsSkeleton = () => {
+  return (
+    <Styled.Container>
+      <Skeleton width="5rem" height="0.875rem" />
+
+      <Styled.Header>
+        <Styled.HeaderInfo>
+          <Skeleton width="13rem" height="2rem" />
+          <Skeleton width="10rem" height="1rem" />
+        </Styled.HeaderInfo>
+
+        <Styled.HeaderActions>
+          <Skeleton width="5.5rem" height="2.5rem" />
+          <Skeleton width="5.5rem" height="2.5rem" />
+        </Styled.HeaderActions>
+      </Styled.Header>
+
+      <Styled.CardsRow>
+        <Styled.Card>
+          <Skeleton width="8rem" height="1.25rem" />
+
+          <Styled.CoordinatorRow>
+            <Skeleton width="2.5rem" height="2.5rem" variant="circular" />
+
+            <Styled.CoordinatorInfo>
+              <Skeleton width="7rem" height="1rem" />
+              <Skeleton width="5rem" height="0.75rem" />
+            </Styled.CoordinatorInfo>
+          </Styled.CoordinatorRow>
+
+          <Skeleton width="6rem" height="1.75rem" />
+        </Styled.Card>
+
+        <Styled.Card>
+          <Styled.MeetingHeader>
+            <Skeleton width="9rem" height="1.25rem" />
+            <Skeleton width="5rem" height="1.25rem" />
+          </Styled.MeetingHeader>
+
+          <Styled.MeetingBody>
+            <Skeleton width="2.5rem" height="2.5rem" />
+
+            <Styled.MeetingInfo>
+              <Skeleton width="9rem" height="1.1rem" />
+              <Skeleton width="7rem" height="0.85rem" />
+              <Skeleton width="8rem" height="0.85rem" />
+            </Styled.MeetingInfo>
+          </Styled.MeetingBody>
+        </Styled.Card>
+      </Styled.CardsRow>
+      <Styled.SkeletonTabs>
+        <Skeleton width="6rem" height="2rem" />
+        <Skeleton width="7rem" height="2rem" />
+      </Styled.SkeletonTabs>
+
+      <Styled.TableContainer>
+        <Styled.SkeletonTable>
+          {Array.from({ length: 5 }).map((_, rowIndex) => (
+            <Styled.SkeletonTableRow key={rowIndex}>
+              <Skeleton width="30%" height="1rem" />
+              <Skeleton width="20%" height="1rem" />
+              <Skeleton width="15%" height="1rem" />
+              <Skeleton width="10%" height="1rem" />
+            </Styled.SkeletonTableRow>
+          ))}
+        </Styled.SkeletonTable>
+      </Styled.TableContainer>
+    </Styled.Container>
+  );
 };
 
 export const GroupDetails = () => {
@@ -444,8 +516,18 @@ export const GroupDetails = () => {
     [locale, participantColumns, fetchParticipants, meetingColumns, fetchMeetings],
   );
 
-  if (loading) return <Styled.Message>{locale.group_details.loading}</Styled.Message>;
-  if (!group) return <Styled.Message>{locale.group_details.loadError}</Styled.Message>;
+  if (loading) {
+    return (
+      <div role="status">
+        <Styled.VisuallyHidden>{locale.group_details.loading}</Styled.VisuallyHidden>
+        <GroupDetailsSkeleton />
+      </div>
+    );
+  }
+
+  if (!group) {
+    return <Styled.Message>{locale.group_details.loadError}</Styled.Message>;
+  }
 
   const meeting = group.next_meeting;
   const isActive = group.is_active;
