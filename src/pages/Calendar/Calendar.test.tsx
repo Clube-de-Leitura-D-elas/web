@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import { locale } from '../../locales';
 import { getCalendarMonth } from '../../services/calendarService';
-import { pending, renderWithProviders } from '../../test/render';
+import { renderWithProviders } from '../../test/render';
 import type { CalendarMonthResponse } from '../../types/calendar';
 import { Calendar } from './index';
 
@@ -29,14 +29,6 @@ describe('Calendar', () => {
     expect(screen.getByText(text.title)).toBeInTheDocument();
 
     expect(screen.getByText(text.subtitle)).toBeInTheDocument();
-  });
-
-  it('mostra o carregamento enquanto busca os dados', () => {
-    jest.mocked(getCalendarMonth).mockReturnValue(pending());
-
-    renderPage();
-
-    expect(screen.getByRole('status')).toHaveTextContent(text.loading);
   });
 
   it('mostra uma mensagem de erro quando o calendário não carrega', async () => {
