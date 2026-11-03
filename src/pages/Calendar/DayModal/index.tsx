@@ -51,7 +51,7 @@ export const DayModal = ({ isOpen, onClose, date, events }: DayModalProps) => {
           ))}
         </Styled.EventsList>
       ) : (
-        <Styled.EmptyState> {locale.calendar.emptyState}</Styled.EmptyState>
+        <Styled.EmptyState>{locale.calendar.emptyState}</Styled.EmptyState>
       )}
     </Modal>
   );
