@@ -212,7 +212,6 @@ export const Calendar = () => {
           <Styled.MonthSelector ref={monthSelectorRef}>
             <Styled.MonthSelectorTrigger
               type="button"
-              data-testid="month-selector"
               aria-haspopup="listbox"
               aria-expanded={isMonthDropdownOpen}
               onClick={() => setIsMonthDropdownOpen((current) => !current)}

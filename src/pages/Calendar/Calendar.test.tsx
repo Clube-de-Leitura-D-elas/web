@@ -105,7 +105,9 @@ describe('Calendar', () => {
   it('abre o seletor e lista os meses', async () => {
     const { user } = renderPage();
 
-    const monthButton = await screen.findByTestId('month-selector');
+    const monthButton = await screen.findByRole('button', {
+      name: new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date()),
+    });
 
     await user.click(monthButton);
 
@@ -117,7 +119,9 @@ describe('Calendar', () => {
   it('seleciona outro mês e fecha o seletor', async () => {
     const { user } = renderPage();
 
-    const monthButton = await screen.findByTestId('month-selector');
+    const monthButton = await screen.findByRole('button', {
+      name: new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date()),
+    });
 
     await user.click(monthButton);
 
