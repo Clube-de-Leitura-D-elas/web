@@ -37,7 +37,7 @@ export const DayModal = ({ isOpen, onClose, date, events }: DayModalProps) => {
       {sortedEvents.length > 0 ? (
         <Styled.EventsList>
           {sortedEvents.map((event) => (
-            <Styled.EventItem key={event.id} tabIndex={0}>
+            <Styled.EventItem key={event.id}>
               <Styled.EventDot />
 
               <Styled.EventDetails>

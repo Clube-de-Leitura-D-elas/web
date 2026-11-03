@@ -1,13 +1,13 @@
 import styled from 'styled-components';
 import { theme } from '../../../theme/theme';
 
-export const EventsList = styled.div`
+export const EventsList = styled.ul`
   display: flex;
   flex-direction: column;
   gap: 1rem;
 `;
 
-export const EventItem = styled.div`
+export const EventItem = styled.li`
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
@@ -15,16 +15,6 @@ export const EventItem = styled.div`
   border: 1px solid ${theme.border};
   border-radius: 0.5rem;
   background-color: ${theme.surface};
-
-  &:hover,
-  &:focus-visible {
-    background-color: ${theme.surfaceSunken};
-    outline: none;
-  }
-
-  &:focus-visible {
-    box-shadow: 0 0 0 2px ${theme.textBrand};
-  }
 `;
 
 export const EventDot = styled.span`
