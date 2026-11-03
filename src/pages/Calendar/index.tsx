@@ -54,7 +54,7 @@ export const Calendar = () => {
   const totalWeeks = days.length / 7;
 
   const [calendarData, setCalendarData] = useState<CalendarMonthResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isEditingYear, setIsEditingYear] = useState(false);
@@ -271,8 +271,6 @@ export const Calendar = () => {
           )}
         </Styled.MonthNavigationButtons>
       </Styled.MonthNavigation>
-
-      {loading && <Styled.Feedback role="status">{locale.calendar.loading}</Styled.Feedback>}
 
       {error && <Styled.Feedback role="alert">{locale.calendar.loadError}</Styled.Feedback>}
 
