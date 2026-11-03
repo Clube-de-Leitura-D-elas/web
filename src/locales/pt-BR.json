@@ -35,6 +35,9 @@
     "showPassword": "Mostrar senha",
     "hidePassword": "Ocultar senha"
   },
+  "modal": {
+    "cancel": "Cancelar"
+  },
   "autocomplete": {
     "noResults": "Nenhuma opção encontrada"
   },
