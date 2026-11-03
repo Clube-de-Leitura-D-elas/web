@@ -105,12 +105,7 @@ describe('Calendar', () => {
   it('abre o seletor e lista os meses', async () => {
     const { user } = renderPage();
 
-    const monthButton = await screen.findByRole('button', {
-      name: new RegExp(
-        'janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro',
-        'i',
-      ),
-    });
+    const monthButton = await screen.findByTestId('month-selector');
 
     await user.click(monthButton);
 
@@ -122,12 +117,7 @@ describe('Calendar', () => {
   it('seleciona outro mês e fecha o seletor', async () => {
     const { user } = renderPage();
 
-    const monthButton = await screen.findByRole('button', {
-      name: new RegExp(
-        'janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro',
-        'i',
-      ),
-    });
+    const monthButton = await screen.findByTestId('month-selector');
 
     await user.click(monthButton);
 

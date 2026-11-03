@@ -57,6 +57,7 @@ export const Calendar = () => {
   const [calendarData, setCalendarData] = useState<CalendarMonthResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const isCalendarAvailable = !loading && !error && calendarData !== null;
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isEditingYear, setIsEditingYear] = useState(false);
@@ -173,7 +174,9 @@ export const Calendar = () => {
     date.getDate() === today.getDate() &&
     date.getMonth() === today.getMonth() &&
     date.getFullYear() === today.getFullYear();
+
   const handleDayClick = (date: Date) => {
+    if (!isCalendarAvailable) return;
     setSelectedDay(date);
   };
 
@@ -209,6 +212,7 @@ export const Calendar = () => {
           <Styled.MonthSelector ref={monthSelectorRef}>
             <Styled.MonthSelectorTrigger
               type="button"
+              data-testid="month-selector"
               aria-haspopup="listbox"
               aria-expanded={isMonthDropdownOpen}
               onClick={() => setIsMonthDropdownOpen((current) => !current)}
@@ -307,16 +311,27 @@ export const Calendar = () => {
 
             const visibleEvents =
               hiddenCount > 0 ? events.slice(0, MAX_VISIBLE_EVENTS - 1) : events;
+            const dayAriaLabel = locale.calendar.dayAriaLabel
+              .replace('{{day}}', String(date.getDate()))
+              .replace(
+                '{{month}}',
+                new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(date),
+              )
+              .replace('{{year}}', String(date.getFullYear()));
 
             return (
               <Styled.DayCell
                 key={dateKey}
                 $outsideMonth={!inMonth}
+                $disabled={!isCalendarAvailable}
                 role="button"
-                tabIndex={0}
-                aria-label={`Abrir eventos do dia ${date.getDate()}`}
+                tabIndex={isCalendarAvailable ? 0 : -1}
+                aria-disabled={!isCalendarAvailable}
+                aria-label={dayAriaLabel}
                 onClick={() => handleDayClick(date)}
                 onKeyDown={(event) => {
+                  if (!isCalendarAvailable) return;
+
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
                     handleDayClick(date);

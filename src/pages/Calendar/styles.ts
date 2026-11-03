@@ -260,7 +260,10 @@ export const WeekdayHeader = styled.div`
   border-bottom: 1px solid ${theme.border};
 `;
 
-export const DayCell = styled.div<{ $outsideMonth: boolean }>`
+export const DayCell = styled.div<{
+  $outsideMonth: boolean;
+  $disabled: boolean;
+}>`
   min-width: 0;
   min-height: 0;
   box-sizing: border-box;
@@ -272,10 +275,11 @@ export const DayCell = styled.div<{ $outsideMonth: boolean }>`
   &:nth-child(7n) {
     border-right: none;
   }
-  cursor: pointer;
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
 
   &:hover {
-    background-color: ${theme.surfaceSunken};
+    background-color: ${({ $disabled, $outsideMonth }) =>
+      $disabled ? ($outsideMonth ? theme.surfaceSunken : theme.surface) : theme.surfaceSunken};
   }
 `;
 

@@ -390,6 +390,7 @@
   },
   "calendar": {
     "title": "Calendário",
+    "dayAriaLabel": "{{day}} de {{month}} de {{year}}",
     "subtitle": "Visualize os encontros de todos os grupos do clube.",
     "weekdays": {
       "sunday": "DOM.",
