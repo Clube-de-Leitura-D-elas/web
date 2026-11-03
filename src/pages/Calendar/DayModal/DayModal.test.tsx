@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import { renderWithProviders } from '../../../test/render';
 import { DayModal } from '.';
 import type { CalendarEvent } from '../../../types/calendar';
+import ptBR from '../../../locales/pt-BR.json';
 
 const mockEvents: CalendarEvent[] = [
   {
@@ -59,11 +60,10 @@ describe('DayModal', () => {
 
     expect(eventNames).toEqual(['Grupo de Tecnologia', 'Clube de Leitura']);
   });
-
   it('exibe uma mensagem quando não existem eventos', () => {
     renderDayModal([]);
 
-    expect(screen.getByText('Nenhum evento neste dia.')).toBeInTheDocument();
+    expect(screen.getByText(ptBR.calendar.emptyState)).toBeInTheDocument();
   });
 
   it('não exibe o footer do modal', () => {

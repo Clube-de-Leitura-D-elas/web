@@ -402,6 +402,7 @@
     },
     "loading": "Carregando encontros...",
     "loadError": "Não foi possível carregar os encontros.",
+    "emptyState": "Nenhum evento neste dia.",
     "moreEvents": "+{{count}} mais",
     "navigation": {
       "today": "Hoje",
