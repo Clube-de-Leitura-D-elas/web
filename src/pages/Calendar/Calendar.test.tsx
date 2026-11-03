@@ -14,6 +14,12 @@ const nav = text.navigation;
 
 const renderPage = () => renderWithProviders(<Calendar />);
 
+const getCalendarDayLabel = (date: Date) =>
+  locale.calendar.dayAriaLabel
+    .replace('{{day}}', String(date.getDate()))
+    .replace('{{month}}', new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(date))
+    .replace('{{year}}', String(date.getFullYear()));
+
 const emptyCalendar = {
   days: [],
 } as unknown as CalendarMonthResponse;
@@ -198,5 +204,62 @@ describe('Calendar', () => {
     await waitFor(() => {
       expect(getCalendarMonth).toHaveBeenLastCalledWith(now.getFullYear(), now.getMonth() + 1);
     });
+  });
+  it('desabilita as células dos dias enquanto carrega', () => {
+    jest.mocked(getCalendarMonth).mockReturnValue(pending());
+
+    renderPage();
+
+    const dayCells = screen.getAllByRole('button', {
+      name: /\d+ de .+ de \d{4}/,
+    });
+
+    expect(dayCells.length).toBeGreaterThan(0);
+
+    dayCells.forEach((day) => {
+      expect(day).toHaveAttribute('aria-disabled', 'true');
+      expect(day).toHaveAttribute('tabindex', '-1');
+    });
+  });
+
+  it('abre o modal ao clicar em um dia', async () => {
+    const { user } = renderPage();
+
+    const date = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+    const dayCell = await screen.findByRole('button', {
+      name: getCalendarDayLabel(date),
+    });
+
+    await user.click(dayCell);
+
+    const modalTitle = new Intl.DateTimeFormat('pt-BR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(date);
+
+    expect(await screen.findByRole('dialog', { name: modalTitle })).toBeInTheDocument();
+  });
+
+  it('abre o modal ao pressionar Enter em um dia', async () => {
+    const { user } = renderPage();
+
+    const date = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+    const dayCell = await screen.findByRole('button', {
+      name: getCalendarDayLabel(date),
+    });
+
+    dayCell.focus();
+    await user.keyboard('{Enter}');
+
+    const modalTitle = new Intl.DateTimeFormat('pt-BR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(date);
+
+    expect(await screen.findByRole('dialog', { name: modalTitle })).toBeInTheDocument();
   });
 });
