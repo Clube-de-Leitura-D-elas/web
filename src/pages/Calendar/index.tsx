@@ -9,6 +9,7 @@ import { getCalendarMonth } from '../../services/calendarService';
 import type { CalendarMonthResponse } from '../../types/calendar';
 import { getCalendarDays } from '../../utils/calendar';
 import { Input } from '../../components/Input';
+import { DayModal } from './DayModal';
 
 const MAX_VISIBLE_EVENTS = 3;
 const TIME_ZONE = 'America/Sao_Paulo';
@@ -56,6 +57,7 @@ export const Calendar = () => {
   const [calendarData, setCalendarData] = useState<CalendarMonthResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isEditingYear, setIsEditingYear] = useState(false);
   const monthSelectorRef = useRef<HTMLDivElement>(null);
@@ -171,6 +173,9 @@ export const Calendar = () => {
     date.getDate() === today.getDate() &&
     date.getMonth() === today.getMonth() &&
     date.getFullYear() === today.getFullYear();
+  const handleDayClick = (date: Date) => {
+    setSelectedDay(date);
+  };
 
   return (
     <Styled.Container>
@@ -304,7 +309,20 @@ export const Calendar = () => {
               hiddenCount > 0 ? events.slice(0, MAX_VISIBLE_EVENTS - 1) : events;
 
             return (
-              <Styled.DayCell key={dateKey} $outsideMonth={!inMonth}>
+              <Styled.DayCell
+                key={dateKey}
+                $outsideMonth={!inMonth}
+                role="button"
+                tabIndex={0}
+                aria-label={`Abrir eventos do dia ${date.getDate()}`}
+                onClick={() => handleDayClick(date)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleDayClick(date);
+                  }
+                }}
+              >
                 <Styled.DayNumber $today={currentDay} $outsideMonth={!inMonth}>
                   {date.getDate()}
                 </Styled.DayNumber>
@@ -334,6 +352,14 @@ export const Calendar = () => {
           })}
         </Styled.CalendarGrid>
       </Styled.CalendarScroll>
+      {selectedDay && (
+        <DayModal
+          isOpen={Boolean(selectedDay)}
+          onClose={() => setSelectedDay(null)}
+          date={selectedDay}
+          events={eventsByDate.get(getDateKey(selectedDay)) ?? []}
+        />
+      )}
     </Styled.Container>
   );
 };

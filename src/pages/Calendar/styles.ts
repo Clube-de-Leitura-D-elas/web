@@ -272,6 +272,11 @@ export const DayCell = styled.div<{ $outsideMonth: boolean }>`
   &:nth-child(7n) {
     border-right: none;
   }
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${theme.surfaceSunken};
+  }
 `;
 
 export const DayNumber = styled.span<{

@@ -10,10 +10,11 @@ export type ModalProps = {
   title: string;
   description?: string;
   children?: ReactNode;
-  onConfirm: () => void;
-  confirmText: string;
+  onConfirm?: () => void;
+  confirmText?: string;
   confirmDisabled?: boolean;
   size?: ModalSize;
+  showFooter?: boolean;
 };
 
 const FOCUSABLE_SELECTOR =
@@ -31,6 +32,7 @@ export const Modal = ({
   confirmText,
   confirmDisabled = false,
   size = 'md',
+  showFooter = true,
 }: ModalProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const pressStartedOnOverlay = useRef(false);
@@ -124,14 +126,16 @@ export const Modal = ({
 
         {children && <Styled.Body>{children}</Styled.Body>}
 
-        <Styled.Footer $size={size}>
-          <Button variant="secondary" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={onConfirm} disabled={confirmDisabled}>
-            {confirmText}
-          </Button>
-        </Styled.Footer>
+        {showFooter && onConfirm && confirmText && (
+          <Styled.Footer $size={size}>
+            <Button variant="secondary" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button variant="primary" onClick={onConfirm} disabled={confirmDisabled}>
+              {confirmText}
+            </Button>
+          </Styled.Footer>
+        )}
       </Styled.Container>
     </Styled.Overlay>
   );
