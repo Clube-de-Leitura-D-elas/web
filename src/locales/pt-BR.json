@@ -321,8 +321,7 @@
     },
     "updateStatusError": "Não foi possível atualizar o status do grupo. Tente novamente.",
     "coordinator": {
-      "label": "Coordenadora Responsável",
-      "change": "Trocar"
+      "label": "Coordenadoras"
     },
     "nextMeeting": {
       "label": "Próximo Encontro Agendado",
@@ -379,13 +378,18 @@
       "optionsError": "Não foi possível carregar as cidades e zonas."
     },
     "participantActions": {
-      "promote": "Tornar coordenadora",
+      "promote": "Adicionar coordenadora",
+      "demote": "Remover coordenação",
       "remove": "Remover do grupo",
-      "promoteTitle": "Tornar coordenadora?",
+      "promoteTitle": "Adicionar coordenadora?",
+      "demoteTitle": "Remover coordenação?",
       "removeTitle": "Remover participante?",
-      "promoteDescription": "Deseja tornar {{name}} coordenadora deste grupo? As coordenadoras atuais serão mantidas.",
+      "promoteDescription": "Adicionar {{name}} como coordenadora deste grupo? As coordenadoras atuais serão mantidas.",
+      "demoteDescription": "{{name}} deixará de ser coordenadora, mas continua no grupo.",
       "removeDescription": "Deseja remover {{name}} do grupo? O cadastro e o histórico serão preservados.",
-      "error": "Não foi possível atualizar a participante. Tente novamente."
+      "lastCoordinatorHint": "O grupo precisa manter ao menos uma coordenadora. Adicione outra antes.",
+      "error": "Não foi possível atualizar a participante. Tente novamente.",
+      "conflictError": "A situação da participante mudou. Os dados foram atualizados; confira e tente novamente."
     }
   },
   "calendar": {

@@ -7,6 +7,9 @@ export type ActionItem = {
   icon?: ReactNode;
   onClick: () => void;
   variant?: 'default' | 'danger';
+  disabled?: boolean;
+  // Motivo do item estar desabilitado; aparece escrito sob o rótulo (title não aparece em botão desabilitado).
+  hint?: string;
 };
 
 export type ActionMenuProps = {
@@ -101,13 +104,19 @@ export const ActionMenu = ({ items, ariaLabel = 'Mais ações' }: ActionMenuProp
               type="button"
               role="menuitem"
               $variant={item.variant}
+              disabled={item.disabled}
               onClick={() => {
                 item.onClick();
                 setIsOpen(false);
               }}
             >
               {item.icon}
-              <span>{item.label}</span>
+              <Styled.MenuItemText>
+                <span>{item.label}</span>
+                {item.disabled && item.hint && (
+                  <Styled.MenuItemHint>{item.hint}</Styled.MenuItemHint>
+                )}
+              </Styled.MenuItemText>
             </Styled.MenuItem>
           ))}
         </Styled.MenuDropdown>

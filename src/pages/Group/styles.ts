@@ -255,22 +255,14 @@ export const CoordinatorInfo = styled.div`
   min-width: 0;
 `;
 
-export const TrocarButton = styled.button`
-  flex-shrink: 0;
-  padding: 0.4rem 1rem;
-  border-radius: 999px;
-  border: 1px solid ${theme.borderBrand};
-  background: ${theme.surface};
-  color: ${theme.textBrand};
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: ${theme.surfaceBrandSoft};
-  }
-
-  ${focusRing}
+export const CoordinatorList = styled.ul`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 `;
 
 export const CoordinatorTag = styled.span`

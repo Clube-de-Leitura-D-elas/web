@@ -36,6 +36,19 @@ export const MenuDropdown = styled.div`
   gap: 2px;
 `;
 
+export const MenuItemText = styled.span`
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+`;
+
+export const MenuItemHint = styled.small`
+  max-width: 14rem;
+  white-space: normal;
+  font-size: 0.75rem;
+  color: ${theme.textMuted};
+`;
+
 export const MenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
   border: none;
   background-color: transparent;
@@ -65,4 +78,13 @@ export const MenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
             background-color: ${theme.border};
           }
         `}
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:disabled:hover {
+    background-color: transparent;
+  }
 `;
