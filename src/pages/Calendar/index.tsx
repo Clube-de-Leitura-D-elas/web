@@ -10,6 +10,7 @@ import type { CalendarMonthResponse } from '../../types/calendar';
 import { getCalendarDays } from '../../utils/calendar';
 import { Input } from '../../components/Input';
 import { DayModal } from './DayModal';
+import { interpolate } from '../../locales';
 
 const MAX_VISIBLE_EVENTS = 3;
 const TIME_ZONE = 'America/Sao_Paulo';
@@ -310,13 +311,11 @@ export const Calendar = () => {
 
             const visibleEvents =
               hiddenCount > 0 ? events.slice(0, MAX_VISIBLE_EVENTS - 1) : events;
-            const dayAriaLabel = locale.calendar.dayAriaLabel
-              .replace('{{day}}', String(date.getDate()))
-              .replace(
-                '{{month}}',
-                new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(date),
-              )
-              .replace('{{year}}', String(date.getFullYear()));
+            const dayAriaLabel = interpolate(locale.calendar.dayAriaLabel, {
+              day: date.getDate(),
+              month: new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(date),
+              year: date.getFullYear(),
+            });
 
             return (
               <Styled.DayCell
