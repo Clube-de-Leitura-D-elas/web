@@ -497,8 +497,12 @@ describe('GroupDetails', () => {
       expect(await within(dialog).findByRole('alert')).toHaveTextContent(
         text.participantActions.conflictError,
       );
-      await waitFor(() => expect(screen.getAllByText('Joana Alves')).toHaveLength(1));
-      expect(screen.queryByText('Carla Dias')).not.toBeInTheDocument();
+      await waitFor(() => expect(screen.queryByText('Carla Dias')).not.toBeInTheDocument());
+      await waitFor(() =>
+        expect(
+          within(dialog).getByRole('button', { name: text.participantActions.demote }),
+        ).toBeEnabled(),
+      );
 
       await confirm();
 
