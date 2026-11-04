@@ -260,7 +260,10 @@ export const WeekdayHeader = styled.div`
   border-bottom: 1px solid ${theme.border};
 `;
 
-export const DayCell = styled.div<{ $outsideMonth: boolean }>`
+export const DayCell = styled.div<{
+  $outsideMonth: boolean;
+  $isLoading: boolean;
+}>`
   min-width: 0;
   min-height: 0;
   box-sizing: border-box;
@@ -268,7 +271,14 @@ export const DayCell = styled.div<{ $outsideMonth: boolean }>`
   border-right: 1px solid ${theme.border};
   border-bottom: 1px solid ${theme.border};
   overflow: hidden;
-  background-color: ${({ $outsideMonth }) => ($outsideMonth ? theme.surfaceSunken : theme.surface)};
+
+  background-color: ${({ $outsideMonth, $isLoading }) => {
+    if ($outsideMonth) return theme.surfaceSunken;
+    if ($isLoading) return theme.backgroundSubtle;
+
+    return theme.surface;
+  }};
+
   &:nth-child(7n) {
     border-right: none;
   }

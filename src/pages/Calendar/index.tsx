@@ -54,7 +54,7 @@ export const Calendar = () => {
   const totalWeeks = days.length / 7;
 
   const [calendarData, setCalendarData] = useState<CalendarMonthResponse | null>(null);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isEditingYear, setIsEditingYear] = useState(false);
@@ -302,7 +302,12 @@ export const Calendar = () => {
               hiddenCount > 0 ? events.slice(0, MAX_VISIBLE_EVENTS - 1) : events;
 
             return (
-              <Styled.DayCell key={dateKey} $outsideMonth={!inMonth}>
+              <Styled.DayCell
+                data-testid="calendar-day"
+                key={dateKey}
+                $outsideMonth={!inMonth}
+                $isLoading={loading}
+              >
                 <Styled.DayNumber $today={currentDay} $outsideMonth={!inMonth}>
                   {date.getDate()}
                 </Styled.DayNumber>

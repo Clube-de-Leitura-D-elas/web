@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { locale } from '../../locales';
 import { getCalendarMonth } from '../../services/calendarService';
 import { renderWithProviders } from '../../test/render';
@@ -29,6 +29,31 @@ describe('Calendar', () => {
     expect(screen.getByText(text.title)).toBeInTheDocument();
 
     expect(screen.getByText(text.subtitle)).toBeInTheDocument();
+  });
+
+  it('aplica o fundo de skeleton aos dias do mês enquanto carrega', async () => {
+    let resolveRequest!: (value: CalendarMonthResponse) => void;
+
+    jest.mocked(getCalendarMonth).mockReturnValue(
+      new Promise((resolve) => {
+        resolveRequest = resolve;
+      }),
+    );
+
+    const { container } = renderPage();
+
+    const dayCells = container.querySelectorAll('div');
+
+    const hasLoadingCell = Array.from(dayCells).some(
+      (cell) => getComputedStyle(cell).backgroundColor === 'rgb(250, 248, 249)',
+    );
+
+    expect(hasLoadingCell).toBe(true);
+
+    await act(async () => {
+      resolveRequest(emptyCalendar);
+      await Promise.resolve();
+    });
   });
 
   it('mostra uma mensagem de erro quando o calendário não carrega', async () => {
