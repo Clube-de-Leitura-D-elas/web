@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { IoMdMore } from 'react-icons/io';
 import * as Styled from './styles';
 
@@ -8,7 +8,7 @@ export type ActionItem = {
   onClick: () => void;
   variant?: 'default' | 'danger';
   disabled?: boolean;
-  // Motivo do item estar desabilitado; aparece escrito sob o rótulo (title não aparece em botão desabilitado).
+  // Motivo de o item estar desabilitado, escrito sob o rótulo.
   hint?: string;
 };
 
@@ -22,6 +22,7 @@ const MENU_GAP = 4;
 type MenuPosition = { top: number; right: number };
 
 export const ActionMenu = ({ items, ariaLabel = 'Mais ações' }: ActionMenuProps) => {
+  const menuId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<MenuPosition | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -104,8 +105,11 @@ export const ActionMenu = ({ items, ariaLabel = 'Mais ações' }: ActionMenuProp
               type="button"
               role="menuitem"
               $variant={item.variant}
-              disabled={item.disabled}
+              // aria-disabled (e não disabled) mantém o item no Tab, para o teclado chegar à dica
+              aria-disabled={item.disabled || undefined}
+              aria-describedby={item.disabled && item.hint ? `${menuId}-hint-${index}` : undefined}
               onClick={() => {
+                if (item.disabled) return;
                 item.onClick();
                 setIsOpen(false);
               }}
@@ -114,7 +118,9 @@ export const ActionMenu = ({ items, ariaLabel = 'Mais ações' }: ActionMenuProp
               <Styled.MenuItemText>
                 <span>{item.label}</span>
                 {item.disabled && item.hint && (
-                  <Styled.MenuItemHint>{item.hint}</Styled.MenuItemHint>
+                  <Styled.MenuItemHint id={`${menuId}-hint-${index}`}>
+                    {item.hint}
+                  </Styled.MenuItemHint>
                 )}
               </Styled.MenuItemText>
             </Styled.MenuItem>

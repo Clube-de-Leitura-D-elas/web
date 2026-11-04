@@ -302,20 +302,33 @@ export const GroupDetails = () => {
   };
 
   const refreshGroup = async () => {
-    const updatedGroup = await getGroupDetails(groupId);
-    setResult({ id: groupId, group: updatedGroup });
-    setParticipantsVersion((version) => version + 1);
+    try {
+      const updatedGroup = await getGroupDetails(groupId);
+      setResult({ id: groupId, group: updatedGroup });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      // a tabela busca por conta própria, então atualiza mesmo se o card não recarregar
+      setParticipantsVersion((version) => version + 1);
+    }
   };
 
   const confirmParticipantAction = async () => {
     if (!selectedParticipant || !participantAction || savingParticipant) return;
+
+    // O card pode ter mudado com o modal aberto (ex.: depois de um 409).
+    const removesCoordinator =
+      selectedParticipant.is_coordinator &&
+      (participantAction === 'demote' || participantAction === 'remove');
+    if (removesCoordinator && isLastCoordinator) {
+      setParticipantError(locale.group_details.participantActions.lastCoordinatorHint);
+      return;
+    }
+
     setSavingParticipant(true);
     setParticipantError(null);
     try {
       await updateGroupParticipant(groupId, selectedParticipant.id, participantAction);
-      await refreshGroup();
-      setSelectedParticipant(null);
-      setParticipantAction(null);
     } catch (err) {
       console.error(err);
       setParticipantError(
@@ -324,10 +337,16 @@ export const GroupDetails = () => {
           : locale.group_details.participantActions.error,
       );
       // O servidor pode ter mudado (ex.: 409); recarrega o card e a tabela para refletir o estado real.
-      refreshGroup().catch((refreshErr) => console.error(refreshErr));
-    } finally {
+      await refreshGroup();
       setSavingParticipant(false);
+      return;
     }
+
+    // A escrita deu certo: fecha o modal mesmo que o recarregamento falhe, para não repetir a ação.
+    await refreshGroup();
+    setSelectedParticipant(null);
+    setParticipantAction(null);
+    setSavingParticipant(false);
   };
 
   //aba 1

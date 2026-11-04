@@ -370,7 +370,10 @@ describe('GroupDetails', () => {
       await user.click(actions('Ana Souza'));
 
       for (const name of [text.participantActions.demote, text.participantActions.remove]) {
-        expect(screen.getByRole('menuitem', { name: new RegExp(name) })).toBeDisabled();
+        expect(screen.getByRole('menuitem', { name: new RegExp(name) })).toHaveAttribute(
+          'aria-disabled',
+          'true',
+        );
       }
       // a dica aparece só uma vez, no "Remover coordenação"
       expect(screen.getAllByText(text.participantActions.lastCoordinatorHint)).toHaveLength(1);
@@ -450,6 +453,59 @@ describe('GroupDetails', () => {
         expect(jest.mocked(getGroupDetails).mock.calls.length).toBeGreaterThan(detailsFetches),
       );
       expect(dialog).toBeInTheDocument();
+    });
+
+    it('fecha o modal sem erro quando a ação funciona e só o recarregamento falha', async () => {
+      jest.mocked(updateGroupParticipant).mockResolvedValue();
+      const { user } = renderPage();
+      await screen.findByRole('link', { name: 'Bia Lima' });
+      jest.mocked(getGroupDetails).mockRejectedValue(new Error('rede'));
+
+      await user.click(actions('Bia Lima'));
+      await user.click(screen.getByRole('menuitem', { name: text.participantActions.promote }));
+      const dialog = screen.getByRole('dialog', { name: text.participantActions.promoteTitle });
+      await user.click(
+        within(dialog).getByRole('button', { name: text.participantActions.promote }),
+      );
+
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+      expect(updateGroupParticipant).toHaveBeenCalledTimes(1);
+      expect(screen.queryByText(text.participantActions.error)).not.toBeInTheDocument();
+    });
+
+    it('não envia a ação se, após recarregar, ela virou a última coordenadora', async () => {
+      const two = [
+        ...group.coordinators,
+        { id: 'p3', name: 'Carla Dias', email: null, photo: null },
+      ];
+      jest.mocked(getGroupDetails).mockResolvedValue({ ...group, coordinators: two });
+      jest
+        .mocked(updateGroupParticipant)
+        .mockRejectedValue(new Error(text.participantActions.conflictError));
+      const { user } = renderPage();
+      await screen.findByRole('link', { name: /^Ana Souza/ });
+
+      await user.click(actions('Ana Souza'));
+      await user.click(screen.getByRole('menuitem', { name: text.participantActions.demote }));
+      const dialog = screen.getByRole('dialog', { name: text.participantActions.demoteTitle });
+      const confirm = () =>
+        user.click(within(dialog).getByRole('button', { name: text.participantActions.demote }));
+
+      // a primeira tentativa dá conflito e o recarregamento mostra só uma coordenadora
+      jest.mocked(getGroupDetails).mockResolvedValue({ ...group, coordinators: [two[0]] });
+      await confirm();
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+        text.participantActions.conflictError,
+      );
+      await waitFor(() => expect(screen.getAllByText('Joana Alves')).toHaveLength(1));
+      expect(screen.queryByText('Carla Dias')).not.toBeInTheDocument();
+
+      await confirm();
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+        text.participantActions.lastCoordinatorHint,
+      );
+      expect(updateGroupParticipant).toHaveBeenCalledTimes(1);
     });
 
     it('remove do grupo e mantém o modal aberto com erro quando falha', async () => {

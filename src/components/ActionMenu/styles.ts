@@ -79,12 +79,12 @@ export const MenuItem = styled.button<{ $variant?: 'default' | 'danger' }>`
           }
         `}
 
-  &:disabled {
+  &[aria-disabled='true'] {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
-  &:disabled:hover {
+  &[aria-disabled='true']:hover {
     background-color: transparent;
   }
 `;
