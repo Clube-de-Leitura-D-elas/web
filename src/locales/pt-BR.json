@@ -73,6 +73,12 @@
     "nextPage": "Próxima página",
     "goToPage": "Ir para a página {{page}}"
   },
+  "dataState": {
+    "loading": "Carregando...",
+    "empty": "Ainda não há dados para mostrar.",
+    "error": "Não foi possível carregar os dados.",
+    "retry": "Tentar novamente"
+  },
   "participant_details": {
     "title": "Participante",
     "loading": "Carregando informações da participante...",
@@ -603,6 +609,16 @@
       "video": "Claudine explica o funcionamento do clube",
       "adminLogin": "Acesso da coordenação",
       "copyright": "Clube de Leitura D'Elas"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Acompanhe os principais indicadores do clube.",
+    "kpis": {
+      "label": "Indicadores"
+    },
+    "charts": {
+      "label": "Gráficos"
     }
   }
 }
