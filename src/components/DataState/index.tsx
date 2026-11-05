@@ -55,7 +55,7 @@ export const DataState = ({
   }
 
   return (
-    <Styled.Container $size={size} $minHeight={minHeight}>
+    <Styled.Container role="status" $size={size} $minHeight={minHeight}>
       <Styled.Icon $variant="empty" $size={size}>
         <LuInbox aria-hidden />
       </Styled.Icon>

@@ -39,6 +39,17 @@ describe('DataState', () => {
       expect(screen.getByText('Nenhuma inscrição no período.')).toBeInTheDocument();
       expect(screen.queryByText(text.empty)).not.toBeInTheDocument();
     });
+
+    it('anuncia na mesma região de status quando o carregamento termina sem dados', () => {
+      const { rerender } = renderWithProviders(<DataState variant="loading" />);
+      const region = screen.getByRole('status');
+
+      rerender(<DataState variant="empty" />);
+
+      expect(screen.getByRole('status')).toBe(region);
+      expect(region).toHaveTextContent(text.empty);
+      expect(region).not.toHaveTextContent(text.loading);
+    });
   });
 
   describe('error', () => {
