@@ -396,6 +396,7 @@
   },
   "calendar": {
     "title": "Calendário",
+    "loading": "Carregando calendário...",
     "subtitle": "Visualize os encontros de todos os grupos do clube.",
     "weekdays": {
       "sunday": "DOM.",
@@ -406,7 +407,6 @@
       "friday": "SEX.",
       "saturday": "SÁB."
     },
-    "loading": "Carregando encontros...",
     "loadError": "Não foi possível carregar os encontros.",
     "moreEvents": "+{{count}} mais",
     "navigation": {
