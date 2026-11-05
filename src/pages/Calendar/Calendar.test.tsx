@@ -204,10 +204,10 @@ describe('Calendar', () => {
       expect(getCalendarMonth).toHaveBeenLastCalledWith(now.getFullYear(), now.getMonth() + 1);
     });
   });
-  it('desabilita as células dos dias enquanto carrega', () => {
+  it('impede abrir o modal ao clicar em um dia enquanto carrega', async () => {
     jest.mocked(getCalendarMonth).mockReturnValue(pending());
 
-    renderPage();
+    const { user } = renderPage();
 
     const dayCells = screen.getAllByRole('button', {
       name: /\d+ de .+ de \d{4}/,
@@ -219,6 +219,9 @@ describe('Calendar', () => {
       expect(day).toHaveAttribute('aria-disabled', 'true');
       expect(day).toHaveAttribute('tabindex', '-1');
     });
+    await user.click(dayCells[0]);
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('mostra no modal somente os eventos do dia selecionado', async () => {
