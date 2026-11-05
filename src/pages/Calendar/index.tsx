@@ -304,11 +304,12 @@ export const Calendar = () => {
 
             const visibleEvents =
               hiddenCount > 0 ? events.slice(0, MAX_VISIBLE_EVENTS - 1) : events;
-            const dayAriaLabel = interpolate(locale.calendar.dayAriaLabel, {
+
+            const dayAriaLabel = `${interpolate(locale.calendar.dayAriaLabel, {
               day: date.getDate(),
               month: formatCalendarMonthName(date),
               year: date.getFullYear(),
-            });
+            })}, ${events.length} ${events.length === 1 ? 'evento' : 'eventos'}`;
 
             return (
               <Styled.DayCell

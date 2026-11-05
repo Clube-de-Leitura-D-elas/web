@@ -16,10 +16,10 @@ const renderPage = () => renderWithProviders(<Calendar />);
 const getMonthButton = () => screen.getByRole('button', { expanded: false });
 
 const getCalendarDayLabel = (date: Date) =>
-  locale.calendar.dayAriaLabel
+  `${locale.calendar.dayAriaLabel
     .replace('{{day}}', String(date.getDate()))
     .replace('{{month}}', new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(date))
-    .replace('{{year}}', String(date.getFullYear()));
+    .replace('{{year}}', String(date.getFullYear()))}, 0 eventos`;
 
 const emptyCalendar = {
   days: [],
