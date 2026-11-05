@@ -348,6 +348,67 @@ Nos tokens de feedback, `…Light` e `…Dark` são as tonalidades clara e escur
 
 ---
 
+## Gráficos
+
+Os gráficos usam o [Recharts](https://recharts.org/), escolhido por três motivos:
+
+- **É React de verdade**: o gráfico é montado com componentes (`<BarChart>`, `<XAxis>`, `<Bar>`),
+  do mesmo jeito que o resto da tela, sem configurar um objeto gigante.
+- **Desenha em SVG**: as cores vêm direto do tema, o texto é nítido em qualquer tela e o
+  gráfico já tem tooltip e navegação por teclado.
+- **Cobre o que o Dashboard precisa** (barras, linhas, áreas, tooltip, legenda) sem
+  precisarmos desenhar eixo e escala na mão, e funciona no Jest sem configuração extra.
+
+O `react-is` também está nas dependências porque o Recharts exige a mesma versão do React. Ao
+atualizar o React, atualize o `react-is` junto.
+
+### Cores
+
+O Recharts recebe a cor como prop, não por CSS. Pegue as cores do tema com o `useTheme()` do
+styled-components, nunca hex solto:
+
+```tsx
+import { useTheme } from 'styled-components';
+
+const theme = useTheme();
+// <Bar fill={theme.primary} />, <CartesianGrid stroke={theme.border} />
+```
+
+### Onde entra cada indicador
+
+A página fica em `src/pages/Dashboard/` (rota `/`). Ela tem duas áreas vazias, prontas para
+receber os indicadores:
+
+- `KpiGrid`: a linha dos cards de número.
+- `ChartsGrid`: a área dos gráficos e listas, em duas colunas (uma no tablet e no celular).
+
+### Estados de carregando, vazio e erro
+
+Cada indicador mostra os três estados com o componente `DataState`
+(`src/components/DataState/`):
+
+```tsx
+<DataState variant="loading" minHeight="16rem" />
+<DataState variant="empty">Nenhuma inscrição no período.</DataState>
+<DataState variant="error" onRetry={load} />
+```
+
+Sem `children`, cada variante usa o texto padrão. O tipo `DataStatus`
+(`'loading' | 'empty' | 'error' | 'ready'`) serve para guardar o estado no componente do
+indicador.
+
+### Testando um gráfico
+
+O `ResponsiveContainer` mede o tamanho da tela para desenhar, e o jsdom do Jest não tem tamanho:
+o gráfico simplesmente não aparece no teste. Passe um tamanho inicial para ele desenhar mesmo
+assim:
+
+```tsx
+<ResponsiveContainer width="100%" height={256} initialDimension={{ width: 600, height: 256 }}>
+```
+
+---
+
 ## 🌿 Branches e commits
 
 Branch padrão: **`develop`**. Todo trabalho sai de uma branch nova e volta por Pull Request.
