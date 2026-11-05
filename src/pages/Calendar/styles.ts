@@ -147,7 +147,7 @@ export const MonthOption = styled.button<{ $isSelected: boolean }>`
   &:hover,
   &:focus-visible {
     background: ${theme.surfaceBrandSoft};
-    color: ${theme.focusRing};
+    color: ${theme.textBrand};
     outline: none;
   }
 `;
