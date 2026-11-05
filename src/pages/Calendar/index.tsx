@@ -11,9 +11,9 @@ import { getCalendarDays } from '../../utils/calendar';
 import { Input } from '../../components/Input';
 import { DayModal } from './DayModal';
 import { interpolate } from '../../locales';
+import { formatCalendarMonthName, formatEventTime } from '../../utils/date';
 
 const MAX_VISIBLE_EVENTS = 3;
-const TIME_ZONE = 'America/Sao_Paulo';
 // mesmo intervalo aceito pela edge function calendar-month
 const MIN_YEAR = 1000;
 const MAX_YEAR = 9998;
@@ -31,13 +31,6 @@ const getDateKey = (date: Date): string =>
     String(date.getMonth() + 1).padStart(2, '0'),
     String(date.getDate()).padStart(2, '0'),
   ].join('-');
-
-const formatTime = (value: string): string =>
-  new Intl.DateTimeFormat('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: TIME_ZONE,
-  }).format(new Date(value));
 
 export const Calendar = () => {
   const locale = useLocale();
@@ -313,7 +306,7 @@ export const Calendar = () => {
               hiddenCount > 0 ? events.slice(0, MAX_VISIBLE_EVENTS - 1) : events;
             const dayAriaLabel = interpolate(locale.calendar.dayAriaLabel, {
               day: date.getDate(),
-              month: new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(date),
+              month: formatCalendarMonthName(date),
               year: date.getFullYear(),
             });
 
@@ -344,12 +337,12 @@ export const Calendar = () => {
                   {visibleEvents.map((event) => (
                     <Styled.EventItem
                       key={event.id}
-                      title={`${formatTime(event.startsAt)} - ${event.groupName}`}
+                      title={`${formatEventTime(event.startsAt)} - ${event.groupName}`}
                     >
                       <Styled.EventDot />
 
                       <Styled.EventText>
-                        {formatTime(event.startsAt)} {event.groupName}
+                        {formatEventTime(event.startsAt)} {event.groupName}
                       </Styled.EventText>
                     </Styled.EventItem>
                   ))}
