@@ -3,6 +3,7 @@ import { locale } from '../../locales';
 import { getCalendarMonth } from '../../services/calendarService';
 import { renderWithProviders } from '../../test/render';
 import type { CalendarMonthResponse } from '../../types/calendar';
+import { getCalendarDays } from '../../utils/calendar';
 import { Calendar } from './index';
 
 jest.mock('../../services/calendarService', () => ({
@@ -31,7 +32,7 @@ describe('Calendar', () => {
     expect(screen.getByText(text.subtitle)).toBeInTheDocument();
   });
 
-  it('aplica o fundo de skeleton aos dias do mês enquanto carrega', async () => {
+  it('aplica os fundos corretos durante e após o carregamento', async () => {
     let resolveRequest!: (value: CalendarMonthResponse) => void;
 
     jest.mocked(getCalendarMonth).mockReturnValue(
@@ -40,19 +41,42 @@ describe('Calendar', () => {
       }),
     );
 
-    const { container } = renderPage();
+    const { container } = renderWithProviders(<Calendar />);
 
-    const dayCells = container.querySelectorAll('div');
+    const currentDate = new Date();
+    const days = getCalendarDays(currentDate.getFullYear(), currentDate.getMonth() + 1);
 
-    const hasLoadingCell = Array.from(dayCells).some(
-      (cell) => getComputedStyle(cell).backgroundColor === 'rgb(250, 248, 249)',
-    );
+    const dayCells = Array.from(container.querySelectorAll('[data-testid="calendar-day"]'));
 
-    expect(hasLoadingCell).toBe(true);
+    const insideMonth = days
+      .map((day, index) => ({ day, cell: dayCells[index] }))
+      .filter(({ day }) => day.getMonth() === currentDate.getMonth());
+
+    const outsideMonth = days
+      .map((day, index) => ({ day, cell: dayCells[index] }))
+      .filter(({ day }) => day.getMonth() !== currentDate.getMonth());
+
+    expect(insideMonth.length).toBeGreaterThan(0);
+    expect(outsideMonth.length).toBeGreaterThan(0);
+
+    insideMonth.forEach(({ cell }) => {
+      expect(getComputedStyle(cell).backgroundColor).toBe('rgb(250, 248, 249)');
+    });
+
+    outsideMonth.forEach(({ cell }) => {
+      expect(getComputedStyle(cell).backgroundColor).toBe('rgb(242, 239, 241)');
+    });
 
     await act(async () => {
       resolveRequest(emptyCalendar);
-      await Promise.resolve();
+    });
+
+    insideMonth.forEach(({ cell }) => {
+      expect(getComputedStyle(cell).backgroundColor).toBe('rgb(255, 255, 255)');
+    });
+
+    outsideMonth.forEach(({ cell }) => {
+      expect(getComputedStyle(cell).backgroundColor).toBe('rgb(242, 239, 241)');
     });
   });
 
