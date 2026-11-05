@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router';
 import { ProtectedAdminRoute } from './components/Routes/ProtectedAdminRoute';
 import { DefaultLayout } from './layouts/DefaultLayout';
+import { Dashboard } from './pages/Dashboard';
 import { Landing } from './pages/Landing';
 import { LoginPage } from './pages/Login';
 import { NotFound } from './pages/NotFound';
@@ -16,6 +17,7 @@ export const App = () => (
     <Route element={<ProtectedAdminRoute />}>
       <Route path="/" element={<DefaultLayout />}>
         {/* para páginas com sidebar coloque aqui */}
+        <Route index element={<Dashboard />} />
         <Route path="/participantes" element={<Participants />} />
         <Route path="/participantes/:participantId" element={<ParticipantDetails />} />
         <Route path="/grupos" element={<Groups />} />
