@@ -29,12 +29,14 @@ const renderDayModal = (events: CalendarEvent[] = mockEvents) =>
   );
 
 describe('DayModal', () => {
-  it('exibe a data no título do modal', () => {
-    renderDayModal();
+  it('exibe a data local selecionada no título do modal', () => {
+    renderWithProviders(
+      <DayModal isOpen onClose={jest.fn()} date={new Date(2026, 10, 5, 0)} events={[]} />,
+    );
 
     expect(
       screen.getByRole('dialog', {
-        name: '15 de outubro de 2026',
+        name: '5 de novembro de 2026',
       }),
     ).toBeInTheDocument();
   });

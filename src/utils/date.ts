@@ -47,13 +47,6 @@ const eventDateTimeFormatter = new Intl.DateTimeFormat(LOCALE, {
   timeZone: 'America/Sao_Paulo',
 });
 
-const dayModalDateFormatter = new Intl.DateTimeFormat(LOCALE, {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-  timeZone: 'America/Sao_Paulo',
-});
-
 const eventTimeFormatter = new Intl.DateTimeFormat(LOCALE, {
   hour: '2-digit',
   minute: '2-digit',
@@ -96,7 +89,11 @@ export const formatMeetingDate = (iso: string): string => {
 export const formatDayModalDate = (date: Date): string => {
   if (!isValid(date)) return '';
 
-  return dayModalDateFormatter.format(date);
+  return new Intl.DateTimeFormat(LOCALE, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
 };
 
 export const formatEventTime = (iso: string): string => {
