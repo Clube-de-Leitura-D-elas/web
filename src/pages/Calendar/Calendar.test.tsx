@@ -13,6 +13,7 @@ const text = locale.calendar;
 const nav = text.navigation;
 
 const renderPage = () => renderWithProviders(<Calendar />);
+const getMonthButton = () => screen.getByRole('button', { expanded: false });
 
 const getCalendarDayLabel = (date: Date) =>
   locale.calendar.dayAriaLabel
@@ -111,9 +112,7 @@ describe('Calendar', () => {
   it('abre o seletor e lista os meses', async () => {
     const { user } = renderPage();
 
-    const monthButton = await screen.findByRole('button', {
-      name: new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date()),
-    });
+    const monthButton = getMonthButton();
 
     await user.click(monthButton);
 
