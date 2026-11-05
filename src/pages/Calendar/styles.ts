@@ -74,7 +74,7 @@ export const MonthNavigationButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${theme.textBrand};
+    outline: 2px solid ${theme.focusRing};
     outline-offset: 2px;
   }
 `;
@@ -112,7 +112,7 @@ export const MonthSelectorTrigger = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${theme.textBrand};
+    outline: 2px solid ${theme.focusRing};
     outline-offset: 2px;
   }
 `;
@@ -147,7 +147,7 @@ export const MonthOption = styled.button<{ $isSelected: boolean }>`
   &:hover,
   &:focus-visible {
     background: ${theme.surfaceBrandSoft};
-    color: ${theme.textBrand};
+    color: ${theme.focusRing};
     outline: none;
   }
 `;
@@ -195,7 +195,7 @@ export const YearButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${theme.textBrand};
+    outline: 2px solid ${theme.focusRing};
     outline-offset: 2px;
   }
 `;
@@ -216,7 +216,7 @@ export const TodayButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${theme.textBrand};
+    outline: 2px solid ${theme.focusRing};
     outline-offset: 2px;
   }
 `;
@@ -280,6 +280,12 @@ export const DayCell = styled.div<{
   &:hover {
     background-color: ${({ $disabled, $outsideMonth }) =>
       $disabled ? ($outsideMonth ? theme.surfaceSunken : theme.surface) : theme.surfaceSunken};
+  }
+  &:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline: 2px solid ${theme.focusRing};
+    outline-offset: -2px;
   }
 `;
 
