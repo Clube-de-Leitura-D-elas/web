@@ -390,6 +390,7 @@
   },
   "calendar": {
     "title": "Calendário",
+    "loading": "Carregando calendário...",
     "subtitle": "Visualize os encontros de todos os grupos do clube.",
     "weekdays": {
       "sunday": "DOM.",

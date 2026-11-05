@@ -5,6 +5,7 @@ import { renderWithProviders } from '../../test/render';
 import type { CalendarMonthResponse } from '../../types/calendar';
 import { getCalendarDays } from '../../utils/calendar';
 import { Calendar } from './index';
+import { theme } from '../../theme/theme';
 
 jest.mock('../../services/calendarService', () => ({
   getCalendarMonth: jest.fn(),
@@ -14,6 +15,18 @@ const text = locale.calendar;
 const nav = text.navigation;
 
 const renderPage = () => renderWithProviders(<Calendar />);
+const getThemeColor = (color: string) => {
+  const element = document.createElement('div');
+
+  element.style.backgroundColor = color;
+  document.body.appendChild(element);
+
+  const computedColor = getComputedStyle(element).backgroundColor;
+
+  element.remove();
+
+  return computedColor;
+};
 
 const emptyCalendar = {
   days: [],
@@ -31,6 +44,10 @@ describe('Calendar', () => {
 
     expect(screen.getByText(text.subtitle)).toBeInTheDocument();
   });
+
+  const backgroundSubtle = getThemeColor(theme.backgroundSubtle);
+  const surfaceSunken = getThemeColor(theme.surfaceSunken);
+  const surface = getThemeColor(theme.surface);
 
   it('aplica os fundos corretos durante e após o carregamento', async () => {
     let resolveRequest!: (value: CalendarMonthResponse) => void;
@@ -60,11 +77,11 @@ describe('Calendar', () => {
     expect(outsideMonth.length).toBeGreaterThan(0);
 
     insideMonth.forEach(({ cell }) => {
-      expect(getComputedStyle(cell).backgroundColor).toBe('rgb(250, 248, 249)');
+      expect(getComputedStyle(cell).backgroundColor).toBe(backgroundSubtle);
     });
 
     outsideMonth.forEach(({ cell }) => {
-      expect(getComputedStyle(cell).backgroundColor).toBe('rgb(242, 239, 241)');
+      expect(getComputedStyle(cell).backgroundColor).toBe(surfaceSunken);
     });
 
     await act(async () => {
@@ -72,11 +89,11 @@ describe('Calendar', () => {
     });
 
     insideMonth.forEach(({ cell }) => {
-      expect(getComputedStyle(cell).backgroundColor).toBe('rgb(255, 255, 255)');
+      expect(getComputedStyle(cell).backgroundColor).toBe(surface);
     });
 
     outsideMonth.forEach(({ cell }) => {
-      expect(getComputedStyle(cell).backgroundColor).toBe('rgb(242, 239, 241)');
+      expect(getComputedStyle(cell).backgroundColor).toBe(surfaceSunken);
     });
   });
 

@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
-
 import * as Styled from './styles';
-
 import { useLocale } from '../../hooks/useLocale';
 import { getCalendarMonth } from '../../services/calendarService';
 import type { CalendarMonthResponse } from '../../types/calendar';
@@ -275,6 +273,9 @@ export const Calendar = () => {
       {error && <Styled.Feedback role="alert">{locale.calendar.loadError}</Styled.Feedback>}
 
       <Styled.CalendarScroll>
+        {loading && (
+          <Styled.LoadingStatus role="status">{locale.calendar.loading}</Styled.LoadingStatus>
+        )}
         <Styled.CalendarGrid
           style={
             {
