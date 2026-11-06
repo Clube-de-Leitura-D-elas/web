@@ -39,6 +39,39 @@ describe('ActionMenu', () => {
     expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
   });
 
+  it('item desabilitado não executa a ação e mostra a dica', async () => {
+    const onBlocked = jest.fn();
+    const { user } = renderWithProviders(
+      <ActionMenu
+        items={[{ label: 'Bloqueado', onClick: onBlocked, disabled: true, hint: 'Motivo' }]}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Mais ações' }));
+    const item = screen.getByRole('menuitem', { name: /Bloqueado/ });
+    await user.click(item);
+
+    expect(item).toHaveAttribute('aria-disabled', 'true');
+    expect(item).toHaveAccessibleDescription('Motivo');
+    expect(screen.getByText('Motivo')).toBeVisible();
+    expect(onBlocked).not.toHaveBeenCalled();
+    // o menu continua aberto: nada foi executado
+    expect(item).toBeInTheDocument();
+  });
+
+  it('item desabilitado continua alcançável pelo teclado', async () => {
+    const { user } = renderWithProviders(
+      <ActionMenu
+        items={[{ label: 'Bloqueado', onClick: jest.fn(), disabled: true, hint: 'Motivo' }]}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Mais ações' }));
+    await user.tab();
+
+    expect(screen.getByRole('menuitem', { name: /Bloqueado/ })).toHaveFocus();
+  });
+
   it('fecha com Esc', async () => {
     const { user, trigger } = renderMenu();
 

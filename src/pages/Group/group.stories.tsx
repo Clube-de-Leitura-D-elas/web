@@ -27,9 +27,9 @@ const group: GroupDetailsData = {
   zone: '',
   is_active: true,
   active_participants_count: 8,
-  coordinator_name: 'Joseane Alves',
-  coordinator_email: 'joseane.alves@email.com',
-  coordinator_photo: null,
+  coordinators: [
+    { id: 'p-04', name: 'Joseane Alves', email: 'joseane.alves@email.com', photo: null },
+  ],
   next_meeting: {
     date: '2024-08-24T22:30:00Z',
     book_title: 'A Hora da Estrela',
@@ -275,6 +275,32 @@ export const Loading: Story = {
 export const LoadError: Story = {
   beforeEach: () => {
     mocked(getGroupDetails).mockRejectedValue(new Error('fail'));
+  },
+};
+
+export const MultipleCoordinators: Story = {
+  beforeEach: () => {
+    mocked(getGroupDetails).mockResolvedValue({
+      ...group,
+      coordinators: [
+        ...group.coordinators,
+        { id: 'p-02', name: 'Carla Mendes', email: 'carla@email.com', photo: null },
+      ],
+    });
+    mocked(getGroupParticipantsPage).mockResolvedValue({
+      items: participants.map((p) => (p.id === 'p-02' ? { ...p, is_coordinator: true } : p)),
+      total: participants.length,
+    });
+  },
+};
+
+export const NoCoordinator: Story = {
+  beforeEach: () => {
+    mocked(getGroupDetails).mockResolvedValue({ ...group, coordinators: [] });
+    mocked(getGroupParticipantsPage).mockResolvedValue({
+      items: participants.map((p) => ({ ...p, is_coordinator: false })),
+      total: participants.length,
+    });
   },
 };
 

@@ -7,6 +7,15 @@ export type GroupNextMeeting = {
   confirmed: boolean;
 };
 
+export type GroupCoordinator = {
+  id: string;
+  name: string;
+  email: string | null;
+  photo: string | null;
+};
+
+export type GroupParticipantAction = 'promote' | 'demote' | 'remove';
+
 export type GroupDetails = {
   id: string;
   // o nome exibido é montado com number + description, como na grade de grupos
@@ -16,9 +25,7 @@ export type GroupDetails = {
   zone: string | null;
   is_active: boolean;
   active_participants_count: number;
-  coordinator_name: string | null;
-  coordinator_email: string | null;
-  coordinator_photo: string | null;
+  coordinators: GroupCoordinator[];
   next_meeting: GroupNextMeeting | null;
 };
 

@@ -263,6 +263,7 @@ export const WeekdayHeader = styled.div`
 export const DayCell = styled.div<{
   $outsideMonth: boolean;
   $disabled: boolean;
+  $isLoading: boolean;
 }>`
   min-width: 0;
   min-height: 0;
@@ -271,15 +272,26 @@ export const DayCell = styled.div<{
   border-right: 1px solid ${theme.border};
   border-bottom: 1px solid ${theme.border};
   overflow: hidden;
-  background-color: ${({ $outsideMonth }) => ($outsideMonth ? theme.surfaceSunken : theme.surface)};
+
+  background-color: ${({ $outsideMonth, $isLoading }) => {
+    if ($outsideMonth) return theme.surfaceSunken;
+    if ($isLoading) return theme.backgroundSubtle;
+
+    return theme.surface;
+  }};
+
   &:nth-child(7n) {
     border-right: none;
   }
   cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
 
   &:hover {
-    background-color: ${({ $disabled, $outsideMonth }) =>
-      $disabled ? ($outsideMonth ? theme.surfaceSunken : theme.surface) : theme.surfaceSunken};
+    background-color: ${({ $disabled, $outsideMonth, $isLoading }) => {
+      if (!$disabled || $outsideMonth) return theme.surfaceSunken;
+      if ($isLoading) return theme.backgroundSubtle;
+
+      return theme.surface;
+    }};
   }
   &:focus-visible {
     position: relative;
@@ -353,4 +365,16 @@ export const MoreEvents = styled.span`
   font-size: 0.75rem;
   font-weight: 700;
   color: ${theme.textBrand};
+`;
+
+export const LoadingStatus = styled.span`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 `;

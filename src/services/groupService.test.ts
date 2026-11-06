@@ -6,8 +6,10 @@ import {
   getGroupDetails,
   getGroupMeetingsPage,
   getGroupParticipantsPage,
+  updateGroupParticipant,
   updateGroupStatus,
 } from './groupService';
+import { locale } from '../locales';
 import { supabase } from './supabaseClient';
 
 const invoke = jest.mocked(supabase.functions.invoke);
@@ -49,7 +51,7 @@ describe('updateGroupStatus', () => {
     respond({ is_active: false });
 
     await expect(updateGroupStatus('g1', false)).resolves.toBe(false);
-    expect(invoke).toHaveBeenCalledWith('update-group-status', {
+    expect(invoke).toHaveBeenCalledWith('update-group-status-web', {
       body: { group_id: 'g1', is_active: false },
     });
   });
@@ -58,6 +60,37 @@ describe('updateGroupStatus', () => {
     respond(null);
 
     await expect(updateGroupStatus('g1', true)).rejects.toThrow('returned no data');
+  });
+});
+
+describe('updateGroupParticipant', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  it.each(['promote', 'demote', 'remove'] as const)('envia a ação %s no body', async (action) => {
+    respond({ success: true });
+
+    await expect(updateGroupParticipant('g1', 'p1', action)).resolves.toBeUndefined();
+    expect(invoke).toHaveBeenCalledWith('update-group-participant-web', {
+      body: { groupId: 'g1', participantId: 'p1', action },
+    });
+  });
+
+  it('traduz o 409 para a mensagem de conflito', async () => {
+    fail(new FunctionsHttpError({ status: 409 }));
+
+    await expect(updateGroupParticipant('g1', 'p1', 'demote')).rejects.toThrow(
+      locale.group_details.participantActions.conflictError,
+    );
+  });
+
+  it('trata outros erros com a mensagem genérica', async () => {
+    fail(new FunctionsHttpError({ status: 500 }));
+
+    await expect(updateGroupParticipant('g1', 'p1', 'promote')).rejects.toThrow(
+      locale.group_details.participantActions.error,
+    );
   });
 });
 

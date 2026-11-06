@@ -7,6 +7,7 @@ import * as Styled from './styles';
 import { GroupModal } from './GroupModal';
 import { Modal } from '../../components/Modal';
 import { Tabs } from '../../components/Tab';
+import { Skeleton } from '../../components/Skeleton';
 import {
   Table,
   type TableColumn,
@@ -30,6 +31,7 @@ import type {
   GroupFormValues,
   GroupMeetingHistoryItem,
   GroupOption,
+  GroupParticipantAction,
   GroupZoneOption,
   GroupParticipantListItem,
 } from '../../types/group';
@@ -70,6 +72,77 @@ const formatNextMeetingDate = (iso: string) => {
   return `${d} de ${month.charAt(0).toUpperCase()}${month.slice(1)}, ${formattedTime}`;
 };
 
+const GroupDetailsSkeleton = () => {
+  return (
+    <Styled.Container>
+      <Skeleton width="5rem" height="0.875rem" />
+
+      <Styled.Header>
+        <Styled.HeaderInfo>
+          <Skeleton width="13rem" height="2rem" />
+          <Skeleton width="10rem" height="1rem" />
+        </Styled.HeaderInfo>
+
+        <Styled.HeaderActions>
+          <Skeleton width="5.5rem" height="2.5rem" />
+          <Skeleton width="5.5rem" height="2.5rem" />
+        </Styled.HeaderActions>
+      </Styled.Header>
+
+      <Styled.CardsRow>
+        <Styled.Card>
+          <Skeleton width="8rem" height="1.25rem" />
+
+          <Styled.CoordinatorRow>
+            <Skeleton width="2.5rem" height="2.5rem" variant="circular" />
+
+            <Styled.CoordinatorInfo>
+              <Skeleton width="7rem" height="1rem" />
+              <Skeleton width="5rem" height="0.75rem" />
+            </Styled.CoordinatorInfo>
+          </Styled.CoordinatorRow>
+
+          <Skeleton width="6rem" height="1.75rem" />
+        </Styled.Card>
+
+        <Styled.Card>
+          <Styled.MeetingHeader>
+            <Skeleton width="9rem" height="1.25rem" />
+            <Skeleton width="5rem" height="1.25rem" />
+          </Styled.MeetingHeader>
+
+          <Styled.MeetingBody>
+            <Skeleton width="2.5rem" height="2.5rem" />
+
+            <Styled.MeetingInfo>
+              <Skeleton width="9rem" height="1.1rem" />
+              <Skeleton width="7rem" height="0.85rem" />
+              <Skeleton width="8rem" height="0.85rem" />
+            </Styled.MeetingInfo>
+          </Styled.MeetingBody>
+        </Styled.Card>
+      </Styled.CardsRow>
+      <Styled.SkeletonTabs>
+        <Skeleton width="6rem" height="2rem" />
+        <Skeleton width="7rem" height="2rem" />
+      </Styled.SkeletonTabs>
+
+      <Styled.TableContainer>
+        <Styled.SkeletonTable>
+          {Array.from({ length: 5 }).map((_, rowIndex) => (
+            <Styled.SkeletonTableRow key={rowIndex}>
+              <Skeleton width="30%" height="1rem" />
+              <Skeleton width="20%" height="1rem" />
+              <Skeleton width="15%" height="1rem" />
+              <Skeleton width="10%" height="1rem" />
+            </Styled.SkeletonTableRow>
+          ))}
+        </Styled.SkeletonTable>
+      </Styled.TableContainer>
+    </Styled.Container>
+  );
+};
+
 export const GroupDetails = () => {
   const locale = useLocale();
   const { groupId = '' } = useParams<{ groupId: string }>();
@@ -82,7 +155,7 @@ export const GroupDetails = () => {
   const [selectedParticipant, setSelectedParticipant] = useState<GroupParticipantListItem | null>(
     null,
   );
-  const [participantAction, setParticipantAction] = useState<'promote' | 'remove' | null>(null);
+  const [participantAction, setParticipantAction] = useState<GroupParticipantAction | null>(null);
   const [savingParticipant, setSavingParticipant] = useState(false);
   const [participantError, setParticipantError] = useState<string | null>(null);
   const [result, setResult] = useState<{ id: string; group: GroupDetailsData | null } | null>(null);
@@ -140,6 +213,16 @@ export const GroupDetails = () => {
 
   const loading = result?.id !== groupId;
   const group = result?.group ?? null;
+  const isLastCoordinator = group?.coordinators.length === 1;
+
+  const openParticipantAction = (
+    participant: GroupParticipantListItem,
+    action: GroupParticipantAction,
+  ) => {
+    setSelectedParticipant(participant);
+    setParticipantAction(action);
+    setParticipantError(null);
+  };
 
   const handleOpenModal = () => {
     setStatusError(null);
@@ -218,23 +301,52 @@ export const GroupDetails = () => {
     }
   };
 
+  const refreshGroup = async () => {
+    try {
+      const updatedGroup = await getGroupDetails(groupId);
+      setResult({ id: groupId, group: updatedGroup });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      // a tabela busca por conta própria, então atualiza mesmo se o card não recarregar
+      setParticipantsVersion((version) => version + 1);
+    }
+  };
+
   const confirmParticipantAction = async () => {
     if (!selectedParticipant || !participantAction || savingParticipant) return;
+
+    // O card pode ter mudado com o modal aberto (ex.: depois de um 409).
+    const removesCoordinator =
+      selectedParticipant.is_coordinator &&
+      (participantAction === 'demote' || participantAction === 'remove');
+    if (removesCoordinator && isLastCoordinator) {
+      setParticipantError(locale.group_details.participantActions.lastCoordinatorHint);
+      return;
+    }
+
     setSavingParticipant(true);
     setParticipantError(null);
     try {
       await updateGroupParticipant(groupId, selectedParticipant.id, participantAction);
-      const updatedGroup = await getGroupDetails(groupId);
-      setResult({ id: groupId, group: updatedGroup });
-      setParticipantsVersion((version) => version + 1);
-      setSelectedParticipant(null);
-      setParticipantAction(null);
     } catch (err) {
       console.error(err);
-      setParticipantError(locale.group_details.participantActions.error);
-    } finally {
+      setParticipantError(
+        err instanceof Error && err.message
+          ? err.message
+          : locale.group_details.participantActions.error,
+      );
+      // O servidor pode ter mudado (ex.: 409); recarrega o card e a tabela para refletir o estado real.
+      await refreshGroup();
       setSavingParticipant(false);
+      return;
     }
+
+    // A escrita deu certo: fecha o modal mesmo que o recarregamento falhe, para não repetir a ação.
+    await refreshGroup();
+    setSelectedParticipant(null);
+    setParticipantAction(null);
+    setSavingParticipant(false);
   };
 
   //aba 1
@@ -300,26 +412,23 @@ export const GroupDetails = () => {
               name: p.name,
             })}
             items={[
-              ...(!p.is_coordinator
-                ? [
-                    {
-                      label: locale.group_details.participantActions.promote,
-                      onClick: () => {
-                        setSelectedParticipant(p);
-                        setParticipantAction('promote');
-                        setParticipantError(null);
-                      },
-                    },
-                  ]
-                : []),
+              {
+                label: p.is_coordinator
+                  ? locale.group_details.participantActions.demote
+                  : locale.group_details.participantActions.promote,
+                // o grupo precisa manter ao menos uma coordenadora
+                disabled: p.is_coordinator && isLastCoordinator,
+                hint:
+                  p.is_coordinator && isLastCoordinator
+                    ? locale.group_details.participantActions.lastCoordinatorHint
+                    : undefined,
+                onClick: () => openParticipantAction(p, p.is_coordinator ? 'demote' : 'promote'),
+              },
               {
                 label: locale.group_details.participantActions.remove,
                 variant: 'danger' as const,
-                onClick: () => {
-                  setSelectedParticipant(p);
-                  setParticipantAction('remove');
-                  setParticipantError(null);
-                },
+                disabled: p.is_coordinator && isLastCoordinator,
+                onClick: () => openParticipantAction(p, 'remove'),
               },
             ]}
           />
@@ -329,7 +438,7 @@ export const GroupDetails = () => {
 
       return { rows, total };
     },
-    [groupId, locale, participantsVersion],
+    [groupId, locale, participantsVersion, isLastCoordinator],
   );
 
   //aba 2
@@ -444,8 +553,39 @@ export const GroupDetails = () => {
     [locale, participantColumns, fetchParticipants, meetingColumns, fetchMeetings],
   );
 
-  if (loading) return <Styled.Message>{locale.group_details.loading}</Styled.Message>;
-  if (!group) return <Styled.Message>{locale.group_details.loadError}</Styled.Message>;
+  if (loading) {
+    return (
+      <div role="status">
+        <Styled.VisuallyHidden>{locale.group_details.loading}</Styled.VisuallyHidden>
+        <GroupDetailsSkeleton />
+      </div>
+    );
+  }
+
+  if (!group) {
+    return <Styled.Message>{locale.group_details.loadError}</Styled.Message>;
+  }
+
+  const actions = locale.group_details.participantActions;
+  const participantActionText = participantAction
+    ? {
+        promote: {
+          title: actions.promoteTitle,
+          description: actions.promoteDescription,
+          confirm: actions.promote,
+        },
+        demote: {
+          title: actions.demoteTitle,
+          description: actions.demoteDescription,
+          confirm: actions.demote,
+        },
+        remove: {
+          title: actions.removeTitle,
+          description: actions.removeDescription,
+          confirm: actions.remove,
+        },
+      }[participantAction]
+    : null;
 
   const meeting = group.next_meeting;
   const isActive = group.is_active;
@@ -483,26 +623,27 @@ export const GroupDetails = () => {
       <Styled.CardsRow>
         <Styled.Card>
           <Styled.CardLabel>{locale.group_details.coordinator.label}</Styled.CardLabel>
-          <Styled.CoordinatorRow>
-            <Styled.Avatar aria-hidden>
-              {group.coordinator_photo ? (
-                <img src={group.coordinator_photo} alt="" />
-              ) : (
-                <LuUserRound />
-              )}
-            </Styled.Avatar>
-            <Styled.CoordinatorInfo>
-              <Styled.CardValue>
-                {group.coordinator_name || locale.group_details.notInformed}
-              </Styled.CardValue>
-              <Styled.CardText>
-                {group.coordinator_email || locale.group_details.notInformed}
-              </Styled.CardText>
-            </Styled.CoordinatorInfo>
-            <Styled.TrocarButton type="button">
-              {locale.group_details.coordinator.change}
-            </Styled.TrocarButton>
-          </Styled.CoordinatorRow>
+          {group.coordinators.length > 0 ? (
+            <Styled.CoordinatorList>
+              {group.coordinators.map((coordinator) => (
+                <li key={coordinator.id}>
+                  <Styled.CoordinatorRow>
+                    <Styled.Avatar aria-hidden>
+                      {coordinator.photo ? <img src={coordinator.photo} alt="" /> : <LuUserRound />}
+                    </Styled.Avatar>
+                    <Styled.CoordinatorInfo>
+                      <Styled.CardValue>{coordinator.name}</Styled.CardValue>
+                      <Styled.CardText>
+                        {coordinator.email || locale.group_details.notInformed}
+                      </Styled.CardText>
+                    </Styled.CoordinatorInfo>
+                  </Styled.CoordinatorRow>
+                </li>
+              ))}
+            </Styled.CoordinatorList>
+          ) : (
+            <Styled.CardValue>{locale.group_details.notInformed}</Styled.CardValue>
+          )}
         </Styled.Card>
 
         <Styled.Card>
@@ -561,22 +702,11 @@ export const GroupDetails = () => {
           setParticipantError(null);
           setSelectedParticipant(null);
         }}
-        title={
-          participantAction === 'remove'
-            ? locale.group_details.participantActions.removeTitle
-            : locale.group_details.participantActions.promoteTitle
-        }
-        description={interpolate(
-          participantAction === 'remove'
-            ? locale.group_details.participantActions.removeDescription
-            : locale.group_details.participantActions.promoteDescription,
-          { name: selectedParticipant?.name ?? '' },
-        )}
-        confirmText={
-          participantAction === 'remove'
-            ? locale.group_details.participantActions.remove
-            : locale.group_details.participantActions.promote
-        }
+        title={participantActionText?.title ?? ''}
+        description={interpolate(participantActionText?.description ?? '', {
+          name: selectedParticipant?.name ?? '',
+        })}
+        confirmText={participantActionText?.confirm ?? ''}
         confirmDisabled={savingParticipant}
         onConfirm={confirmParticipantAction}
       >

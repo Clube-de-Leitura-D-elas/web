@@ -113,6 +113,18 @@ export const Estados: Story = {
   },
 };
 
+export const ComFoto: Story = {
+  args: { user: { name: 'Claudine', photoUrl: 'https://picsum.photos/seed/claudine/96/96' } },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Com `photoUrl`, o avatar mostra a foto da usuária. Se a imagem não carregar, volta a mostrar a inicial.',
+      },
+    },
+  },
+};
+
 export const ItemAtivo: Story = {
   parameters: {
     initialRoute: '/participantes',

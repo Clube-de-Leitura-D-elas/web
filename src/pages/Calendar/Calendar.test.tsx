@@ -1,9 +1,11 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import { locale } from '../../locales';
 import { getCalendarMonth } from '../../services/calendarService';
 import { pending, renderWithProviders } from '../../test/render';
 import type { CalendarMonthResponse } from '../../types/calendar';
+import { getCalendarDays } from '../../utils/calendar';
 import { Calendar } from './index';
+import { theme } from '../../theme/theme';
 
 jest.mock('../../services/calendarService', () => ({
   getCalendarMonth: jest.fn(),
@@ -20,6 +22,19 @@ const getCalendarDayLabel = (date: Date) =>
     .replace('{{day}}', String(date.getDate()))
     .replace('{{month}}', new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(date))
     .replace('{{year}}', String(date.getFullYear()))}, 0 eventos`;
+
+const getThemeColor = (color: string) => {
+  const element = document.createElement('div');
+
+  element.style.backgroundColor = color;
+  document.body.appendChild(element);
+
+  const computedColor = getComputedStyle(element).backgroundColor;
+
+  element.remove();
+
+  return computedColor;
+};
 
 const emptyCalendar = {
   days: [],
@@ -38,12 +53,56 @@ describe('Calendar', () => {
     expect(screen.getByText(text.subtitle)).toBeInTheDocument();
   });
 
-  it('mostra o carregamento enquanto busca os dados', () => {
-    jest.mocked(getCalendarMonth).mockReturnValue(pending());
+  const backgroundSubtle = getThemeColor(theme.backgroundSubtle);
+  const surfaceSunken = getThemeColor(theme.surfaceSunken);
+  const surface = getThemeColor(theme.surface);
 
-    renderPage();
+  it('aplica os fundos corretos durante e após o carregamento', async () => {
+    let resolveRequest!: (value: CalendarMonthResponse) => void;
 
-    expect(screen.getByRole('status')).toHaveTextContent(text.loading);
+    jest.mocked(getCalendarMonth).mockReturnValue(
+      new Promise((resolve) => {
+        resolveRequest = resolve;
+      }),
+    );
+
+    const { container } = renderWithProviders(<Calendar />);
+
+    const currentDate = new Date();
+    const days = getCalendarDays(currentDate.getFullYear(), currentDate.getMonth() + 1);
+
+    const dayCells = Array.from(container.querySelectorAll('[data-testid="calendar-day"]'));
+
+    const insideMonth = days
+      .map((day, index) => ({ day, cell: dayCells[index] }))
+      .filter(({ day }) => day.getMonth() === currentDate.getMonth());
+
+    const outsideMonth = days
+      .map((day, index) => ({ day, cell: dayCells[index] }))
+      .filter(({ day }) => day.getMonth() !== currentDate.getMonth());
+
+    expect(insideMonth.length).toBeGreaterThan(0);
+    expect(outsideMonth.length).toBeGreaterThan(0);
+
+    insideMonth.forEach(({ cell }) => {
+      expect(getComputedStyle(cell).backgroundColor).toBe(backgroundSubtle);
+    });
+
+    outsideMonth.forEach(({ cell }) => {
+      expect(getComputedStyle(cell).backgroundColor).toBe(surfaceSunken);
+    });
+
+    await act(async () => {
+      resolveRequest(emptyCalendar);
+    });
+
+    insideMonth.forEach(({ cell }) => {
+      expect(getComputedStyle(cell).backgroundColor).toBe(surface);
+    });
+
+    outsideMonth.forEach(({ cell }) => {
+      expect(getComputedStyle(cell).backgroundColor).toBe(surfaceSunken);
+    });
   });
 
   it('mostra uma mensagem de erro quando o calendário não carrega', async () => {

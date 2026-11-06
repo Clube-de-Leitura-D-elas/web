@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
-
 import * as Styled from './styles';
-
 import { useLocale } from '../../hooks/useLocale';
 import { getCalendarMonth } from '../../services/calendarService';
 import type { CalendarMonthResponse } from '../../types/calendar';
@@ -274,11 +272,12 @@ export const Calendar = () => {
         </Styled.MonthNavigationButtons>
       </Styled.MonthNavigation>
 
-      {loading && <Styled.Feedback role="status">{locale.calendar.loading}</Styled.Feedback>}
-
       {error && <Styled.Feedback role="alert">{locale.calendar.loadError}</Styled.Feedback>}
 
       <Styled.CalendarScroll>
+        {loading && (
+          <Styled.LoadingStatus role="status">{locale.calendar.loading}</Styled.LoadingStatus>
+        )}
         <Styled.CalendarGrid
           style={
             {
@@ -313,8 +312,10 @@ export const Calendar = () => {
 
             return (
               <Styled.DayCell
+                data-testid="calendar-day"
                 key={dateKey}
                 $outsideMonth={!inMonth}
+                $isLoading={loading}
                 $disabled={!isCalendarAvailable}
                 role="button"
                 tabIndex={isCalendarAvailable ? 0 : -1}

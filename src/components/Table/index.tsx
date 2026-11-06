@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { interpolate, locale } from '../../locales';
 import { Button } from '../Button';
 import * as Styled from './styles';
+import { Skeleton } from '../Skeleton';
 
 export type TableAlign = 'left' | 'center' | 'right';
 
@@ -182,11 +183,10 @@ export const Table = ({
   const renderBody = () => {
     if (isLoading) {
       return Array.from({ length: skeletonRowCount }, (_, rowIndex) =>
-        renderRow(rowIndex, (_column, columnIndex) => (
-          <Styled.Skeleton
-            aria-hidden="true"
-            $width={SKELETON_WIDTHS[(rowIndex + columnIndex) % SKELETON_WIDTHS.length]}
-          />
+        renderRow(rowIndex, (column, columnIndex) => (
+          <Styled.SkeletonWrapper $align={column.align ?? 'center'}>
+            <Skeleton width={SKELETON_WIDTHS[(rowIndex + columnIndex) % SKELETON_WIDTHS.length]} />
+          </Styled.SkeletonWrapper>
         )),
       );
     }
@@ -239,7 +239,7 @@ export const Table = ({
 
       <Styled.Footer>
         <Styled.Summary aria-live="polite">
-          {isTotalKnown ? summary : <Styled.Skeleton aria-hidden="true" $width="10rem" />}
+          {isTotalKnown ? summary : <Skeleton width="10rem" />}
         </Styled.Summary>
         <Styled.Pagination aria-label={locale.table.paginationLabel}>
           <Styled.PageButton

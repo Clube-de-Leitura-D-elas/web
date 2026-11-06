@@ -255,22 +255,14 @@ export const CoordinatorInfo = styled.div`
   min-width: 0;
 `;
 
-export const TrocarButton = styled.button`
-  flex-shrink: 0;
-  padding: 0.4rem 1rem;
-  border-radius: 999px;
-  border: 1px solid ${theme.borderBrand};
-  background: ${theme.surface};
-  color: ${theme.textBrand};
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: ${theme.surfaceBrandSoft};
-  }
-
-  ${focusRing}
+export const CoordinatorList = styled.ul`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 `;
 
 export const CoordinatorTag = styled.span`
@@ -389,4 +381,35 @@ export const FormError = styled.p`
   color: ${theme.error};
   font-size: 0.875rem;
   line-height: 1.25rem;
+`;
+
+export const SkeletonTabs = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border-bottom: 1px solid ${theme.border};
+  padding-bottom: 0.75rem;
+`;
+
+export const SkeletonTable = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const SkeletonTableRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid ${theme.border};
+`;
+
+export const VisuallyHidden = styled.span`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 `;

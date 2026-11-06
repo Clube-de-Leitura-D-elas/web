@@ -2,12 +2,13 @@ import { screen } from '@testing-library/react';
 import { App } from './App';
 import { locale } from './locales';
 import { AuthServiceError } from './services/authErrors';
-import { getCurrentUserRole, onSignOut } from './services/authService';
+import { getCurrentUserProfile, getCurrentUserRole, onSignOut } from './services/authService';
 import { renderWithProviders } from './test/render';
 
 jest.mock('./services/authService', () => ({
   ...jest.requireActual('./services/authService'),
   getCurrentUserRole: jest.fn(),
+  getCurrentUserProfile: jest.fn(),
   onSignOut: jest.fn(),
 }));
 
@@ -31,4 +32,15 @@ describe('App', () => {
       expect(await screen.findByRole('heading', { name: locale.login.title })).toBeInTheDocument();
     },
   );
+
+  it('mostra o Dashboard na rota / para quem tem acesso ao painel', async () => {
+    jest.mocked(getCurrentUserRole).mockResolvedValue('MANAGER');
+    jest.mocked(getCurrentUserProfile).mockResolvedValue(null);
+
+    renderWithProviders(<App />, { route: '/' });
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: locale.dashboard.title }),
+    ).toBeInTheDocument();
+  });
 });

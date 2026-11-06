@@ -1,5 +1,3 @@
-import { FunctionsHttpError } from '@supabase/supabase-js';
-
 import { locale } from '../locales';
 import type {
   Participant,
@@ -9,6 +7,7 @@ import type {
   ParticipantZoneOption,
   UpdateParticipantInput,
 } from '../types/participant';
+import { readFunctionErrorMessage } from './functionError';
 import { supabase } from './supabaseClient';
 
 type ParticipantResponse = {
@@ -143,17 +142,6 @@ export async function getZones(): Promise<ParticipantZoneOption[]> {
   if (error) throw error;
 
   return (data ?? []).map(({ id, name, city_id }) => ({ id, name, cityId: city_id }));
-}
-
-async function readFunctionErrorMessage(error: unknown): Promise<string | null> {
-  if (!(error instanceof FunctionsHttpError)) return null;
-
-  try {
-    const body = await error.context.json();
-    return typeof body?.error === 'string' && body.error ? body.error : null;
-  } catch {
-    return null;
-  }
 }
 
 export async function updateParticipant(

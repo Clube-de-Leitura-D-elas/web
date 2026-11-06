@@ -59,6 +59,21 @@ export const ApenasAcoesPadrao: Story = {
   },
 };
 
+export const ItemDesabilitado: Story = {
+  args: {
+    items: [
+      mockItems[0],
+      {
+        label: 'Remover coordenação',
+        icon: <MdBlock size={18} />,
+        disabled: true,
+        hint: 'O grupo precisa manter ao menos uma coordenadora.',
+        onClick: () => alert('Não deveria disparar'),
+      },
+    ],
+  },
+};
+
 export const AcaoDestrutiva: Story = {
   args: {
     items: [

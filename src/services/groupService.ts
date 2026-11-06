@@ -4,11 +4,13 @@ import type {
   GroupDetails,
   GroupMeetingHistoryItem,
   GroupOption,
+  GroupParticipantAction,
   GroupZoneOption,
   GroupParticipantListItem,
   UpdateGroupLocationInput,
 } from '../types/group';
 import type { Page } from '../types/participantList';
+import { readFunctionErrorMessage } from './functionError';
 import { GroupServiceError } from './groupErrors';
 import { invokeGet } from './invokeGet';
 import { supabase } from './supabaseClient';
@@ -34,12 +36,12 @@ export function getGroupMeetingsPage(
 
 export const updateGroupStatus = async (groupId: string, isActive: boolean): Promise<boolean> => {
   const { data, error } = await supabase.functions.invoke<{ is_active: boolean }>(
-    'update-group-status',
+    'update-group-status-web',
     { body: { group_id: groupId, is_active: isActive } },
   );
 
   if (error) throw error;
-  if (!data) throw new Error('update-group-status returned no data');
+  if (!data) throw new Error('update-group-status-web returned no data');
 
   return data.is_active;
 };
@@ -93,18 +95,6 @@ export async function getGroupZones(): Promise<GroupZoneOption[]> {
   return (data ?? []).map(({ id, name, city_id }) => ({ id, name, cityId: city_id }));
 }
 
-// Extrai a mensagem `{ error: "..." }` devolvida pela edge function, quando existir.
-async function readFunctionErrorMessage(error: unknown): Promise<string | null> {
-  if (!(error instanceof FunctionsHttpError)) return null;
-
-  try {
-    const body = await error.context.json();
-    return typeof body?.error === 'string' && body.error ? body.error : null;
-  } catch {
-    return null;
-  }
-}
-
 export async function updateGroupLocation(
   groupId: string,
   input: UpdateGroupLocationInput,
@@ -133,10 +123,19 @@ export async function updateGroupLocation(
 export async function updateGroupParticipant(
   groupId: string,
   participantId: string,
-  action: 'promote' | 'remove',
+  action: GroupParticipantAction,
 ): Promise<void> {
   const { error } = await supabase.functions.invoke('update-group-participant-web', {
     body: { groupId, participantId, action },
   });
-  if (error) throw error;
+
+  if (error) {
+    console.error('update-group-participant-web error', error);
+    // 409: o vínculo ou a lista de coordenadoras mudou no servidor; a mensagem do backend é técnica.
+    throw new Error(
+      error instanceof FunctionsHttpError && error.context?.status === 409
+        ? locale.group_details.participantActions.conflictError
+        : locale.group_details.participantActions.error,
+    );
+  }
 }

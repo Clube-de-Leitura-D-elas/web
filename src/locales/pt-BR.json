@@ -76,10 +76,16 @@
     "nextPage": "Próxima página",
     "goToPage": "Ir para a página {{page}}"
   },
+  "dataState": {
+    "loading": "Carregando...",
+    "empty": "Ainda não há dados para mostrar.",
+    "error": "Não foi possível carregar os dados.",
+    "retry": "Tentar novamente"
+  },
   "participant_details": {
     "title": "Participante",
+    "loading": "Carregando informações da participante...",
     "back": "Voltar para participantes",
-    "loading": "Carregando participante...",
     "loadError": "Não foi possível carregar os dados da participante.",
     "updateStatusError": "Não foi possível atualizar o status da participante.",
     "notInformed": "Não informado",
@@ -303,7 +309,7 @@
   },
   "group_details": {
     "back": "Voltar para grupos",
-    "loading": "Carregando grupo...",
+    "loading": "Carregando informações do grupo...",
     "loadError": "Não foi possível carregar os dados do grupo.",
     "notInformed": "—",
     "header": {
@@ -324,8 +330,7 @@
     },
     "updateStatusError": "Não foi possível atualizar o status do grupo. Tente novamente.",
     "coordinator": {
-      "label": "Coordenadora Responsável",
-      "change": "Trocar"
+      "label": "Coordenadoras"
     },
     "nextMeeting": {
       "label": "Próximo Encontro Agendado",
@@ -382,18 +387,24 @@
       "optionsError": "Não foi possível carregar as cidades e zonas."
     },
     "participantActions": {
-      "promote": "Tornar coordenadora",
+      "promote": "Adicionar coordenadora",
+      "demote": "Remover coordenação",
       "remove": "Remover do grupo",
-      "promoteTitle": "Tornar coordenadora?",
+      "promoteTitle": "Adicionar coordenadora?",
+      "demoteTitle": "Remover coordenação?",
       "removeTitle": "Remover participante?",
-      "promoteDescription": "Deseja tornar {{name}} coordenadora deste grupo? As coordenadoras atuais serão mantidas.",
+      "promoteDescription": "Adicionar {{name}} como coordenadora deste grupo? As coordenadoras atuais serão mantidas.",
+      "demoteDescription": "{{name}} deixará de ser coordenadora, mas continua no grupo.",
       "removeDescription": "Deseja remover {{name}} do grupo? O cadastro e o histórico serão preservados.",
-      "error": "Não foi possível atualizar a participante. Tente novamente."
+      "lastCoordinatorHint": "O grupo precisa manter ao menos uma coordenadora. Adicione outra antes.",
+      "error": "Não foi possível atualizar a participante. Tente novamente.",
+      "conflictError": "A situação da participante mudou. Os dados foram atualizados; confira e tente novamente."
     }
   },
   "calendar": {
     "title": "Calendário",
     "dayAriaLabel": "{{day}} de {{month}} de {{year}}",
+    "loading": "Carregando calendário...",
     "subtitle": "Visualize os encontros de todos os grupos do clube.",
     "weekdays": {
       "sunday": "DOM.",
@@ -404,7 +415,6 @@
       "friday": "SEX.",
       "saturday": "SÁB."
     },
-    "loading": "Carregando encontros...",
     "loadError": "Não foi possível carregar os encontros.",
     "emptyState": "Nenhum evento neste dia.",
     "moreEvents": "+{{count}} mais",
@@ -608,6 +618,16 @@
       "video": "Claudine explica o funcionamento do clube",
       "adminLogin": "Acesso da coordenação",
       "copyright": "Clube de Leitura D'Elas"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Acompanhe os principais indicadores do clube.",
+    "kpis": {
+      "label": "Indicadores"
+    },
+    "charts": {
+      "label": "Gráficos"
     }
   }
 }

@@ -1,4 +1,4 @@
-import styled, { css, keyframes } from 'styled-components';
+import styled, { css } from 'styled-components';
 import type { TableAlign } from '.';
 import { Link } from 'react-router';
 
@@ -144,34 +144,6 @@ export const CellContent = styled.div<{ $align: TableAlign }>`
   `}
 `;
 
-const pulse = keyframes`
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.4;
-  }
-`;
-
-export const Skeleton = styled.span<{ $width: string }>`
-  ${({ theme, $width }) => css`
-    display: block;
-    width: ${$width};
-    max-width: 100%;
-    height: 0.75rem;
-    margin-block: 0.25rem;
-    border-radius: 0.25rem;
-    background-color: ${theme.border};
-    animation: ${pulse} 1.5s ease-in-out infinite;
-
-    @media (prefers-reduced-motion: reduce) {
-      animation: none;
-    }
-  `}
-`;
-
 export const MessageCell = styled.td`
   ${({ theme }) => css`
     padding: 1.5rem 1rem;
@@ -256,4 +228,11 @@ export const PageButton = styled.button<{ $active?: boolean }>`
       `
     }
   `}
+`;
+export const SkeletonWrapper = styled.div<{ $align: TableAlign }>`
+  display: flex;
+  align-items: center;
+  justify-content: ${({ $align }) => justifyByAlign[$align]};
+  width: 100%;
+  margin-block: 0.25rem;
 `;
