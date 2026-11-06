@@ -186,7 +186,36 @@
       "empty": "A presença deste evento ainda não foi marcada.",
       "presentEmpty": "Ninguém esteve presente.",
       "absentEmpty": "Ninguém faltou."
+    },
+    "photos": {
+      "empty": "Ninguém enviou fotos deste evento ainda.",
+      "count": {
+        "one": "{{count}} foto",
+        "other": "{{count}} fotos"
+      },
+      "gridLabel": "Fotos do evento",
+      "openPhoto": "Ampliar foto {{position}} de {{total}}",
+      "thumbnailAlt": "Foto {{position}} do evento",
+      "unavailable": "Foto indisponível",
+      "downloadAll": "Baixar todas",
+      "downloadOriginal": "Baixar original",
+      "zipProgress": "Baixando fotos: {{done}} de {{total}}",
+      "zipPacking": "Montando o arquivo compactado...",
+      "downloadError": "Não foi possível baixar as fotos. Tente novamente.",
+      "downloadOneError": "Não foi possível baixar esta foto. Tente novamente.",
+      "loadError": "Algumas fotos não carregaram. O link pode ter vencido.",
+      "retry": "Tentar novamente",
+      "reload": "Recarregar fotos",
+      "uploadedBy": "Enviada por {{name}} em {{date}}",
+      "uploadedAt": "Enviada em {{date}}"
     }
+  },
+  "lightbox": {
+    "close": "Fechar",
+    "previous": "Foto anterior",
+    "next": "Próxima foto",
+    "position": "{{position}} de {{total}}",
+    "unavailable": "Não foi possível carregar esta foto."
   },
   "participants": {
     "title": "Participantes",

@@ -108,3 +108,18 @@ export const formatCalendarMonthName = (date: Date): string => {
 
   return calendarMonthFormatter.format(date);
 };
+
+const isoDateFormatter = new Intl.DateTimeFormat('en-CA', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: 'America/Sao_Paulo',
+});
+
+// "2026-08-22" no fuso de São Paulo, para nomes de arquivo; '' se vazio ou inválido
+export const formatIsoDate = (iso: string): string => {
+  const date = new Date(iso);
+  if (!isValid(date)) return '';
+
+  return isoDateFormatter.format(date);
+};

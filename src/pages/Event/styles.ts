@@ -48,7 +48,8 @@ export const Sections = styled.div`
   gap: 1rem;
 `;
 
-export const Section = styled.section<{ $filled?: boolean }>`
+export const Section = styled.section<{ $filled?: boolean; $wide?: boolean }>`
+  ${({ $wide }) => ($wide ? 'grid-column: 1 / -1;' : '')}
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -336,4 +337,127 @@ export const HostName = styled.span`
   font-size: 1rem;
   font-weight: 700;
   overflow-wrap: anywhere;
+`;
+
+export const PhotosRoot = styled.div`
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const PhotosToolbar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+`;
+
+export const PhotosCount = styled.p`
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: ${theme.text};
+`;
+
+export const PhotosEmpty = styled.p`
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${theme.text};
+`;
+
+export const PhotosStatus = styled.p`
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${theme.textMuted};
+`;
+
+export const PhotosNotice = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: ${theme.errorLight};
+  color: ${theme.errorDark};
+  font-size: 0.875rem;
+`;
+
+export const PhotoGrid = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 0.75rem;
+`;
+
+export const PhotoThumbButton = styled.button`
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid ${theme.border};
+  border-radius: 0.5rem;
+  background: ${theme.surfaceSunken};
+  color: ${theme.textMuted};
+  cursor: pointer;
+
+  &:hover {
+    border-color: ${theme.borderBrand};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${theme.focusRing};
+    outline-offset: 2px;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+export const PhotoThumbPlaceholder = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+
+  svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+`;
+
+export const PhotoMeta = styled.p`
+  margin: 0;
+  color: ${theme.textMuted};
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+`;
+
+export const PhotoActions = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const PhotoError = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  color: ${theme.errorDark};
+  font-size: 0.875rem;
 `;
