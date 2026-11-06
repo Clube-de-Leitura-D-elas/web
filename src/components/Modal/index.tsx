@@ -1,5 +1,6 @@
 import { useEffect, useEffectEvent, useId, useRef, type ReactNode } from 'react';
 import { Button } from '../Button';
+import { useLocale } from '../../hooks/useLocale';
 import * as Styled from './styles';
 
 export type ModalSize = 'sm' | 'md' | 'lg';
@@ -10,10 +11,11 @@ export type ModalProps = {
   title: string;
   description?: string;
   children?: ReactNode;
-  onConfirm: () => void;
-  confirmText: string;
+  onConfirm?: () => void;
+  confirmText?: string;
   confirmDisabled?: boolean;
   size?: ModalSize;
+  showFooter?: boolean;
 };
 
 const FOCUSABLE_SELECTOR =
@@ -31,10 +33,12 @@ export const Modal = ({
   confirmText,
   confirmDisabled = false,
   size = 'md',
+  showFooter = true,
 }: ModalProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const pressStartedOnOverlay = useRef(false);
   const titleId = useId();
+  const locale = useLocale();
 
   const handleClose = useEffectEvent(onClose);
 
@@ -124,14 +128,16 @@ export const Modal = ({
 
         {children && <Styled.Body>{children}</Styled.Body>}
 
-        <Styled.Footer $size={size}>
-          <Button variant="secondary" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={onConfirm} disabled={confirmDisabled}>
-            {confirmText}
-          </Button>
-        </Styled.Footer>
+        {showFooter && onConfirm && confirmText && (
+          <Styled.Footer $size={size}>
+            <Button variant="secondary" onClick={onClose}>
+              {locale.modal.cancel}
+            </Button>
+            <Button variant="primary" onClick={onConfirm} disabled={confirmDisabled}>
+              {confirmText}
+            </Button>
+          </Styled.Footer>
+        )}
       </Styled.Container>
     </Styled.Overlay>
   );

@@ -47,6 +47,16 @@ const eventDateTimeFormatter = new Intl.DateTimeFormat(LOCALE, {
   timeZone: 'America/Sao_Paulo',
 });
 
+const eventTimeFormatter = new Intl.DateTimeFormat(LOCALE, {
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'America/Sao_Paulo',
+});
+
+const calendarMonthFormatter = new Intl.DateTimeFormat(LOCALE, {
+  month: 'long',
+});
+
 // "22 de Agosto, 19h" ou "22 de Agosto, 19h30"; '' se vazio ou inválido
 export const formatEventDateTime = (iso: string): string => {
   const date = new Date(iso);
@@ -75,4 +85,26 @@ export const formatMeetingDate = (iso: string): string => {
   const time = minutes === 0 ? `${hours}h` : `${hours}h${String(minutes).padStart(2, '0')}`;
 
   return `${day} ${month}, ${time}`;
+};
+export const formatDayModalDate = (date: Date): string => {
+  if (!isValid(date)) return '';
+
+  return new Intl.DateTimeFormat(LOCALE, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+};
+
+export const formatEventTime = (iso: string): string => {
+  const date = new Date(iso);
+  if (!isValid(date)) return '';
+
+  return eventTimeFormatter.format(date);
+};
+
+export const formatCalendarMonthName = (date: Date): string => {
+  if (!isValid(date)) return '';
+
+  return calendarMonthFormatter.format(date);
 };

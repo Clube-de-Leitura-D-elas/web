@@ -35,6 +35,9 @@
     "showPassword": "Mostrar senha",
     "hidePassword": "Ocultar senha"
   },
+  "modal": {
+    "cancel": "Cancelar"
+  },
   "autocomplete": {
     "noResults": "Nenhuma opção encontrada"
   },
@@ -400,6 +403,7 @@
   },
   "calendar": {
     "title": "Calendário",
+    "dayAriaLabel": "{{day}} de {{month}} de {{year}}",
     "loading": "Carregando calendário...",
     "subtitle": "Visualize os encontros de todos os grupos do clube.",
     "weekdays": {
@@ -412,6 +416,7 @@
       "saturday": "SÁB."
     },
     "loadError": "Não foi possível carregar os encontros.",
+    "emptyState": "Nenhum evento neste dia.",
     "moreEvents": "+{{count}} mais",
     "navigation": {
       "today": "Hoje",

@@ -74,7 +74,7 @@ export const MonthNavigationButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${theme.textBrand};
+    outline: 2px solid ${theme.focusRing};
     outline-offset: 2px;
   }
 `;
@@ -112,7 +112,7 @@ export const MonthSelectorTrigger = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${theme.textBrand};
+    outline: 2px solid ${theme.focusRing};
     outline-offset: 2px;
   }
 `;
@@ -195,7 +195,7 @@ export const YearButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${theme.textBrand};
+    outline: 2px solid ${theme.focusRing};
     outline-offset: 2px;
   }
 `;
@@ -216,7 +216,7 @@ export const TodayButton = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid ${theme.textBrand};
+    outline: 2px solid ${theme.focusRing};
     outline-offset: 2px;
   }
 `;
@@ -262,6 +262,7 @@ export const WeekdayHeader = styled.div`
 
 export const DayCell = styled.div<{
   $outsideMonth: boolean;
+  $disabled: boolean;
   $isLoading: boolean;
 }>`
   min-width: 0;
@@ -281,6 +282,22 @@ export const DayCell = styled.div<{
 
   &:nth-child(7n) {
     border-right: none;
+  }
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
+
+  &:hover {
+    background-color: ${({ $disabled, $outsideMonth, $isLoading }) => {
+      if (!$disabled || $outsideMonth) return theme.surfaceSunken;
+      if ($isLoading) return theme.backgroundSubtle;
+
+      return theme.surface;
+    }};
+  }
+  &:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline: 2px solid ${theme.focusRing};
+    outline-offset: -2px;
   }
 `;
 

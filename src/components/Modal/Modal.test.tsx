@@ -118,4 +118,10 @@ describe('Modal', () => {
     rerender(renderOpen(false));
     expect(opener).toHaveFocus();
   });
+  it('não exibe o footer quando showFooter é false', () => {
+    renderModal({ showFooter: false });
+
+    expect(screen.queryByRole('button', { name: 'Encerrar' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cancelar' })).not.toBeInTheDocument();
+  });
 });
