@@ -3,6 +3,7 @@ import { mocked } from 'storybook/test';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { DefaultLayout } from '../../layouts/DefaultLayout';
 
+import { fetchPhotoBlob } from '../../services/eventPhotoService';
 import { getEventDetails } from '../../services/eventService';
 import type {
   EventBook,
@@ -10,6 +11,7 @@ import type {
   EventHost,
   EventLocation,
   EventParticipant,
+  EventPhoto,
 } from '../../types/event';
 
 import { EventDetails } from '.';
@@ -74,6 +76,31 @@ const buildAttendance = (participants: EventParticipant[]) => ({
 
 const defaultParticipants = buildParticipants(8, 2);
 
+const buildPhotos = (count: number): EventPhoto[] =>
+  Array.from({ length: count }, (_, index) => {
+    const url = `https://picsum.photos/seed/evento-${index + 1}/1200/800`;
+
+    return {
+      id: `photo-${index + 1}`,
+      url,
+      thumbnailUrl: `https://picsum.photos/seed/evento-${index + 1}/300/300`,
+      uploadedAt: `2026-08-23T10:${String(10 + (index % 50)).padStart(2, '0')}:00-03:00`,
+      uploadedBy: {
+        id: `participant-${(index % participantNames.length) + 1}`,
+        name: participantNames[index % participantNames.length],
+      },
+    };
+  });
+
+// o download das stories devolve uma imagem pequena em vez de ir à rede
+const fakePhotoBlob = () =>
+  new Blob(
+    [
+      '<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4"/></svg>',
+    ],
+    { type: 'image/png' },
+  );
+
 const event: EventDetailsData = {
   id: '9f2c1a44-8f3e-4c7a-9a1b-2d6f0e5b7c31',
   startsAt: '2026-08-22T19:00:00-03:00',
@@ -87,6 +114,7 @@ const event: EventDetailsData = {
   host,
   attendance: buildAttendance(defaultParticipants),
   participants: defaultParticipants,
+  photos: buildPhotos(8),
 };
 
 // monta um evento de exemplo com as participantes e as contagens batendo
@@ -121,6 +149,12 @@ const meta = {
       await wait(REQUEST_DELAY);
 
       return event;
+    });
+
+    mocked(fetchPhotoBlob).mockImplementation(async () => {
+      await wait(REQUEST_DELAY);
+
+      return fakePhotoBlob();
     });
   },
 } satisfies Meta<typeof EventDetails>;
@@ -306,6 +340,70 @@ export const LongNames: Story = {
     };
 
     mocked(getEventDetails).mockResolvedValue(withParticipants(participants));
+  },
+};
+
+// evento sem fotos: estado vazio, sem botão de download
+export const WithoutPhotos: Story = {
+  beforeEach: () => {
+    mocked(getEventDetails).mockResolvedValue({ ...event, photos: [] });
+  },
+};
+
+// uma única foto: navegação do lightbox fica desabilitada
+export const SinglePhoto: Story = {
+  beforeEach: () => {
+    mocked(getEventDetails).mockResolvedValue({ ...event, photos: buildPhotos(1) });
+  },
+};
+
+// muitas fotos: a grade cresce e quebra em várias linhas
+export const ManyPhotos: Story = {
+  beforeEach: () => {
+    mocked(getEventDetails).mockResolvedValue({ ...event, photos: buildPhotos(40) });
+  },
+};
+
+// miniaturas que não carregam: placeholder na grade e aviso para recarregar
+export const PhotosBrokenThumbnail: Story = {
+  beforeEach: () => {
+    const photos = buildPhotos(8);
+    photos[1] = {
+      ...photos[1],
+      thumbnailUrl: '/foto-inexistente.jpg',
+      url: '/foto-inexistente.jpg',
+    };
+    photos[4] = { ...photos[4], thumbnailUrl: '/foto-inexistente.jpg' };
+
+    mocked(getEventDetails).mockResolvedValue({ ...event, photos });
+  },
+};
+
+// quem enviou não foi encontrado: o lightbox mostra só a data
+export const PhotoWithoutUploader: Story = {
+  beforeEach: () => {
+    const photos = buildPhotos(4);
+    photos[0] = { ...photos[0], uploadedBy: null };
+
+    mocked(getEventDetails).mockResolvedValue({ ...event, photos });
+  },
+};
+
+// download falha (ex.: link vencido): aviso com "Tentar novamente"
+export const PhotosDownloadError: Story = {
+  beforeEach: () => {
+    mocked(fetchPhotoBlob).mockRejectedValue(new Error('PHOTO_FETCH_FAILED_400'));
+  },
+};
+
+// download lento: dá tempo de ver o progresso do pacote
+export const PhotosSlowDownload: Story = {
+  beforeEach: () => {
+    mocked(fetchPhotoBlob).mockImplementation(async () => {
+      await wait(1500);
+
+      return fakePhotoBlob();
+    });
   },
 };
 

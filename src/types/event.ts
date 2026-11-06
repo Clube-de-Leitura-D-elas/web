@@ -30,6 +30,17 @@ export type EventParticipant = {
   attended: boolean | null;
 };
 
+export type EventPhoto = {
+  id: string;
+  // URLs assinadas: expiram (1 h), então a tela precisa lidar com link vencido
+  url: string;
+  // pode ser igual a `url` quando não há versão reduzida
+  thumbnailUrl: string;
+  uploadedAt: string;
+  // null = quem enviou não foi encontrado
+  uploadedBy: { id: string; name: string } | null;
+};
+
 export type EventDetails = {
   id: string;
   startsAt: string;
@@ -43,4 +54,5 @@ export type EventDetails = {
   host: EventHost | null;
   attendance: EventAttendance | null;
   participants: EventParticipant[];
+  photos: EventPhoto[];
 };
