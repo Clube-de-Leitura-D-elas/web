@@ -10,6 +10,7 @@ import { Input } from '../../components/Input';
 import { DayModal } from './DayModal';
 import { interpolate } from '../../locales';
 import { formatCalendarMonthName, formatEventTime } from '../../utils/date';
+import { useNavigate, useSearchParams } from 'react-router';
 
 const MAX_VISIBLE_EVENTS = 3;
 // mesmo intervalo aceito pela edge function calendar-month
@@ -30,18 +31,54 @@ const getDateKey = (date: Date): string =>
     String(date.getDate()).padStart(2, '0'),
   ].join('-');
 
+const getInitialCalendarDate = (params: URLSearchParams): Date => {
+  const today = new Date();
+
+  const yearParam = params.get('year');
+  const monthParam = params.get('month');
+
+  const year = Number(yearParam);
+  const month = Number(monthParam);
+
+  const validYear =
+    yearParam !== null && /^\d{4}$/.test(yearParam) && year >= MIN_YEAR && year <= MAX_YEAR;
+
+  const validMonth =
+    monthParam !== null && /^\d{1,2}$/.test(monthParam) && month >= 1 && month <= 12;
+
+  if (validYear && validMonth) {
+    return new Date(year, month - 1, 1);
+  }
+
+  return new Date(today.getFullYear(), today.getMonth(), 1);
+};
+
 export const Calendar = () => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const locale = useLocale();
   const navigationText = locale.calendar.navigation;
 
   const today = new Date();
 
-  const [selectedDate, setSelectedDate] = useState(
-    () => new Date(today.getFullYear(), today.getMonth(), 1),
-  );
+  const [selectedDate, setSelectedDate] = useState(() => getInitialCalendarDate(searchParams));
 
   const year = selectedDate.getFullYear();
   const month = selectedDate.getMonth() + 1;
+
+  useEffect(() => {
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+
+        next.set('year', String(year));
+        next.set('month', String(month));
+
+        return next;
+      },
+      { replace: true },
+    );
+  }, [year, month, setSearchParams]);
 
   const days = getCalendarDays(year, month);
   const totalWeeks = days.length / 7;
@@ -170,6 +207,11 @@ export const Calendar = () => {
   const handleDayClick = (date: Date) => {
     if (!isCalendarAvailable) return;
     setSelectedDay(date);
+  };
+
+  const handleEventSelect = (eventId: string) => {
+    setSelectedDay(null);
+    navigate(`/eventos/${eventId}`);
   };
 
   return (
@@ -364,6 +406,7 @@ export const Calendar = () => {
         <DayModal
           isOpen={Boolean(selectedDay)}
           onClose={() => setSelectedDay(null)}
+          onSelectEvent={handleEventSelect}
           date={selectedDay}
           events={eventsByDate.get(getDateKey(selectedDay)) ?? []}
         />

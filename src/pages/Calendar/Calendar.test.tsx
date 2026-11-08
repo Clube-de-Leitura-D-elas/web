@@ -361,4 +361,53 @@ describe('Calendar', () => {
 
     expect(await screen.findByRole('dialog', { name: modalTitle })).toBeInTheDocument();
   });
+
+  it('navega para os detalhes usando o ID do encontro', async () => {
+    const date = new Date(2026, 9, 15);
+
+    const event = {
+      id: 'evento-123',
+      groupId: 'grupo-456',
+      groupName: 'Clube do Livro',
+      city: 'Porto Alegre',
+      startsAt: '2026-10-15T19:00:00-03:00',
+      status: 'confirmed',
+    };
+
+    jest.mocked(getCalendarMonth).mockResolvedValue({
+      year: 2026,
+      month: 10,
+      rangeStart: '2026-10-15',
+      rangeEnd: '2026-10-15',
+      days: [
+        {
+          date: '2026-10-15',
+          inMonth: true,
+          events: [event],
+        },
+      ],
+    });
+
+    const { user } = renderWithProviders(<Calendar />, {
+      route: '/calendario?year=2026&month=10',
+      path: '/calendario',
+    });
+
+    const dayCell = await screen.findByRole('button', {
+      name: `${getCalendarDayLabel(date).replace(/, 0 eventos$/, '')}, 1 evento`,
+    });
+
+    await user.click(dayCell);
+
+    const modal = await screen.findByRole('dialog');
+
+    await user.click(
+      within(modal).getByRole('button', {
+        name: /Clube do Livro/,
+      }),
+    );
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/eventos/evento-123');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
 });
