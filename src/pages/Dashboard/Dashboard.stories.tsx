@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MemoryRouter, Route, Routes } from 'react-router';
-import { expect } from 'storybook/test';
+import { expect, mocked } from 'storybook/test';
 import { DefaultLayout } from '../../layouts/DefaultLayout';
 import { locale } from '../../locales';
+import { getRegistrations } from '../../services/dashboardService';
 import { Dashboard } from '.';
+import { buildRegistrations } from './storyData';
 
 const meta = {
   title: 'Pages/Dashboard',
@@ -22,6 +24,12 @@ const meta = {
       </MemoryRouter>
     ),
   ],
+  // os estados do gráfico estão nas stories de NewRegistrationsChart
+  beforeEach: () => {
+    mocked(getRegistrations).mockImplementation(async (granularity, from) =>
+      buildRegistrations(granularity, from),
+    );
+  },
 } satisfies Meta<typeof Dashboard>;
 
 export default meta;
