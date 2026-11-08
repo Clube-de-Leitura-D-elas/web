@@ -26,9 +26,12 @@ export const NewRegistrationsChart = () => {
 
   useEffect(() => {
     let ignore = false;
-    const { from, to } = getRegistrationsRange(granularity);
 
-    getRegistrations(granularity, from, to)
+    // dentro do Promise: se o intervalo de datas falhar, vira o estado de erro do card
+    new Promise<RegistrationsItem[]>((resolve) => {
+      const { from, to } = getRegistrationsRange(granularity);
+      resolve(getRegistrations(granularity, from, to));
+    })
       .then((items) => {
         if (!ignore) setResult({ key: requestKey, items });
       })

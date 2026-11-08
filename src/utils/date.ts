@@ -155,7 +155,7 @@ export const getRegistrationsRange = (
 ): { from: string; to: string } => {
   const to = formatIsoDate(now.toISOString());
   const today = parseCivilDate(to);
-  if (!today) return { from: '', to: '' };
+  if (!today) throw new Error(`INVALID_DATE: ${now.toISOString()}`);
 
   if (granularity === 'month') {
     const from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - PERIODS_BACK, 1));

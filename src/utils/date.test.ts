@@ -88,6 +88,10 @@ describe('getRegistrationsRange', () => {
     });
   });
 
+  it('falha de forma explícita quando a data de referência é inválida', () => {
+    expect(() => getRegistrationsRange('month', new Date('não é data'))).toThrow();
+  });
+
   it('usa o dia de São Paulo, não o de UTC', () => {
     // 02h UTC de segunda ainda é domingo 23h em São Paulo
     expect(getRegistrationsRange('week', new Date('2026-11-09T02:00:00Z'))).toEqual({

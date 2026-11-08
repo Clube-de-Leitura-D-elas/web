@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { locale } from '../../locales';
 import { getRegistrations } from '../../services/dashboardService';
 import { pending, renderWithProviders } from '../../test/render';
@@ -115,8 +115,10 @@ describe('NewRegistrationsChart', () => {
     await user.click(screen.getByRole('tab', { name: text.week }));
     expect(await screen.findByRole('group', { name: text.chartLabel.week })).toBeInTheDocument();
 
-    month.resolve(monthItems);
-    await Promise.resolve();
+    // a resposta do mês chega depois de a aba semana já estar mostrando os dados
+    await act(async () => {
+      month.resolve(monthItems);
+    });
 
     expect(screen.getByRole('group', { name: text.chartLabel.week })).toBeInTheDocument();
     expect(screen.queryByRole('group', { name: text.chartLabel.month })).not.toBeInTheDocument();
