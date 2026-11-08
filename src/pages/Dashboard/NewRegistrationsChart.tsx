@@ -46,6 +46,17 @@ export const NewRegistrationsChart = () => {
     };
   }, [granularity, requestKey]);
 
+  // Limpa o resultado ao trocar de aba: voltar para a aba anterior antes de a outra responder
+  // reaproveitaria a chave antiga e mostraria dados velhos em vez do carregamento.
+  // Clicar na aba já ativa não muda nada e preserva o resultado.
+  const handleGranularityChange = (value: string) => {
+    const next = value as Granularity;
+    if (next === granularity) return;
+
+    setResult(null);
+    setGranularity(next);
+  };
+
   const items = result?.key === requestKey ? result.items : undefined;
 
   // os períodos vazios já vêm com total 0: "sem inscrição" é quando todos são 0
@@ -84,7 +95,7 @@ export const NewRegistrationsChart = () => {
     <ChartCard title={text.title}>
       <Tabs
         active={granularity}
-        onChange={(value) => setGranularity(value as Granularity)}
+        onChange={handleGranularityChange}
         tabs={[
           { value: 'month', label: text.month, children: content },
           { value: 'week', label: text.week, children: content },

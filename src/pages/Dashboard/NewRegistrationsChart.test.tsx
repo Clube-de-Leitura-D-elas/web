@@ -106,6 +106,29 @@ describe('NewRegistrationsChart', () => {
     expect(daysSinceMonday(from)).toBe(1);
   });
 
+  it('clicar na aba que já está ativa não refaz a busca nem esconde o gráfico', async () => {
+    const { user } = renderWithProviders(<NewRegistrationsChart />);
+    await screen.findByRole('group', { name: text.chartLabel.month });
+
+    await user.click(screen.getByRole('tab', { name: text.month }));
+
+    expect(screen.getByRole('group', { name: text.chartLabel.month })).toBeInTheDocument();
+    expect(getRegistrations).toHaveBeenCalledTimes(1);
+  });
+
+  it('voltar para a aba anterior antes da resposta mostra o carregamento, não os dados antigos', async () => {
+    const { user } = renderWithProviders(<NewRegistrationsChart />);
+    await screen.findByRole('group', { name: text.chartLabel.month });
+
+    jest.mocked(getRegistrations).mockReturnValueOnce(pending());
+    await user.click(screen.getByRole('tab', { name: text.week }));
+    jest.mocked(getRegistrations).mockReturnValueOnce(pending());
+    await user.click(screen.getByRole('tab', { name: text.month }));
+
+    expect(screen.getByText(locale.dataState.loading)).toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: text.chartLabel.month })).not.toBeInTheDocument();
+  });
+
   it('ignora a resposta de uma aba anterior que chega atrasada', async () => {
     const month = deferred<RegistrationsItem[]>();
     jest.mocked(getRegistrations).mockReturnValueOnce(month.promise);
