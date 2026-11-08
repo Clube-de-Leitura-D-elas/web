@@ -657,6 +657,21 @@
     },
     "charts": {
       "label": "Gráficos"
+    },
+    "registrations": {
+      "title": "Novas inscrições",
+      "month": "Mês",
+      "week": "Semana",
+      "empty": "Nenhuma inscrição no período.",
+      "chartLabel": {
+        "month": "Gráfico de novas inscrições por mês",
+        "week": "Gráfico de novas inscrições por semana"
+      },
+      "weekLabel": "Semana de {{date}}",
+      "count": {
+        "one": "{{count}} inscrição",
+        "other": "{{count}} inscrições"
+      }
     }
   }
 }
