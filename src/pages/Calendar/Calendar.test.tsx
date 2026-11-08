@@ -105,6 +105,77 @@ describe('Calendar', () => {
     });
   });
 
+  it('restaura o mês e o ano informados na URL', async () => {
+    renderWithProviders(<Calendar />, {
+      route: '/calendario?year=2026&month=10',
+      path: '/calendario',
+      showLocationSearch: true,
+    });
+
+    await waitFor(() => {
+      expect(getCalendarMonth).toHaveBeenCalledWith(2026, 10);
+    });
+
+    expect(screen.getByTestId('location-search')).toHaveTextContent('year=2026&month=10');
+  });
+
+  it('corrige um mês inválido na URL', async () => {
+    jest.useFakeTimers({
+      now: new Date(2026, 10, 8),
+      doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
+    });
+    try {
+      const now = new Date();
+
+      renderWithProviders(<Calendar />, {
+        route: '/calendario?year=2026&month=13',
+        path: '/calendario',
+        showLocationSearch: true,
+      });
+
+      await waitFor(() => {
+        expect(getCalendarMonth).toHaveBeenCalledWith(now.getFullYear(), now.getMonth() + 1);
+      });
+
+      await waitFor(() => {
+        const params = new URLSearchParams(screen.getByTestId('location-search').textContent ?? '');
+
+        expect(params.get('year')).toBe(String(now.getFullYear()));
+        expect(params.get('month')).toBe(String(now.getMonth() + 1));
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('atualiza o mês na URL sem remover outros parâmetros', async () => {
+    const { user } = renderWithProviders(<Calendar />, {
+      route: '/calendario?year=2026&month=10&filter=active',
+      path: '/calendario',
+      showLocationSearch: true,
+    });
+
+    await waitFor(() => {
+      expect(getCalendarMonth).toHaveBeenCalledWith(2026, 10);
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: nav.nextMonth,
+      }),
+    );
+
+    await waitFor(() => {
+      const params = new URLSearchParams(screen.getByTestId('location-search').textContent ?? '');
+
+      expect(params.get('year')).toBe('2026');
+      expect(params.get('month')).toBe('11');
+      expect(params.get('filter')).toBe('active');
+    });
+
+    expect(getCalendarMonth).toHaveBeenCalledWith(2026, 11);
+  });
+
   it('mostra uma mensagem de erro quando o calendário não carrega', async () => {
     jest.mocked(getCalendarMonth).mockRejectedValue(new Error('Erro 500'));
 
