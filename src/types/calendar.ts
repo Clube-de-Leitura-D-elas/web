@@ -3,6 +3,7 @@ export type CalendarEvent = {
   groupId: string;
   groupName: string;
   city: string;
+  state: string;
   startsAt: string;
   status: string;
 };
