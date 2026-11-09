@@ -1,4 +1,11 @@
-import { formatEntryDate, formatMeetingDate, formatMonthYear } from './date';
+import {
+  formatDayMonth,
+  formatEntryDate,
+  formatMeetingDate,
+  formatMonthLabel,
+  formatMonthYear,
+  getRegistrationsRange,
+} from './date';
 
 // O jest.config.js fixa o fuso em America/Sao_Paulo (UTC-3).
 
@@ -49,5 +56,74 @@ describe('formatEntryDate', () => {
   it('devolve texto vazio quando não há data ou ela é inválida', () => {
     expect(formatEntryDate(null)).toBe('');
     expect(formatEntryDate('não é data')).toBe('');
+  });
+});
+
+describe('getRegistrationsRange', () => {
+  it('pede os últimos 12 meses, começando no dia 1', () => {
+    expect(getRegistrationsRange('month', new Date('2026-11-08T15:00:00Z'))).toEqual({
+      from: '2025-12-01',
+      to: '2026-11-08',
+    });
+  });
+
+  it('atravessa a virada do ano', () => {
+    expect(getRegistrationsRange('month', new Date('2026-01-15T15:00:00Z')).from).toBe(
+      '2025-02-01',
+    );
+  });
+
+  it('pede as últimas 12 semanas, começando numa segunda-feira', () => {
+    // 08/11/2026 é domingo: a semana atual começou na segunda 02/11
+    expect(getRegistrationsRange('week', new Date('2026-11-08T15:00:00Z'))).toEqual({
+      from: '2026-08-17',
+      to: '2026-11-08',
+    });
+  });
+
+  it('numa segunda-feira, a semana atual é a própria segunda', () => {
+    expect(getRegistrationsRange('week', new Date('2026-11-09T15:00:00Z'))).toEqual({
+      from: '2026-08-24',
+      to: '2026-11-09',
+    });
+  });
+
+  it('falha de forma explícita quando a data de referência é inválida', () => {
+    expect(() => getRegistrationsRange('month', new Date('não é data'))).toThrow();
+  });
+
+  it('usa o dia de São Paulo, não o de UTC', () => {
+    // 02h UTC de segunda ainda é domingo 23h em São Paulo
+    expect(getRegistrationsRange('week', new Date('2026-11-09T02:00:00Z'))).toEqual({
+      from: '2026-08-17',
+      to: '2026-11-08',
+    });
+  });
+});
+
+describe('formatMonthLabel', () => {
+  it('formata mês abreviado e ano', () => {
+    expect(formatMonthLabel('2026-03-01')).toBe('mar/2026');
+    expect(formatMonthLabel('2026-09-01')).toBe('set/2026');
+  });
+
+  it('não volta para o mês anterior por causa do fuso', () => {
+    expect(formatMonthLabel('2026-08-01')).toBe('ago/2026');
+  });
+
+  it('devolve texto vazio para valor inválido', () => {
+    expect(formatMonthLabel('não é data')).toBe('');
+    expect(formatMonthLabel('2026-13-40')).toBe('');
+  });
+});
+
+describe('formatDayMonth', () => {
+  it('formata dia e mês com dois dígitos', () => {
+    expect(formatDayMonth('2026-09-28')).toBe('28/09');
+    expect(formatDayMonth('2026-11-02')).toBe('02/11');
+  });
+
+  it('devolve texto vazio para valor inválido', () => {
+    expect(formatDayMonth('')).toBe('');
   });
 });

@@ -27,6 +27,7 @@ const event: EventDetailsData = {
     { id: 'p1', name: 'Joseane Alves', photoUrl: null, attended: true },
     { id: 'p2', name: 'Camila Ferreira', photoUrl: null, attended: false },
   ],
+  photos: [],
 };
 
 const renderPage = () =>
@@ -93,12 +94,11 @@ describe('EventDetails', () => {
       expect(section.getByText(text.placeAndHost.hostEmpty)).toBeInTheDocument();
     });
 
-    it('mantém "Em breve" na seção que ainda não existe', async () => {
+    it('não deixa nenhuma seção como "Em breve"', async () => {
       renderPage();
       await screen.findByText(event.group.name);
 
-      // só a de fotos (CLU-207)
-      expect(screen.getAllByText(text.comingSoon)).toHaveLength(1);
+      expect(screen.queryByText(text.comingSoon)).not.toBeInTheDocument();
     });
   });
 

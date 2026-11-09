@@ -1,7 +1,7 @@
-import { act, screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import { locale } from '../../locales';
 import { getCalendarMonth } from '../../services/calendarService';
-import { renderWithProviders } from '../../test/render';
+import { pending, renderWithProviders } from '../../test/render';
 import type { CalendarMonthResponse } from '../../types/calendar';
 import { getCalendarDays } from '../../utils/calendar';
 import { Calendar } from './index';
@@ -15,6 +15,14 @@ const text = locale.calendar;
 const nav = text.navigation;
 
 const renderPage = () => renderWithProviders(<Calendar />);
+const getMonthButton = () => screen.getByRole('button', { expanded: false });
+
+const getCalendarDayLabel = (date: Date) =>
+  `${locale.calendar.dayAriaLabel
+    .replace('{{day}}', String(date.getDate()))
+    .replace('{{month}}', new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(date))
+    .replace('{{year}}', String(date.getFullYear()))}, 0 eventos`;
+
 const getThemeColor = (color: string) => {
   const element = document.createElement('div');
 
@@ -163,12 +171,7 @@ describe('Calendar', () => {
   it('abre o seletor e lista os meses', async () => {
     const { user } = renderPage();
 
-    const monthButton = await screen.findByRole('button', {
-      name: new RegExp(
-        'janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro',
-        'i',
-      ),
-    });
+    const monthButton = getMonthButton();
 
     await user.click(monthButton);
 
@@ -181,10 +184,7 @@ describe('Calendar', () => {
     const { user } = renderPage();
 
     const monthButton = await screen.findByRole('button', {
-      name: new RegExp(
-        'janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro',
-        'i',
-      ),
+      name: new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date()),
     });
 
     await user.click(monthButton);
@@ -262,5 +262,103 @@ describe('Calendar', () => {
     await waitFor(() => {
       expect(getCalendarMonth).toHaveBeenLastCalledWith(now.getFullYear(), now.getMonth() + 1);
     });
+  });
+  it('impede abrir o modal ao clicar em um dia enquanto carrega', async () => {
+    jest.mocked(getCalendarMonth).mockReturnValue(pending());
+
+    const { user } = renderPage();
+
+    const dayCells = screen.getAllByRole('button', {
+      name: /\d+ de .+ de \d{4}/,
+    });
+
+    expect(dayCells.length).toBeGreaterThan(0);
+
+    dayCells.forEach((day) => {
+      expect(day).toHaveAttribute('aria-disabled', 'true');
+      expect(day).toHaveAttribute('tabindex', '-1');
+    });
+    await user.click(dayCells[0]);
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('mostra no modal somente os eventos do dia selecionado', async () => {
+    const date = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const nextDate = new Date(date.getFullYear(), date.getMonth(), 2);
+
+    const formatDateKey = (value: Date) =>
+      `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
+
+    const selectedEvent = {
+      id: 'e1',
+      groupId: 'g1',
+      groupName: 'Clube do Livro',
+      city: 'Porto Alegre',
+      startsAt: `${formatDateKey(date)}T19:00:00`,
+      status: 'confirmed',
+    };
+
+    const otherEvent = {
+      id: 'e2',
+      groupId: 'g2',
+      groupName: 'Grupo de Tecnologia',
+      city: 'São Paulo',
+      startsAt: `${formatDateKey(nextDate)}T19:00:00`,
+      status: 'confirmed',
+    };
+
+    jest.mocked(getCalendarMonth).mockResolvedValue({
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+      rangeStart: formatDateKey(date),
+      rangeEnd: formatDateKey(nextDate),
+      days: [
+        {
+          date: formatDateKey(date),
+          inMonth: true,
+          events: [selectedEvent],
+        },
+        {
+          date: formatDateKey(nextDate),
+          inMonth: true,
+          events: [otherEvent],
+        },
+      ],
+    });
+
+    const { user } = renderPage();
+
+    const dayCell = await screen.findByRole('button', {
+      name: `${getCalendarDayLabel(date).replace(/, 0 eventos$/, '')}, 1 evento`,
+    });
+
+    await user.click(dayCell);
+
+    const modal = await screen.findByRole('dialog');
+
+    expect(within(modal).getByText('Clube do Livro')).toBeInTheDocument();
+    expect(within(modal).queryByText('Grupo de Tecnologia')).not.toBeInTheDocument();
+  });
+
+  it('abre o modal ao pressionar Enter em um dia', async () => {
+    const { user } = renderPage();
+
+    const date = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+    const dayCell = await screen.findByRole('button', {
+      name: getCalendarDayLabel(date),
+    });
+
+    dayCell.focus();
+    await user.keyboard('{Enter}');
+
+    const modalTitle = new Intl.DateTimeFormat('pt-BR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(date);
+
+    expect(await screen.findByRole('dialog', { name: modalTitle })).toBeInTheDocument();
   });
 });

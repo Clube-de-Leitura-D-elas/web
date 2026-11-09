@@ -5,10 +5,11 @@ import { Button } from '../../components/Button';
 import { NotFound } from '../NotFound';
 import { interpolate, locale } from '../../locales';
 import { getEventDetails } from '../../services/eventService';
-import type { EventDetails as EventDetailsData } from '../../types/event';
+import type { EventDetails as EventDetailsData, EventPhoto } from '../../types/event';
 import { formatEventDateTime } from '../../utils/date';
 import { EventBook } from './EventBook';
 import { EventParticipation } from './EventParticipation';
+import { EventPhotos } from './EventPhotos';
 import { EventPlaceAndHost } from './EventPlaceAndHost';
 import * as Styled from './styles';
 
@@ -36,6 +37,18 @@ export const EventDetails = () => {
     };
   }, [eventId]);
 
+  // As URLs das fotos expiram: refaz o fetch do evento sem voltar à tela de carregamento.
+  const refreshPhotos = async (): Promise<EventPhoto[] | null> => {
+    try {
+      const data = await getEventDetails(eventId);
+      setResult({ id: eventId, event: data });
+      return data.photos;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  };
+
   const loading = result?.id !== eventId;
   const event = result?.event ?? null;
 
@@ -52,8 +65,8 @@ export const EventDetails = () => {
 
   const groupPath = `/grupos/${event.group.id}`;
 
-  // seções sem `content` mostram "Em breve"; o conteúdo das que faltam entra na issue 207
-  const sections: { key: string; title: string; content?: ReactNode }[] = [
+  // seções sem `content` mostram "Em breve"
+  const sections: { key: string; title: string; content?: ReactNode; wide?: boolean }[] = [
     {
       key: 'participation',
       title: locale.event_details.sections.participation,
@@ -71,7 +84,19 @@ export const EventDetails = () => {
       title: locale.event_details.sections.placeAndHost,
       content: <EventPlaceAndHost location={event.location} host={event.host} />,
     },
-    { key: 'photos', title: locale.event_details.sections.photos },
+    {
+      key: 'photos',
+      title: locale.event_details.sections.photos,
+      wide: true,
+      content: (
+        <EventPhotos
+          groupName={event.group.name}
+          startsAt={event.startsAt}
+          photos={event.photos ?? []}
+          onRefresh={refreshPhotos}
+        />
+      ),
+    },
   ];
 
   // 'default' = primeira entrada do histórico (link aberto direto): não há para onde voltar
@@ -101,10 +126,11 @@ export const EventDetails = () => {
       </Styled.Header>
 
       <Styled.Sections>
-        {sections.map(({ key, title, content }) => (
+        {sections.map(({ key, title, content, wide }) => (
           <Styled.Section
             key={key}
             $filled={Boolean(content)}
+            $wide={wide}
             aria-labelledby={`event-section-${key}`}
           >
             <Styled.SectionTitle id={`event-section-${key}`}>{title}</Styled.SectionTitle>

@@ -47,3 +47,28 @@ export const ChartsGrid = styled.section`
     grid-template-columns: minmax(0, 1fr);
   }
 `;
+
+// O Recharts posiciona o canto do tooltip no ponto da barra; o translate o centraliza acima dele.
+export const TooltipBox = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+  pointer-events: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${({ theme }) => theme.border};
+  background-color: ${({ theme }) => theme.surface};
+`;
+
+export const TooltipTitle = styled.span`
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.textMuted};
+`;
+
+export const TooltipValue = styled.span`
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: ${({ theme }) => theme.text};
+`;
