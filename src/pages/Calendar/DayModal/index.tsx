@@ -3,6 +3,7 @@ import type { CalendarEvent } from '../../../types/calendar';
 import * as Styled from './styles';
 import { useLocale } from '../../../hooks/useLocale';
 import { formatDayModalDate, formatEventTime } from '../../../utils/date';
+import { interpolate } from '../../../locales';
 
 export type DayModalProps = {
   isOpen: boolean;
@@ -35,7 +36,11 @@ export const DayModal = ({ isOpen, onClose, onSelectEvent, date, events }: DayMo
                 type="button"
                 onClick={() => onSelectEvent?.(event.id)}
                 disabled={!onSelectEvent}
-                aria-label={`${formatEventTime(event.startsAt)} - ${event.groupName} - ${event.city}`}
+                aria-label={interpolate(locale.calendar.dayModal.eventAriaLabel, {
+                  time: formatEventTime(event.startsAt),
+                  group: event.groupName,
+                  city: event.city,
+                })}
               >
                 <Styled.EventDot />
 

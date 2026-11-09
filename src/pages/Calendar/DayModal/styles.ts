@@ -25,11 +25,11 @@ export const EventButton = styled.button`
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    border-color: ${theme.textBrand};
+    border-color: ${({ theme }) => theme.textBrand};
   }
 
   &:focus-visible {
-    outline: 2px solid ${theme.textBrand};
+    outline: 2px solid ${({ theme }) => theme.textBrand};
     outline-offset: 2px;
   }
 
