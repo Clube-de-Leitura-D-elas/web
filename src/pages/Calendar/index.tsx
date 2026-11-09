@@ -46,11 +46,11 @@ const getInitialCalendarDate = (params: URLSearchParams): Date => {
   const validMonth =
     monthParam !== null && /^\d{1,2}$/.test(monthParam) && month >= 1 && month <= 12;
 
-  if (validYear && validMonth) {
-    return new Date(year, month - 1, 1);
-  }
-
-  return new Date(today.getFullYear(), today.getMonth(), 1);
+  return new Date(
+    validYear ? year : today.getFullYear(),
+    validMonth ? month - 1 : today.getMonth(),
+    1,
+  );
 };
 
 export const Calendar = () => {
@@ -61,12 +61,16 @@ export const Calendar = () => {
 
   const today = new Date();
 
-  const [selectedDate, setSelectedDate] = useState(() => getInitialCalendarDate(searchParams));
+  const selectedDate = getInitialCalendarDate(searchParams);
 
   const year = selectedDate.getFullYear();
   const month = selectedDate.getMonth() + 1;
 
   useEffect(() => {
+    if (searchParams.get('year') === String(year) && searchParams.get('month') === String(month)) {
+      return;
+    }
+
     setSearchParams(
       (current) => {
         const next = new URLSearchParams(current);
@@ -78,7 +82,7 @@ export const Calendar = () => {
       },
       { replace: true },
     );
-  }, [year, month, setSearchParams]);
+  }, [year, month, searchParams, setSearchParams]);
 
   const days = getCalendarDays(year, month);
   const totalWeeks = days.length / 7;
@@ -94,16 +98,27 @@ export const Calendar = () => {
 
   const [yearDraft, setYearDraft] = useState(String(selectedDate.getFullYear()));
 
+  const updateCalendarDate = (date: Date) => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+
+      next.set('year', String(date.getFullYear()));
+      next.set('month', String(date.getMonth() + 1));
+
+      return next;
+    });
+  };
+
   const handlePreviousMonth = () => {
-    setSelectedDate((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1));
+    updateCalendarDate(new Date(year, month - 2, 1));
   };
 
   const handleNextMonth = () => {
-    setSelectedDate((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1));
+    updateCalendarDate(new Date(year, month, 1));
   };
 
-  const handleMonthSelect = (month: number) => {
-    setSelectedDate((current) => new Date(current.getFullYear(), month - 1, 1));
+  const handleMonthSelect = (selectedMonth: number) => {
+    updateCalendarDate(new Date(year, selectedMonth - 1, 1));
 
     setIsMonthDropdownOpen(false);
   };
@@ -118,7 +133,7 @@ export const Calendar = () => {
       return;
     }
 
-    setSelectedDate((current) => new Date(parsedYear, current.getMonth(), 1));
+    updateCalendarDate(new Date(parsedYear, month - 1, 1));
 
     setIsEditingYear(false);
   };
@@ -126,7 +141,7 @@ export const Calendar = () => {
   const handleToday = () => {
     const now = new Date();
 
-    setSelectedDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    updateCalendarDate(new Date(now.getFullYear(), now.getMonth(), 1));
   };
 
   useEffect(() => {

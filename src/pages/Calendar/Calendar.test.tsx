@@ -128,19 +128,19 @@ describe('Calendar', () => {
       const now = new Date();
 
       renderWithProviders(<Calendar />, {
-        route: '/calendario?year=2026&month=13',
+        route: '/calendario?year=2030&month=13',
         path: '/calendario',
         showLocationSearch: true,
       });
 
       await waitFor(() => {
-        expect(getCalendarMonth).toHaveBeenCalledWith(now.getFullYear(), now.getMonth() + 1);
+        expect(getCalendarMonth).toHaveBeenCalledWith(2030, now.getMonth() + 1);
       });
 
       await waitFor(() => {
         const params = new URLSearchParams(screen.getByTestId('location-search').textContent ?? '');
 
-        expect(params.get('year')).toBe(String(now.getFullYear()));
+        expect(params.get('year')).toBe('2030');
         expect(params.get('month')).toBe(String(now.getMonth() + 1));
       });
     } finally {
@@ -174,6 +174,45 @@ describe('Calendar', () => {
     });
 
     expect(getCalendarMonth).toHaveBeenCalledWith(2026, 11);
+  });
+
+  it('restaura o mês anterior ao voltar no histórico do navegador', async () => {
+    const { user } = renderWithProviders(<Calendar />, {
+      route: '/calendario?year=2026&month=10&filter=active',
+      path: '/calendario',
+      showLocationSearch: true,
+      showHistoryBackButton: true,
+    });
+
+    await waitFor(() => {
+      expect(getCalendarMonth).toHaveBeenCalledWith(2026, 10);
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: nav.nextMonth,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(getCalendarMonth).toHaveBeenCalledWith(2026, 11);
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Voltar no histórico',
+      }),
+    );
+
+    await waitFor(() => {
+      const params = new URLSearchParams(screen.getByTestId('location-search').textContent ?? '');
+
+      expect(params.get('year')).toBe('2026');
+      expect(params.get('month')).toBe('10');
+      expect(params.get('filter')).toBe('active');
+    });
+
+    expect(getCalendarMonth).toHaveBeenLastCalledWith(2026, 10);
   });
 
   it('mostra uma mensagem de erro quando o calendário não carrega', async () => {

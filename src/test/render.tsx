@@ -1,7 +1,7 @@
 import { render, type RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement, ReactNode } from 'react';
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 import { theme } from '../theme/theme';
 
@@ -9,6 +9,7 @@ type RenderWithProvidersOptions = Omit<RenderOptions, 'wrapper'> & {
   route?: string;
   path?: string;
   showLocationSearch?: boolean;
+  showHistoryBackButton?: boolean;
 };
 
 /** Mostra o endereço atual, para o teste conferir para onde a tela navegou. */
@@ -23,13 +24,29 @@ const LocationSearchDisplay = () => {
   return <div data-testid="location-search">{location.search}</div>;
 };
 
+const HistoryBackButton = () => {
+  const navigate = useNavigate();
+
+  return (
+    <button type="button" onClick={() => navigate(-1)}>
+      Voltar no histórico
+    </button>
+  );
+};
+
 /**
  * Renderiza com o tema do styled-components e um router em memória, como a aplicação faz em
  * `main.tsx`. Devolve também uma instância do `userEvent`, já pronta para uso.
  */
 export function renderWithProviders(
   ui: ReactElement,
-  { route = '/', path, showLocationSearch = false, ...options }: RenderWithProvidersOptions = {},
+  {
+    route = '/',
+    path,
+    showLocationSearch = false,
+    showHistoryBackButton = false,
+    ...options
+  }: RenderWithProvidersOptions = {},
 ) {
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <ThemeProvider theme={theme}>
@@ -45,6 +62,7 @@ export function renderWithProviders(
           )}
 
           {showLocationSearch && <LocationSearchDisplay />}
+          {showHistoryBackButton && <HistoryBackButton />}
         </>
       </MemoryRouter>
     </ThemeProvider>
