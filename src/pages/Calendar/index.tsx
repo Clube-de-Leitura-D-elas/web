@@ -99,6 +99,10 @@ export const Calendar = () => {
   const [yearDraft, setYearDraft] = useState(String(selectedDate.getFullYear()));
 
   const updateCalendarDate = (date: Date) => {
+    if (date.getFullYear() === year && date.getMonth() + 1 === month) {
+      return;
+    }
+
     setSearchParams((current) => {
       const next = new URLSearchParams(current);
 

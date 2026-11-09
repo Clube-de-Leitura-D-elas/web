@@ -119,6 +119,48 @@ describe('Calendar', () => {
     expect(screen.getByTestId('location-search')).toHaveTextContent('year=2026&month=10');
   });
 
+  it('não cria uma entrada no histórico ao selecionar o mês atual', async () => {
+    jest.useFakeTimers({
+      now: new Date(2026, 10, 9),
+      doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
+    });
+
+    try {
+      const { user } = renderWithProviders(<Calendar />, {
+        route: '/calendario?year=2026&month=10',
+        path: '/calendario',
+        showLocationSearch: true,
+        showHistoryBackButton: true,
+      });
+
+      await waitFor(() => {
+        expect(getCalendarMonth).toHaveBeenCalledWith(2026, 10);
+      });
+
+      // Avança de outubro para novembro.
+      await user.click(screen.getByRole('button', { name: nav.nextMonth }));
+
+      await waitFor(() => {
+        expect(getCalendarMonth).toHaveBeenCalledWith(2026, 11);
+      });
+
+      // Novembro já é o mês atual: não deve criar outra entrada.
+      await user.click(screen.getByRole('button', { name: nav.today }));
+
+      // Uma única volta deve retornar diretamente para outubro.
+      await user.click(screen.getByRole('button', { name: 'Voltar no histórico' }));
+
+      await waitFor(() => {
+        const params = new URLSearchParams(screen.getByTestId('location-search').textContent ?? '');
+
+        expect(params.get('year')).toBe('2026');
+        expect(params.get('month')).toBe('10');
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('corrige um mês inválido na URL', async () => {
     jest.useFakeTimers({
       now: new Date(2026, 10, 8),
