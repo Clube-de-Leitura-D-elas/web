@@ -1,5 +1,5 @@
 import type { CalendarMonthResponse } from '../types/calendar';
-import { supabase } from './supabaseClient';
+import { invokeGet } from './invokeGet';
 
 const CACHE_DURATION_MS = 5 * 60 * 1000;
 
@@ -10,37 +10,41 @@ type CacheEntry = {
 
 const calendarCache = new Map<string, CacheEntry>();
 
+export function clearCalendarCache(): void {
+  calendarCache.clear();
+}
+
 export function getCalendarMonth(year: number, month: number): Promise<CalendarMonthResponse> {
   const cacheKey = `${year}-${month}`;
+  const now = Date.now();
+
+  // Remove entradas expiradas, inclusive de outros meses.
+  for (const [key, entry] of calendarCache) {
+    if (now >= entry.expiresAt) {
+      calendarCache.delete(key);
+    }
+  }
 
   const cached = calendarCache.get(cacheKey);
 
-  if (cached && Date.now() < cached.expiresAt) {
+  if (cached) {
     return cached.request;
   }
 
-  const request = (async (): Promise<CalendarMonthResponse> => {
-    const query = new URLSearchParams({
-      year: String(year),
-      month: String(month),
-    });
-
-    const { data, error } = await supabase.functions.invoke<CalendarMonthResponse>(
-      `calendar-month?${query.toString()}`,
-      {
-        method: 'GET',
-      },
-    );
-
-    if (error) throw error;
-    if (!data) throw new Error('calendar-month returned no data');
+  const request = invokeGet<CalendarMonthResponse>('calendar-month', {
+    year,
+    month,
+  }).then((data) => {
+    if (!data) {
+      throw new Error('calendar-month returned no data');
+    }
 
     return data;
-  })();
+  });
 
   calendarCache.set(cacheKey, {
     request,
-    expiresAt: Date.now() + CACHE_DURATION_MS,
+    expiresAt: now + CACHE_DURATION_MS,
   });
 
   // Requisições com erro não devem permanecer no cache.

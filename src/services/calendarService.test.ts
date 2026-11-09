@@ -1,10 +1,11 @@
 import { supabase } from './supabaseClient';
-import { getCalendarMonth } from './calendarService';
+import { clearCalendarCache, getCalendarMonth } from './calendarService';
 import type { CalendarMonthResponse } from '../types/calendar';
 
 describe('calendarService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    clearCalendarCache();
   });
 
   it('reutiliza a mesma requisição para o mesmo mês', async () => {
@@ -101,5 +102,31 @@ describe('calendarService', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it('limpa o cache e permite buscar novamente o mesmo mês', async () => {
+    const response: CalendarMonthResponse = {
+      year: 2034,
+      month: 9,
+      rangeStart: '2034-09-01',
+      rangeEnd: '2034-09-30',
+      days: [],
+    };
+
+    jest.mocked(supabase.functions.invoke).mockResolvedValue({
+      data: response,
+      error: null,
+    });
+
+    await getCalendarMonth(2034, 9);
+    await getCalendarMonth(2034, 9);
+
+    expect(supabase.functions.invoke).toHaveBeenCalledTimes(1);
+
+    clearCalendarCache();
+
+    await getCalendarMonth(2034, 9);
+
+    expect(supabase.functions.invoke).toHaveBeenCalledTimes(2);
   });
 });
