@@ -31,10 +31,12 @@ export type ParticipantFilterOptions = {
   summary: ActiveGroupsSummary;
 };
 
+export type ParticipantStatus = 'active' | 'inactive' | 'awaiting_account';
+
 export type ParticipantListItem = {
   id: string;
   name: string;
-  is_active: boolean;
+  status: ParticipantStatus;
   group_users: { id: string }[];
 };
 

@@ -37,10 +37,11 @@ beforeEach(() => {
   });
   jest.mocked(getParticipantsPage).mockResolvedValue({
     items: [
-      { id: 'p1', name: 'Ana Souza', is_active: true, group_users: [{ id: 'gu1' }] },
-      { id: 'p2', name: 'Bia Lima', is_active: false, group_users: [] },
+      { id: 'p1', name: 'Ana Souza', status: 'active', group_users: [{ id: 'gu1' }] },
+      { id: 'p2', name: 'Bia Lima', status: 'inactive', group_users: [] },
+      { id: 'p3', name: 'Dora Reis', status: 'awaiting_account', group_users: [] },
     ],
-    total: 2,
+    total: 3,
   });
   jest.mocked(getPendingParticipantsPage).mockResolvedValue({
     items: [
@@ -76,7 +77,7 @@ describe('Participants', () => {
       '/participantes/p1',
     );
     expect(screen.getByText(text.table.groupCountSingle)).toBeInTheDocument();
-    expect(screen.getByText(interpolate(text.table.groupsCount, { count: 0 }))).toBeInTheDocument();
+    expect(screen.getAllByText(interpolate(text.table.groupsCount, { count: 0 }))).toHaveLength(2);
     expect(screen.getByText(text.table.statusActive)).toBeInTheDocument();
     expect(screen.getByText(text.table.statusInactive)).toBeInTheDocument();
     expect(getParticipantsPage).toHaveBeenCalledWith(firstPage, {
@@ -85,6 +86,15 @@ describe('Participants', () => {
       groupId: '',
       order: 'name_asc',
     });
+  });
+
+  it('mostra quem aguarda criação de conta sem link para o perfil', async () => {
+    renderWithProviders(<Participants />);
+
+    await screen.findByText('Dora Reis');
+    const row = screen.getByRole('row', { name: /Dora Reis/ });
+    expect(within(row).getByText(text.table.statusAwaitingAccount)).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Dora Reis' })).not.toBeInTheDocument();
   });
 
   it('busca pelo nome depois que a usuária para de digitar', async () => {

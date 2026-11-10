@@ -26,6 +26,7 @@ import type {
   ActiveGroupsSummary,
   ParticipantFilters,
   ParticipantListItem,
+  ParticipantStatus,
   PendingParticipantListItem,
   ParticipantOrder,
 } from '../../types/participantList';
@@ -102,6 +103,11 @@ export const Participants = () => {
   const fetchParticipants = useCallback(
     async (request: TablePageRequest): Promise<TablePage> => {
       const { items, total } = await getParticipantsPage(request, filters);
+      const statusLabels: Record<ParticipantStatus, string> = {
+        active: locale.participants.table.statusActive,
+        inactive: locale.participants.table.statusInactive,
+        awaiting_account: locale.participants.table.statusAwaitingAccount,
+      };
 
       const rows = items.map((p: ParticipantListItem) => {
         const groupCount = p.group_users?.length ?? 0;
@@ -118,13 +124,9 @@ export const Participants = () => {
             <Styled.AttendanceList>{locale.participants.table.emptyValue}</Styled.AttendanceList>
           ),
           status: (
-            <Styled.StatusBadge $active={p.is_active}>
-              {p.is_active
-                ? locale.participants.table.statusActive
-                : locale.participants.table.statusInactive}
-            </Styled.StatusBadge>
+            <Styled.StatusBadge $status={p.status}>{statusLabels[p.status]}</Styled.StatusBadge>
           ),
-          rowHref: `/participantes/${p.id}`,
+          rowHref: p.status === 'awaiting_account' ? undefined : `/participantes/${p.id}`,
         };
       });
 

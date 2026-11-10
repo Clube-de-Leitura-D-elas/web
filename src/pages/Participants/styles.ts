@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
 import { theme } from '../../theme/theme';
+import type { ParticipantStatus } from '../../types/participantList';
 
 export const Container = styled.div`
   width: 100%;
@@ -153,7 +154,13 @@ export const AttendanceBadge = styled.span<{ $type: 'P' | 'F' }>`
   flex-shrink: 0;
 `;
 
-export const StatusBadge = styled.span<{ $active: boolean }>`
+const STATUS_COLORS: Record<ParticipantStatus, { background: string; color: string }> = {
+  active: { background: theme.successLight, color: theme.successDark },
+  inactive: { background: theme.warningLight, color: theme.warningDark },
+  awaiting_account: { background: theme.infoLight, color: theme.infoDark },
+};
+
+export const StatusBadge = styled.span<{ $status: ParticipantStatus }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -162,8 +169,8 @@ export const StatusBadge = styled.span<{ $active: boolean }>`
   font-size: 0.8125rem;
   font-weight: 500;
   white-space: nowrap;
-  background-color: ${({ $active }) => ($active ? theme.successLight : theme.warningLight)};
-  color: ${({ $active }) => ($active ? theme.successDark : theme.warningDark)};
+  background-color: ${({ $status }) => STATUS_COLORS[$status].background};
+  color: ${({ $status }) => STATUS_COLORS[$status].color};
 `;
 
 export const ActionButton = styled.button`
