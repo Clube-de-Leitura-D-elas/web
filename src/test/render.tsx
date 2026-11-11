@@ -6,9 +6,16 @@ import { ThemeProvider } from 'styled-components';
 import { theme } from '../theme/theme';
 
 type RenderWithProvidersOptions = Omit<RenderOptions, 'wrapper'> & {
+  /** Endereço inicial do MemoryRouter. */
   route?: string;
+
+  /** Padrão da rota utilizada para disponibilizar os parâmetros via useParams. */
   path?: string;
+
+  /** Exibe os parâmetros da URL para verificações nos testes. */
   showLocationSearch?: boolean;
+
+  /** Disponibiliza um botão para simular o retorno no histórico. */
   showHistoryBackButton?: boolean;
 };
 
