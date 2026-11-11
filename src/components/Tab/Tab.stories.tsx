@@ -82,3 +82,30 @@ export const Controlado: Story = {
     return <ControlledExample />;
   },
 };
+
+// Só a lista de abas, sem painel: o conteúdo fica fora do componente (ex.: ao lado do título de um card).
+export const SemPainel: Story = {
+  render: () => {
+    const WithoutPanelExample = () => {
+      const [active, setActive] = useState('1y');
+
+      return (
+        <div style={{ maxWidth: 480 }}>
+          <Tabs
+            active={active}
+            onChange={setActive}
+            showPanels={false}
+            tabs={[
+              { value: '6m', label: '6 meses' },
+              { value: '1y', label: '1 ano' },
+              { value: '2y', label: '2 anos' },
+            ]}
+          />
+          <p style={{ marginTop: 16 }}>Período escolhido: {active}</p>
+        </div>
+      );
+    };
+
+    return <WithoutPanelExample />;
+  },
+};

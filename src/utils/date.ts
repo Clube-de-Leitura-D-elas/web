@@ -147,20 +147,31 @@ const parseCivilDate = (value: string): Date | null => {
   return isValid(date) && toCivilDate(date) === value ? date : null;
 };
 
-// 12 períodos até hoje, com o início já alinhado: dia 1 (mês) ou segunda-feira (semana).
-// O backend conta o primeiro período inteiro, mas mandar alinhado evita depender disso.
-export const getRegistrationsRange = (
-  granularity: 'month' | 'week',
+// Os `months` últimos meses até hoje (dia de São Paulo), com o início no dia 1.
+// Lança erro se a data de referência for inválida.
+export const getMonthlyRange = (
+  months: number,
   now: Date = new Date(),
 ): { from: string; to: string } => {
   const to = formatIsoDate(now.toISOString());
   const today = parseCivilDate(to);
   if (!today) throw new Error(`INVALID_DATE: ${now.toISOString()}`);
 
-  if (granularity === 'month') {
-    const from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - PERIODS_BACK, 1));
-    return { from: toCivilDate(from), to };
-  }
+  const from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (months - 1), 1));
+  return { from: toCivilDate(from), to };
+};
+
+// 12 períodos até hoje, com o início já alinhado: dia 1 (mês) ou segunda-feira (semana).
+// O backend conta o primeiro período inteiro, mas mandar alinhado evita depender disso.
+export const getRegistrationsRange = (
+  granularity: 'month' | 'week',
+  now: Date = new Date(),
+): { from: string; to: string } => {
+  if (granularity === 'month') return getMonthlyRange(PERIODS_BACK + 1, now);
+
+  const to = formatIsoDate(now.toISOString());
+  const today = parseCivilDate(to);
+  if (!today) throw new Error(`INVALID_DATE: ${now.toISOString()}`);
 
   // getUTCDay: 0 = domingo; a semana começa na segunda
   const daysSinceMonday = (today.getUTCDay() + 6) % 7;
@@ -183,4 +194,13 @@ export const formatDayMonth = (period: string): string => {
   if (!date) return '';
 
   return civilDayMonthFormatter.format(date);
+};
+
+// "2026-11-01" -> "nov/26"; '' se inválido
+export const formatMonthShortYear = (period: string): string => {
+  const date = parseCivilDate(period);
+  if (!date) return '';
+
+  const month = civilMonthFormatter.format(date).replace('.', '');
+  return `${month}/${String(date.getUTCFullYear()).slice(-2)}`;
 };

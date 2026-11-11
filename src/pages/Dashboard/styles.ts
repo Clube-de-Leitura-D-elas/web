@@ -48,6 +48,12 @@ export const ChartsGrid = styled.section`
   }
 `;
 
+// O wrapper do tooltip começa no ponto e se estende para a direita (o translate só move a caixa
+// visível): nos pontos finais ele passaria do card e abriria rolagem lateral na página.
+export const ChartFrame = styled.div`
+  overflow: hidden;
+`;
+
 // O Recharts posiciona o canto do tooltip no ponto da barra; o translate o centraliza acima dele.
 export const TooltipBox = styled.div`
   display: flex;
@@ -71,4 +77,46 @@ export const TooltipValue = styled.span`
   font-size: 0.875rem;
   font-weight: 700;
   color: ${({ theme }) => theme.text};
+`;
+
+export const ZoomGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const ZoomButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid ${({ theme }) => theme.border};
+  background-color: ${({ theme }) => theme.surface};
+  color: ${({ theme }) => theme.textMuted};
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: ${({ theme }) => theme.borderBrand};
+    background-color: ${({ theme }) => theme.surfaceBrandSoft};
+    color: ${({ theme }) => theme.textBrand};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    color: ${({ theme }) => theme.disabledFg};
+    background-color: ${({ theme }) => theme.disabledBg};
+  }
 `;

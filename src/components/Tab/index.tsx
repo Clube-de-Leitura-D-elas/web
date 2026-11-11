@@ -6,7 +6,8 @@ export type TabSize = 'md' | 'lg';
 export type Tab = {
   value: string;
   label: string;
-  children: ReactNode;
+  // conteúdo do painel; sem `showPanels`, as abas não têm painel e ele não é usado
+  children?: ReactNode;
   disabled?: boolean;
 };
 
@@ -16,9 +17,18 @@ export type TabsProps = {
   defaultActive?: string;
   onChange?: (value: string) => void;
   size?: TabSize;
+  // `false`: só a lista de abas, sem painel (o conteúdo fica fora, ex.: gráfico abaixo do título)
+  showPanels?: boolean;
 };
 
-export const Tabs = ({ tabs, active, defaultActive, onChange, size = 'md' }: TabsProps) => {
+export const Tabs = ({
+  tabs,
+  active,
+  defaultActive,
+  onChange,
+  size = 'md',
+  showPanels = true,
+}: TabsProps) => {
   const isControlled = active !== undefined;
 
   const [internalActive, setInternalActive] = useState<string | undefined>(
@@ -83,7 +93,7 @@ export const Tabs = ({ tabs, active, defaultActive, onChange, size = 'md' }: Tab
               role="tab"
               id={`tab-${tab.value}`}
               aria-selected={isActive}
-              aria-controls={`tabpanel-${tab.value}`}
+              aria-controls={showPanels ? `tabpanel-${tab.value}` : undefined}
               tabIndex={isActive ? 0 : -1}
               disabled={tab.disabled}
               $active={isActive}
@@ -96,7 +106,7 @@ export const Tabs = ({ tabs, active, defaultActive, onChange, size = 'md' }: Tab
         })}
       </Styled.TabList>
 
-      {activeTab && (
+      {showPanels && activeTab && (
         <Styled.Panel
           role="tabpanel"
           id={`tabpanel-${activeTab.value}`}

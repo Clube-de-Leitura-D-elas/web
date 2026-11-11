@@ -9,3 +9,14 @@ export type RegistrationsItem = {
 export type RegistrationsResponse = {
   items: RegistrationsItem[];
 };
+
+export type ActiveParticipantsItem = {
+  // primeiro dia do mês, em YYYY-MM-DD
+  period: string;
+  // participantes ativas ao fim do mês (acumulado, não as que entraram no mês)
+  total: number;
+};
+
+export type ActiveParticipantsResponse = {
+  items: ActiveParticipantsItem[];
+};

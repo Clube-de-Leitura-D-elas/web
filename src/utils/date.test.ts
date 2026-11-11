@@ -3,7 +3,9 @@ import {
   formatEntryDate,
   formatMeetingDate,
   formatMonthLabel,
+  formatMonthShortYear,
   formatMonthYear,
+  getMonthlyRange,
   getRegistrationsRange,
 } from './date';
 
@@ -125,5 +127,48 @@ describe('formatDayMonth', () => {
 
   it('devolve texto vazio para valor inválido', () => {
     expect(formatDayMonth('')).toBe('');
+  });
+});
+
+describe('getMonthlyRange', () => {
+  it('pede os últimos 60 meses, começando no dia 1', () => {
+    expect(getMonthlyRange(60, new Date('2026-11-11T15:00:00Z'))).toEqual({
+      from: '2021-12-01',
+      to: '2026-11-11',
+    });
+  });
+
+  it('com 1 mês, começa no dia 1 do mês atual', () => {
+    expect(getMonthlyRange(1, new Date('2026-11-11T15:00:00Z'))).toEqual({
+      from: '2026-11-01',
+      to: '2026-11-11',
+    });
+  });
+
+  it('usa o dia de São Paulo, não o de UTC', () => {
+    // 02h UTC de 01/12 ainda é 30/11 em São Paulo
+    expect(getMonthlyRange(2, new Date('2026-12-01T02:00:00Z'))).toEqual({
+      from: '2026-10-01',
+      to: '2026-11-30',
+    });
+  });
+
+  it('falha de forma explícita quando a data de referência é inválida', () => {
+    expect(() => getMonthlyRange(12, new Date('não é data'))).toThrow();
+  });
+});
+
+describe('formatMonthShortYear', () => {
+  it('formata mês abreviado e ano com dois dígitos', () => {
+    expect(formatMonthShortYear('2026-11-01')).toBe('nov/26');
+    expect(formatMonthShortYear('2025-12-01')).toBe('dez/25');
+  });
+
+  it('não volta para o mês anterior por causa do fuso', () => {
+    expect(formatMonthShortYear('2026-08-01')).toBe('ago/26');
+  });
+
+  it('devolve texto vazio para valor inválido', () => {
+    expect(formatMonthShortYear('não é data')).toBe('');
   });
 });

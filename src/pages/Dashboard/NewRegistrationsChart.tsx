@@ -92,15 +92,21 @@ export const NewRegistrationsChart = () => {
     );
 
   return (
-    <ChartCard title={text.title}>
-      <Tabs
-        active={granularity}
-        onChange={handleGranularityChange}
-        tabs={[
-          { value: 'month', label: text.month, children: content },
-          { value: 'week', label: text.week, children: content },
-        ]}
-      />
+    <ChartCard
+      title={text.title}
+      action={
+        <Tabs
+          active={granularity}
+          onChange={handleGranularityChange}
+          showPanels={false}
+          tabs={[
+            { value: 'month', label: text.month },
+            { value: 'week', label: text.week },
+          ]}
+        />
+      }
+    >
+      {content}
     </ChartCard>
   );
 };

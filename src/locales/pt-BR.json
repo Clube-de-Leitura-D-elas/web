@@ -672,6 +672,23 @@
         "one": "{{count}} inscrição",
         "other": "{{count}} inscrições"
       }
+    },
+    "activeParticipants": {
+      "title": "Total de Participantes",
+      "ranges": {
+        "6m": "6 meses",
+        "1y": "1 ano",
+        "2y": "2 anos",
+        "5y": "5 anos"
+      },
+      "zoomIn": "Aproximar (período menor)",
+      "zoomOut": "Afastar (período maior)",
+      "chartLabel": "Gráfico do total de participantes ativas por mês",
+      "empty": "Ainda não há participantes ativas para mostrar.",
+      "count": {
+        "one": "{{count}} participante ativa",
+        "other": "{{count}} participantes ativas"
+      }
     }
   }
 }

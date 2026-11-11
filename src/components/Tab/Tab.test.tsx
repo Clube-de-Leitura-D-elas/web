@@ -75,3 +75,40 @@ describe('Tabs', () => {
     expect(screen.getByRole('tab', { name: 'Segunda' })).toBeDisabled();
   });
 });
+
+describe('Tabs sem painel', () => {
+  it('mostra só a lista de abas, sem tabpanel nem aria-controls', () => {
+    renderWithProviders(
+      <Tabs
+        tabs={[
+          { value: 'one', label: 'Primeira' },
+          { value: 'two', label: 'Segunda' },
+        ]}
+        showPanels={false}
+      />,
+    );
+
+    expect(screen.getAllByRole('tab')).toHaveLength(2);
+    expect(screen.queryByRole('tabpanel')).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Primeira' })).not.toHaveAttribute('aria-controls');
+  });
+
+  it('continua trocando de aba e avisando onChange', async () => {
+    const onChange = jest.fn();
+    const { user } = renderWithProviders(
+      <Tabs
+        tabs={[
+          { value: 'one', label: 'Primeira' },
+          { value: 'two', label: 'Segunda' },
+        ]}
+        showPanels={false}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByRole('tab', { name: 'Segunda' }));
+
+    expect(onChange).toHaveBeenCalledWith('two');
+    expect(screen.getByRole('tab', { name: 'Segunda' })).toHaveAttribute('aria-selected', 'true');
+  });
+});
