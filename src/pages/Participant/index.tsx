@@ -1,16 +1,22 @@
-import { useCallback, useEffect, useState } from 'react';
-import { BackButton } from '../../components/BackButton';
-import { useParams, useLocation, useNavigate } from 'react-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { ActionMenu } from '../../components/ActionMenu';
+import { Breadcrumb } from '../../components/Breadcrumb';
+import { DataState } from '../../components/DataState';
+import {
+  RemoveFromGroupModal,
+  type CoordinatorCandidate,
+} from '../../components/RemoveFromGroupModal';
 import { Table, type TableColumn, type TableFetchPage } from '../../components/Table';
-import { Tag } from '../../components/Tag';
-import { locale } from '../../locales';
-import { formatEntryDate } from '../../utils/date';
-import { Skeleton } from '../../components/Skeleton';
+import { Toast, type ToastVariant } from '../../components/Toast';
+import { interpolate, locale } from '../../locales';
+import { getAllGroupParticipants, updateGroupParticipant } from '../../services/groupService';
 import {
   getCities,
   getParticipantById,
   getParticipantGroups,
   getParticipantPresence,
+  getParticipantPresenceHistory,
   getZones,
   updateParticipant,
   updateParticipantStatus,
@@ -18,89 +24,52 @@ import {
 import type {
   Participant,
   ParticipantFormValues,
+  ParticipantGroup,
   ParticipantOption,
   ParticipantPresence,
   ParticipantZoneOption,
 } from '../../types/participant';
-
-import { ParticipantContacts } from './ParticipantContacts';
-import { ParticipantInfoGrid } from './ParticipantInfoGrid';
+import { formatEntryDate } from '../../utils/date';
+import { ParticipantDetailsSkeleton } from './ParticipantDetailsSkeleton';
 import { ParticipantModal } from './ParticipantModal';
-import { ParticipantSummary } from './ParticipantSummary';
+import { ParticipantProfileCard } from './ParticipantProfileCard';
+import { ParticipantRecentMeetings, type MeetingsState } from './ParticipantRecentMeetings';
+import { ParticipantStats, type GroupsState } from './ParticipantStats';
 import * as Styled from './styles';
 
-const columns: TableColumn[] = [
+const text = locale.participant_details;
+
+const GROUPS_PAGE_SIZE = 100;
+
+type ToastState = {
+  id: number;
+  message: string;
+  variant: ToastVariant;
+};
+
+type RemoveState = {
+  group: ParticipantGroup;
+  needsSuccessor: boolean;
+  candidates: CoordinatorCandidate[];
+};
+
+const firstName = (name: string) => name.split(' ')[0];
+
+const groupNumber = (number: number) => String(number).padStart(2, '0');
+
+const groupColumns: TableColumn[] = [
+  { key: 'number', label: text.groups.columns.name, align: 'left' },
+  { key: 'status', label: text.groups.columns.status, align: 'left' },
+  { key: 'city', label: text.groups.columns.city, align: 'left' },
+  { key: 'entryDate', label: text.groups.columns.entryDate, align: 'left' },
   {
-    key: 'number',
-    label: locale.participant_details.groups.columns.name,
-    align: 'left',
-  },
-  {
-    key: 'status',
-    label: locale.participant_details.groups.columns.status,
-    align: 'center',
-  },
-  {
-    key: 'entryDate',
-    label: locale.participant_details.groups.columns.entryDate,
-    align: 'center',
-  },
-  {
-    key: 'city',
-    label: locale.participant_details.groups.columns.city,
-    align: 'left',
+    key: 'actions',
+    label: <Styled.VisuallyHidden>{text.groups.columns.actions}</Styled.VisuallyHidden>,
+    align: 'right',
+    width: '4.5rem',
+    ignoreRowClick: true,
   },
 ];
-
-const ParticipantDetailsSkeleton = () => {
-  return (
-    <Styled.Card>
-      <Styled.ProfileHeader>
-        <Styled.SkeletonProfile>
-          <Skeleton width="4.5rem" height="4.5rem" variant="circular" />
-
-          <Styled.SkeletonProfileInfo>
-            <Skeleton width="12rem" height="1.5rem" />
-
-            <Styled.SkeletonStatus>
-              <Skeleton width="5rem" height="1.75rem" />
-              <Skeleton width="7rem" height="2rem" />
-              <Skeleton width="6rem" height="2rem" />
-            </Styled.SkeletonStatus>
-          </Styled.SkeletonProfileInfo>
-        </Styled.SkeletonProfile>
-
-        <Styled.SkeletonContacts>
-          <Skeleton width="14rem" height="1rem" />
-          <Skeleton width="10rem" height="1rem" />
-          <Skeleton width="12rem" height="1rem" />
-        </Styled.SkeletonContacts>
-      </Styled.ProfileHeader>
-
-      <Styled.TableArea>
-        <Styled.SkeletonTable>
-          {Array.from({ length: 5 }).map((_, index) => (
-            <Styled.SkeletonTableRow key={index}>
-              <Skeleton width="25%" height="1rem" />
-              <Skeleton width="15%" height="1rem" />
-              <Skeleton width="20%" height="1rem" />
-              <Skeleton width="15%" height="1rem" />
-            </Styled.SkeletonTableRow>
-          ))}
-        </Styled.SkeletonTable>
-      </Styled.TableArea>
-
-      <Styled.SkeletonDetails>
-        {Array.from({ length: 6 }).map((_, index) => (
-          <Styled.SkeletonDetail key={index}>
-            <Skeleton width="6rem" height="0.875rem" />
-            <Skeleton width="8rem" height="1.25rem" />
-          </Styled.SkeletonDetail>
-        ))}
-      </Styled.SkeletonDetails>
-    </Styled.Card>
-  );
-};
 
 export const ParticipantDetails = () => {
   const { participantId } = useParams<{
@@ -112,35 +81,39 @@ export const ParticipantDetails = () => {
 
 const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
   const [participant, setParticipant] = useState<Participant | null>(null);
-
   const [presence, setPresence] = useState<ParticipantPresence[]>([]);
-
   const [loading, setLoading] = useState(Boolean(participantId));
+  const [loadError, setLoadError] = useState<string | null>(participantId ? null : text.loadError);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [savingParticipant, setSavingParticipant] = useState(false);
-
   const [cities, setCities] = useState<ParticipantOption[]>([]);
   const [zones, setZones] = useState<ParticipantZoneOption[]>([]);
   const [optionsError, setOptionsError] = useState(false);
 
-  const [loadError, setLoadError] = useState<string | null>(
-    participantId ? null : locale.participant_details.loadError,
-  );
-
   const [statusError, setStatusError] = useState<string | null>(null);
-
   const [savingStatus, setSavingStatus] = useState(false);
 
-  const location = useLocation();
+  const [groupsVersion, setGroupsVersion] = useState(0);
+  const [groupsState, setGroupsState] = useState<GroupsState>({ status: 'loading', groups: [] });
+  const [meetingsState, setMeetingsState] = useState<MeetingsState>({
+    status: 'loading',
+    meetings: [],
+  });
+
+  const [removeState, setRemoveState] = useState<RemoveState | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
+
   const navigate = useNavigate();
 
-  const handleBack = () => {
-    if (location.key === 'default') navigate('/participantes');
-    else navigate(-1);
-  };
+  const showToast = useCallback(
+    (message: string, variant: ToastVariant = 'success') =>
+      setToast({ id: Date.now(), message, variant }),
+    [],
+  );
 
   useEffect(() => {
     if (!participantId) return;
@@ -155,14 +128,10 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
         setPresence(presenceData);
       })
       .catch(() => {
-        if (!ignore) {
-          setLoadError(locale.participant_details.loadError);
-        }
+        if (!ignore) setLoadError(text.loadError);
       })
       .finally(() => {
-        if (!ignore) {
-          setLoading(false);
-        }
+        if (!ignore) setLoading(false);
       });
 
     return () => {
@@ -190,40 +159,163 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
     };
   }, []);
 
-  const fetchGroupsPage: TableFetchPage = useCallback(
-    async ({ page, pageSize }) => {
-      if (!participantId) {
-        return {
-          rows: [],
-          total: 0,
-        };
+  const groupsRequest = useRef<{ version: number; promise: Promise<ParticipantGroup[]> }>(null);
+
+  const loadGroups = useCallback(() => {
+    if (!participantId) return Promise.resolve([]);
+    if (groupsRequest.current?.version !== groupsVersion) {
+      groupsRequest.current = {
+        version: groupsVersion,
+        promise: getParticipantGroups(participantId, 1, GROUPS_PAGE_SIZE).then(
+          (result) => result.groups,
+        ),
+      };
+    }
+    return groupsRequest.current.promise;
+  }, [participantId, groupsVersion]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    loadGroups()
+      .then((groups) => {
+        if (!ignore) setGroupsState({ status: 'ready', groups });
+      })
+      .catch((error) => {
+        console.error(error);
+        if (!ignore) setGroupsState({ status: 'error', groups: [] });
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [loadGroups]);
+
+  useEffect(() => {
+    if (!participantId) return;
+
+    let ignore = false;
+
+    getParticipantPresenceHistory(participantId)
+      .then((meetings) => {
+        if (!ignore) setMeetingsState({ status: 'ready', meetings });
+      })
+      .catch((error) => {
+        console.error(error);
+        if (!ignore) setMeetingsState({ status: 'error', meetings: [] });
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [participantId]);
+
+  const openRemove = useCallback(
+    async (group: ParticipantGroup) => {
+      setRemoveError(null);
+
+      if (!group.isCoordinator) {
+        setRemoveState({ group, needsSuccessor: false, candidates: [] });
+        return;
       }
 
-      const result = await getParticipantGroups(participantId, page, pageSize);
+      try {
+        const { items } = await getAllGroupParticipants(group.id);
+        const coordinators = items.filter((member) => member.is_coordinator);
+        setRemoveState({
+          group,
+          needsSuccessor: coordinators.length <= 1,
+          candidates: items
+            .filter((member) => member.id !== participantId && !member.is_coordinator)
+            .map(({ id, name }) => ({ id, name })),
+        });
+      } catch (error) {
+        console.error(error);
+        showToast(text.groups.removeError, 'error');
+      }
+    },
+    [participantId, showToast],
+  );
+
+  const fetchGroupsPage: TableFetchPage = useCallback(
+    async ({ page, pageSize }) => {
+      const groups = await loadGroups();
+      const start = (page - 1) * pageSize;
 
       return {
-        rows: result.groups.map((group) => ({
-          number: <Styled.GroupNumber>{group.number}</Styled.GroupNumber>,
+        rows: groups.slice(start, start + pageSize).map((group) => {
+          const entryDate = formatEntryDate(group.entryDate);
+          const label = interpolate(text.groups.groupName, { number: groupNumber(group.number) });
 
-          status: (
-            <Tag color={group.isCoordinator ? 'primary' : 'neutral'}>
-              {group.isCoordinator
-                ? locale.participant_details.groups.roles.coordinator
-                : locale.participant_details.groups.roles.member}
-            </Tag>
-          ),
-
-          entryDate:
-            formatEntryDate(group.entryDate) || locale.participant_details.groups.emptyValue,
-
-          city: group.city ?? locale.participant_details.notInformed,
-        })),
-
-        total: result.total,
+          return {
+            number: <Styled.GroupName>{label}</Styled.GroupName>,
+            status: (
+              <Styled.Pill $tone={group.isCoordinator ? 'brand' : 'neutral'}>
+                {group.isCoordinator ? text.groups.roles.coordinator : text.groups.roles.member}
+              </Styled.Pill>
+            ),
+            city: group.city ?? text.groups.emptyValue,
+            entryDate: (
+              <Styled.EntryDate $missing={!entryDate}>
+                {entryDate || text.groups.noEntryDate}
+              </Styled.EntryDate>
+            ),
+            actions: (
+              <ActionMenu
+                ariaLabel={interpolate(text.groups.actionsAriaLabel, {
+                  number: groupNumber(group.number),
+                })}
+                items={[
+                  { label: text.groups.viewGroup, onClick: () => navigate(`/grupos/${group.id}`) },
+                  {
+                    label: text.groups.remove,
+                    variant: 'danger' as const,
+                    onClick: () => openRemove(group),
+                  },
+                ]}
+              />
+            ),
+            rowHref: `/grupos/${group.id}`,
+          };
+        }),
+        total: groups.length,
       };
     },
-    [participantId],
+    [loadGroups, navigate, openRemove],
   );
+
+  const confirmRemove = async (newCoordinatorId: string | null) => {
+    if (!removeState || !participant || removing) return;
+
+    const { group, candidates } = removeState;
+    setRemoving(true);
+    setRemoveError(null);
+    try {
+      if (newCoordinatorId) await updateGroupParticipant(group.id, newCoordinatorId, 'promote');
+      await updateGroupParticipant(group.id, participant.id, 'remove');
+    } catch (error) {
+      console.error(error);
+      setRemoveError(
+        error instanceof Error && error.message ? error.message : text.groups.removeError,
+      );
+      setGroupsVersion((version) => version + 1);
+      setRemoving(false);
+      return;
+    }
+
+    const successor = candidates.find((candidate) => candidate.id === newCoordinatorId);
+    const values = {
+      name: firstName(participant.name),
+      number: groupNumber(group.number),
+      coordinator: successor ? firstName(successor.name) : '',
+    };
+    showToast(
+      interpolate(successor ? text.groups.removedWithCoordinator : text.groups.removed, values),
+    );
+    setGroupsVersion((version) => version + 1);
+    setRemoveState(null);
+    setRemoving(false);
+  };
 
   const handleToggleActive = async () => {
     if (!participant) return;
@@ -234,16 +326,14 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
     try {
       const active = await updateParticipantStatus(participant.id, !participant.active);
 
-      setParticipant((current) =>
-        current
-          ? {
-              ...current,
-              active,
-            }
-          : current,
+      setParticipant((current) => (current ? { ...current, active } : current));
+      showToast(
+        interpolate(active ? text.status.activated : text.status.deactivated, {
+          name: firstName(participant.name),
+        }),
       );
     } catch {
-      setStatusError(locale.participant_details.updateStatusError);
+      setStatusError(text.updateStatusError);
     } finally {
       setSavingStatus(false);
     }
@@ -299,70 +389,128 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
     } catch (error) {
       // Deu erro: mantém o modal aberto e mostra a mensagem.
       setUpdateError(
-        error instanceof Error && error.message
-          ? error.message
-          : locale.participant_details.modal.saveError,
+        error instanceof Error && error.message ? error.message : text.modal.saveError,
       );
     } finally {
       setSavingParticipant(false);
     }
   };
 
+  const isCoordinator = useMemo(
+    () => groupsState.groups.some((group) => group.isCoordinator),
+    [groupsState.groups],
+  );
+
+  if (loading) {
+    return (
+      <div role="status">
+        <Styled.VisuallyHidden>{text.loading}</Styled.VisuallyHidden>
+        <ParticipantDetailsSkeleton />
+      </div>
+    );
+  }
+
+  const breadcrumb = (
+    <Breadcrumb
+      ariaLabel={text.breadcrumbLabel}
+      parentLabel={text.breadcrumbParticipants}
+      parentTo="/participantes"
+      current={participant?.name}
+    />
+  );
+
+  if (loadError || !participant) {
+    return (
+      <Styled.Page>
+        {breadcrumb}
+        <DataState variant="error">{loadError ?? text.loadError}</DataState>
+      </Styled.Page>
+    );
+  }
+
+  const groupsCount = groupsState.status === 'ready' ? groupsState.groups.length : null;
+
   return (
     <Styled.Page>
-      <BackButton label={locale.participant_details.back} onClick={handleBack} />
+      {breadcrumb}
 
-      <Styled.PageHeader>
-        <Styled.PageTitle>{locale.participant_details.title}</Styled.PageTitle>
-      </Styled.PageHeader>
+      <Styled.Columns>
+        <ParticipantProfileCard
+          participant={participant}
+          isCoordinator={isCoordinator}
+          savingStatus={savingStatus}
+          statusError={statusError}
+          onToggleActive={handleToggleActive}
+          onEdit={handleOpenModal}
+        />
 
-      {loading && (
-        <div role="status">
-          <Styled.VisuallyHidden>{locale.participant_details.loading}</Styled.VisuallyHidden>
-          <ParticipantDetailsSkeleton />
-        </div>
-      )}
-
-      {!loading && loadError && <Styled.Message $error>{loadError}</Styled.Message>}
-
-      {!loading && !loadError && participant && (
-        <Styled.Card>
-          <Styled.ProfileHeader>
-            <ParticipantSummary
-              participant={participant}
-              savingStatus={savingStatus}
-              statusError={statusError}
-              onToggleActive={handleToggleActive}
-              onEdit={handleOpenModal}
-            />
-
-            <ParticipantContacts participant={participant} />
-          </Styled.ProfileHeader>
-
-          <ParticipantModal
-            isOpen={isModalOpen}
-            participant={participant}
-            cities={cities}
-            zones={zones}
-            onClose={handleCloseModal}
-            onConfirm={handleUpdateParticipant}
-            saving={savingParticipant}
-            error={
-              updateError ?? (optionsError ? locale.participant_details.modal.optionsError : null)
-            }
+        <Styled.MainColumn>
+          <ParticipantStats
+            presence={presence}
+            groups={groupsState}
+            entryDate={participant.entryDate}
           />
 
-          <Styled.TableArea>
-            <Table
-              columns={columns}
-              fetchPage={fetchGroupsPage}
-              pageSize={5}
-              itemLabel={locale.participant_details.groups.itemLabel}
-            />
-          </Styled.TableArea>
+          <Styled.Card aria-labelledby="participant-groups" $enter={250}>
+            <Styled.CardHeader>
+              <Styled.CardTitle id="participant-groups">
+                {text.groups.title}
+                {groupsCount !== null && <Styled.Count>{groupsCount}</Styled.Count>}
+              </Styled.CardTitle>
+            </Styled.CardHeader>
 
-          <ParticipantInfoGrid participant={participant} presence={presence} />
-        </Styled.Card>
+            {groupsCount === 0 ? (
+              <Styled.EmptyState>
+                <strong>
+                  {interpolate(text.groups.empty, { name: firstName(participant.name) })}
+                </strong>
+                <span>{text.groups.emptyHint}</span>
+              </Styled.EmptyState>
+            ) : (
+              <Styled.TableArea>
+                <Table
+                  columns={groupColumns}
+                  fetchPage={fetchGroupsPage}
+                  pageSize={5}
+                  itemLabel={text.groups.itemLabel}
+                />
+              </Styled.TableArea>
+            )}
+          </Styled.Card>
+
+          <ParticipantRecentMeetings state={meetingsState} />
+        </Styled.MainColumn>
+      </Styled.Columns>
+
+      <ParticipantModal
+        isOpen={isModalOpen}
+        participant={participant}
+        cities={cities}
+        zones={zones}
+        onClose={handleCloseModal}
+        onConfirm={handleUpdateParticipant}
+        saving={savingParticipant}
+        error={updateError ?? (optionsError ? text.modal.optionsError : null)}
+      />
+
+      <RemoveFromGroupModal
+        isOpen={removeState !== null}
+        personName={participant.name}
+        groupLabel={interpolate(text.groups.groupName, {
+          number: groupNumber(removeState?.group.number ?? 0),
+        })}
+        isCoordinator={removeState?.needsSuccessor ?? false}
+        candidates={removeState?.candidates}
+        saving={removing}
+        error={removeError}
+        onClose={() => setRemoveState(null)}
+        onConfirm={confirmRemove}
+      />
+
+      {toast && (
+        <Toast key={toast.id} variant={toast.variant} onDismiss={() => setToast(null)}>
+          {toast.message}
+        </Toast>
       )}
     </Styled.Page>
   );

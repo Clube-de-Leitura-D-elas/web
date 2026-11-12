@@ -83,9 +83,9 @@
     "retry": "Tentar novamente"
   },
   "participant_details": {
-    "title": "Participante",
+    "breadcrumbLabel": "Navegação estrutural",
+    "breadcrumbParticipants": "Participantes",
     "loading": "Carregando informações da participante...",
-    "back": "Voltar para participantes",
     "loadError": "Não foi possível carregar os dados da participante.",
     "updateStatusError": "Não foi possível atualizar o status da participante.",
     "notInformed": "Não informado",
@@ -116,39 +116,105 @@
       "saveError": "Não foi possível atualizar os dados do participante.",
       "optionsError": "Não foi possível carregar as cidades e zonas."
     },
+    "profile": {
+      "label": "Perfil",
+      "subline": "{{first}} · {{second}}",
+      "coordinatorTag": "Coordenadora"
+    },
     "status": {
       "active": "Ativa",
       "inactive": "Inativa",
-      "activate": "Tornar ativo",
-      "deactivate": "Tornar inativo"
+      "activate": "Ativar",
+      "deactivate": "Desativar",
+      "activated": "{{name}} está ativa de novo",
+      "deactivated": "{{name}} foi desativada"
     },
     "contact": {
+      "title": "CONTATO",
       "emailAria": "Enviar e-mail para {{name}}",
       "instagramAria": "Abrir Instagram de {{name}}",
       "phoneAria": "Ligar para {{name}}"
     },
+    "details": {
+      "title": "DADOS",
+      "city": "Cidade",
+      "location": "{{city}} · {{zone}}",
+      "birthday": "Aniversário",
+      "occupation": "Trabalho",
+      "entryDate": "No clube desde",
+      "appRole": "Perfil no app",
+      "roles": {
+        "MANAGER": "Gestora",
+        "READER": "Leitora",
+        "FOUNDER": "Fundadora"
+      }
+    },
+    "stats": {
+      "label": "Indicadores",
+      "presence": "Presença recente",
+      "presenceAria": "{{present}} de {{total}} presenças nos últimos encontros",
+      "presenceSub": "{{present}} de {{total}} últimos encontros",
+      "noPresence": "Ainda sem encontros",
+      "groups": "Grupos",
+      "groupsSub": "Coordena {{coordinator}} · membra em {{member}}",
+      "groupsMemberSub": {
+        "one": "Membra em {{count}} grupo",
+        "other": "Membra em {{count}} grupos"
+      },
+      "noGroups": "Nenhum grupo no momento",
+      "tenure": "No clube há",
+      "years": {
+        "one": "{{count}} ano",
+        "other": "{{count}} anos"
+      },
+      "months": {
+        "one": "{{count}} mês",
+        "other": "{{count}} meses"
+      },
+      "tenureSince": "desde {{date}}",
+      "tenureMore": "e {{months}} · desde {{date}}",
+      "lessThanMonth": "Menos de 1 mês",
+      "noEntryDate": "Data de entrada não informada",
+      "unavailable": "Não foi possível calcular",
+      "groupsCoordinatorSub": {
+        "one": "Coordena {{count}} grupo",
+        "other": "Coordena {{count}} grupos"
+      }
+    },
     "groups": {
+      "title": "Grupos",
       "itemLabel": "grupos",
+      "groupName": "Grupo {{number}}",
       "emptyValue": "—",
+      "noEntryDate": "Sem data",
+      "empty": "{{name}} não participa de nenhum grupo",
+      "emptyHint": "Adicione-a a um grupo para ela receber os convites dos encontros.",
+      "actionsAriaLabel": "Ações para o Grupo {{number}}",
+      "viewGroup": "Ver grupo",
+      "remove": "Remover do grupo",
+      "removed": "{{name}} foi removida do Grupo {{number}}",
+      "removedWithCoordinator": "{{name}} foi removida do Grupo {{number}} · {{coordinator}} assume a coordenação",
+      "removeError": "Não foi possível remover a participante do grupo. Tente novamente.",
       "columns": {
-        "name": "Grupo",
-        "status": "Função",
-        "entryDate": "Data de Entrada",
-        "city": "Cidade"
+        "name": "GRUPO",
+        "status": "FUNÇÃO",
+        "city": "CIDADE",
+        "entryDate": "ENTROU EM",
+        "actions": "AÇÕES"
       },
       "roles": {
         "coordinator": "Coordenadora",
-        "member": "Membro"
+        "member": "Membra"
       }
     },
-    "details": {
-      "presence": "Presença (últimos 5)",
-      "presenceAria": "{{present}} de {{total}} presenças nos últimos encontros",
-      "city": "Cidade",
-      "zone": "Zona",
-      "birthday": "Aniversário",
-      "entryDate": "Data de Entrada no Sistema",
-      "occupation": "Trabalho"
+    "meetings": {
+      "title": "Últimos encontros",
+      "group": "Grupo {{number}}",
+      "present": "Presente",
+      "absent": "Faltou",
+      "unknown": "Sem registro",
+      "empty": "Nenhum encontro registrado ainda.",
+      "error": "Não foi possível carregar os últimos encontros."
     }
   },
   "event_details": {

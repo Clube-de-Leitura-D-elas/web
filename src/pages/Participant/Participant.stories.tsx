@@ -9,6 +9,7 @@ import {
   getParticipantById,
   getParticipantGroups,
   getParticipantPresence,
+  getParticipantPresenceHistory,
   getZones,
   updateParticipant,
   updateParticipantStatus,
@@ -16,6 +17,7 @@ import {
 import type {
   Participant,
   ParticipantGroup,
+  ParticipantMeetingRecord,
   ParticipantOption,
   ParticipantPresence,
   ParticipantZoneOption,
@@ -127,6 +129,21 @@ const presence: ParticipantPresence[] = [
   },
 ];
 
+const meetingHistory: ParticipantMeetingRecord[] = [
+  ['2026-10-22T22:30:00Z', 'O Avesso da Pele', 3, false],
+  ['2026-10-06T22:30:00Z', 'Pequeno Manual Antirracista', 12, true],
+  ['2026-09-24T22:30:00Z', 'Tudo é Rio', 3, true],
+  ['2026-09-08T22:30:00Z', 'Um Defeito de Cor', 12, false],
+  ['2026-08-27T22:30:00Z', 'Torto Arado', 3, true],
+].map(([date, bookTitle, groupNumber, present], index) => ({
+  meetingId: `meeting-${index}`,
+  date: date as string,
+  bookTitle: bookTitle as string,
+  groupId: `group-${groupNumber}`,
+  groupNumber: groupNumber as number,
+  present: present as boolean,
+}));
+
 const meta = {
   title: 'Pages/Participant',
   component: ParticipantDetails,
@@ -158,6 +175,12 @@ const meta = {
       await wait(REQUEST_DELAY);
 
       return presence;
+    });
+
+    mocked(getParticipantPresenceHistory).mockImplementation(async () => {
+      await wait(REQUEST_DELAY);
+
+      return meetingHistory;
     });
 
     mocked(getParticipantGroups).mockImplementation(async (_participantId, page, pageSize) => {
