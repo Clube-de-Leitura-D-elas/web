@@ -1,4 +1,3 @@
-import { Link } from 'react-router';
 import styled, { css } from 'styled-components';
 import { Button } from '../../components/Button';
 import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
@@ -52,45 +51,6 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-`;
-
-export const Breadcrumb = styled.nav<{ $enter?: number }>`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: ${theme.textMuted};
-  font-size: 0.875rem;
-  font-weight: 600;
-  ${entrance}
-`;
-
-export const BreadcrumbLink = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  color: ${theme.textBrand};
-  font-weight: 700;
-  text-decoration: none;
-
-  svg {
-    width: 1rem;
-    height: 1rem;
-    transition: transform 0.2s ${EASE_OUT};
-  }
-
-  &:hover {
-    color: ${theme.primaryHover};
-
-    svg {
-      transform: translateX(-0.1875rem);
-    }
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${theme.focusRing};
-    outline-offset: 0.25rem;
-    border-radius: 0.25rem;
-  }
 `;
 
 export const Header = styled.header<{ $enter?: number }>`

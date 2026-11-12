@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router';
-import { LuArrowLeft, LuStar } from 'react-icons/lu';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { LuStar } from 'react-icons/lu';
 import { ActionMenu } from '../../components/ActionMenu';
 import { Avatar } from '../../components/Avatar';
+import { Breadcrumb } from '../../components/Breadcrumb';
 import { DataState } from '../../components/DataState';
 import { Modal } from '../../components/Modal';
 import { RemoveFromGroupModal } from '../../components/RemoveFromGroupModal';
@@ -104,14 +105,7 @@ export const GroupDetails = () => {
   const [toast, setToast] = useState<ToastState | null>(null);
 
   const isMobile = useMediaQuery(MOBILE_QUERY);
-  const location = useLocation();
   const navigate = useNavigate();
-
-  const handleBack = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (location.key === 'default') return;
-    event.preventDefault();
-    navigate(-1);
-  };
 
   useEffect(() => {
     let ignore = false;
@@ -628,18 +622,12 @@ export const GroupDetails = () => {
   );
 
   const breadcrumb = (current: string | null) => (
-    <Styled.Breadcrumb aria-label={text.breadcrumbLabel} $enter={0}>
-      <Styled.BreadcrumbLink to="/grupos" onClick={handleBack}>
-        <LuArrowLeft aria-hidden />
-        {text.breadcrumbGroups}
-      </Styled.BreadcrumbLink>
-      {current && (
-        <>
-          <span aria-hidden="true">/</span>
-          <span aria-current="page">{current}</span>
-        </>
-      )}
-    </Styled.Breadcrumb>
+    <Breadcrumb
+      ariaLabel={text.breadcrumbLabel}
+      parentLabel={text.breadcrumbGroups}
+      parentTo="/grupos"
+      current={current}
+    />
   );
 
   if (loading) {
