@@ -1,4 +1,6 @@
 import {
+  formatBirthday,
+  getElapsedTime,
   formatDateBadge,
   formatDayMonth,
   formatEntryDate,
@@ -181,5 +183,38 @@ describe('formatWeekdayTime', () => {
 
   it('devolve texto vazio para data inválida', () => {
     expect(formatWeekdayTime('invalido')).toBe('');
+  });
+});
+
+describe('formatBirthday', () => {
+  it('mostra dia e mês por extenso, sem o ano', () => {
+    expect(formatBirthday('1990-10-24')).toBe('24 de outubro');
+  });
+
+  it('aceita o timestamp e usa só a data', () => {
+    expect(formatBirthday('1990-03-01T00:00:00Z')).toBe('1 de março');
+  });
+
+  it('devolve texto vazio quando não há data ou ela é inválida', () => {
+    expect(formatBirthday(null)).toBe('');
+    expect(formatBirthday('1990-13-40')).toBe('');
+  });
+});
+
+describe('getElapsedTime', () => {
+  const now = new Date(2026, 10, 12);
+
+  it('conta anos e meses completos', () => {
+    expect(getElapsedTime('2024-03-15', now)).toEqual({ years: 2, months: 7 });
+  });
+
+  it('não conta o mês ainda incompleto', () => {
+    expect(getElapsedTime('2026-10-20', now)).toEqual({ years: 0, months: 0 });
+  });
+
+  it('devolve null sem data, com data inválida ou no futuro', () => {
+    expect(getElapsedTime(null, now)).toBeNull();
+    expect(getElapsedTime('invalido', now)).toBeNull();
+    expect(getElapsedTime('2027-01-01', now)).toBeNull();
   });
 });
