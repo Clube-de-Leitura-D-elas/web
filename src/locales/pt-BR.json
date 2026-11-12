@@ -337,14 +337,19 @@
     }
   },
   "group_details": {
-    "back": "Voltar para grupos",
+    "breadcrumbLabel": "Navegação estrutural",
+    "breadcrumbGroups": "Grupos",
+    "breadcrumbCurrent": "Grupo {{number}}",
     "loading": "Carregando informações do grupo...",
     "loadError": "Não foi possível carregar os dados do grupo.",
     "notInformed": "—",
     "header": {
       "tittle": "Grupo {{number}} — {{description}}",
-      "subtitle": "{{city}} • {{count}} participantes ativas",
+      "location": "{{city}} · {{zone}}",
+      "statusActive": "Ativo",
+      "statusClosed": "Encerrado",
       "editLocation": "Editar Localização",
+      "moreActions": "Mais ações do grupo",
       "closeGroup": "Encerrar Grupo",
       "reopenGroup": "Reativar Grupo"
     },
@@ -358,48 +363,94 @@
       "cancel": "Cancelar"
     },
     "updateStatusError": "Não foi possível atualizar o status do grupo. Tente novamente.",
-    "coordinator": {
-      "label": "Coordenadoras"
-    },
-    "nextMeeting": {
-      "label": "Próximo Encontro Agendado",
-      "bookLabel": "Livro:",
-      "location": "{{place}} — {{neighborhood}}",
+    "summary": {
+      "label": "Resumo do grupo",
+      "coordinator": {
+        "one": "Coordenadora",
+        "other": "Coordenadoras"
+      },
+      "noCoordinator": "Sem coordenadora",
+      "nextMeeting": "Próximo encontro",
+      "noNextMeeting": "Nenhum encontro agendado",
+      "book": "Livro",
+      "place": "Local",
       "statusConfirmed": "Confirmado",
-      "statusPending": "Pendente"
+      "statusPending": "Pendente",
+      "detail": "· {{value}}"
+    },
+    "stats": {
+      "label": "Indicadores",
+      "active": "Participantes ativas",
+      "activeOf": "de {{total}}",
+      "inactive": {
+        "one": "{{count}} inativa",
+        "other": "{{count}} inativas"
+      },
+      "allActive": "Todas ativas",
+      "attendance": "Presença média",
+      "attendanceSub": {
+        "one": "Último encontro",
+        "other": "Últimos {{count}} encontros"
+      },
+      "rating": "Nota média dos livros",
+      "ratingSub": "{{meetings}} · {{votes}}",
+      "meetings": {
+        "one": "{{count}} encontro",
+        "other": "{{count}} encontros"
+      },
+      "votes": {
+        "one": "{{count}} voto",
+        "other": "{{count}} votos"
+      },
+      "noMeetings": "Ainda sem encontros",
+      "noRatings": "Ainda sem notas",
+      "attention": "Precisam de atenção",
+      "attentionNone": "Nenhuma participante com presença baixa ou cadastro incompleto.",
+      "lowAttendance": "{{name}} · presença baixa",
+      "incomplete": "{{name}} · cadastro incompleto",
+      "attentionMore": {
+        "one": "e mais {{count}}",
+        "other": "e mais {{count}}"
+      },
+      "unavailable": "Não foi possível calcular"
     },
     "tabs": {
-      "participants": "Participantes Cadastrados",
-      "history": "Histórico de Encontros"
+      "participants": "Participantes",
+      "history": "Histórico de encontros"
     },
     "table": {
       "coordinatorTag": "Coordenadora",
-      "present": "Presente",
-      "absent": "Falta",
+      "incompleteTag": "Cadastro incompleto",
+      "lowTag": "Baixa",
+      "noEmail": "Sem e-mail",
+      "noEntryDate": "Sem data",
+      "noAttendance": "Ainda sem encontros",
+      "attendanceAria": "{{present}} presenças em {{total}} encontros",
+      "legendPresent": "Presente",
+      "legendAbsent": "Falta",
       "itemLabel": "participantes cadastradas",
-      "emptyValue": "—",
       "actionsAriaLabel": "Ações da participante {{name}}",
       "columns": {
-        "name": "NOME COMPLETO",
-        "entryDate": "DATA DE ENTRADA",
-        "attendance": "PRESENÇA",
-        "email": "EMAIL",
+        "participant": "PARTICIPANTE",
+        "entryDate": "NO GRUPO DESDE",
+        "attendance": "PRESENÇA · ÚLTIMOS 3",
         "actions": "AÇÕES"
       }
     },
     "history": {
       "itemLabel": "encontros realizados",
-      "book": "{{title}} - {{author}}",
-      "attendance": "{{present}} / {{total}} ({{percent}}%)",
-      "votes": "({{count}} votos)",
-      "actionsAriaLabel": "Ações do encontro de {{date}}",
+      "attendance": "{{present}} de {{total}}",
+      "votes": {
+        "one": "· {{count}} voto",
+        "other": "· {{count}} votos"
+      },
+      "noRating": "Sem notas",
       "columns": {
-        "date": "DATA DO ENCONTRO",
-        "book": "LIVRO DISCUTIDO",
+        "date": "DATA",
+        "book": "LIVRO",
         "place": "LOCAL",
-        "attendance": "PRESENÇAS",
-        "rating": "AVALIAÇÃO MÉDIA",
-        "actions": "AÇÕES"
+        "attendance": "PRESENÇA",
+        "rating": "NOTA"
       }
     },
     "modal": {
@@ -416,16 +467,17 @@
       "optionsError": "Não foi possível carregar as cidades e zonas."
     },
     "participantActions": {
-      "promote": "Adicionar coordenadora",
+      "viewProfile": "Ver perfil",
+      "promote": "Tornar coordenadora",
       "demote": "Remover coordenação",
       "remove": "Remover do grupo",
-      "promoteTitle": "Adicionar coordenadora?",
-      "demoteTitle": "Remover coordenação?",
-      "removeTitle": "Remover participante?",
-      "promoteDescription": "Adicionar {{name}} como coordenadora deste grupo? As coordenadoras atuais serão mantidas.",
-      "demoteDescription": "{{name}} deixará de ser coordenadora, mas continua no grupo.",
-      "removeDescription": "Deseja remover {{name}} do grupo? O cadastro e o histórico serão preservados.",
       "lastCoordinatorHint": "O grupo precisa manter ao menos uma coordenadora. Adicione outra antes.",
+      "promoted": "{{name}} agora é coordenadora",
+      "demoted": "{{name}} deixou a coordenação",
+      "removed": "{{name}} foi removida do grupo",
+      "removedWithCoordinator": "{{name}} foi removida do grupo · {{coordinator}} é a nova coordenadora",
+      "undo": "Desfazer",
+      "undone": "Ação desfeita",
       "error": "Não foi possível atualizar a participante. Tente novamente.",
       "conflictError": "A situação da participante mudou. Os dados foram atualizados; confira e tente novamente."
     }
@@ -676,5 +728,18 @@
         "other": "{{count}} inscrições"
       }
     }
+  },
+  "removeFromGroup": {
+    "title": "Remover {{name}} do {{group}}?",
+    "description": "Ela sai da lista do grupo e deixa de ser convidada para os próximos encontros.",
+    "keepsHistory": "O histórico de presença e as notas dadas aos livros continuam salvos.",
+    "keepsProfile": "O cadastro no clube e os outros grupos dela não mudam.",
+    "coordinatorWarning": "{{name}} é a coordenadora deste grupo. Escolha quem assume antes de remover.",
+    "noCandidates": "{{name}} é a única coordenadora e não há outra participante no grupo para assumir.",
+    "newCoordinator": "Nova coordenadora",
+    "newCoordinatorPlaceholder": "Selecione uma participante",
+    "cancel": "Cancelar",
+    "confirm": "Remover do grupo",
+    "removing": "Removendo..."
   }
 }
