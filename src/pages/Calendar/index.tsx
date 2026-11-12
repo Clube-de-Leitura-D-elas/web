@@ -10,6 +10,7 @@ import { Input } from '../../components/Input';
 import { DayModal } from './DayModal';
 import { interpolate } from '../../locales';
 import { formatCalendarMonthName, formatEventTime } from '../../utils/date';
+import { useNavigate, useSearchParams } from 'react-router';
 
 const MAX_VISIBLE_EVENTS = 3;
 // mesmo intervalo aceito pela edge function calendar-month
@@ -30,18 +31,58 @@ const getDateKey = (date: Date): string =>
     String(date.getDate()).padStart(2, '0'),
   ].join('-');
 
+const getInitialCalendarDate = (params: URLSearchParams): Date => {
+  const today = new Date();
+
+  const yearParam = params.get('year');
+  const monthParam = params.get('month');
+
+  const year = Number(yearParam);
+  const month = Number(monthParam);
+
+  const validYear =
+    yearParam !== null && /^\d{4}$/.test(yearParam) && year >= MIN_YEAR && year <= MAX_YEAR;
+
+  const validMonth =
+    monthParam !== null && /^\d{1,2}$/.test(monthParam) && month >= 1 && month <= 12;
+
+  return new Date(
+    validYear ? year : today.getFullYear(),
+    validMonth ? month - 1 : today.getMonth(),
+    1,
+  );
+};
+
 export const Calendar = () => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const locale = useLocale();
   const navigationText = locale.calendar.navigation;
 
   const today = new Date();
 
-  const [selectedDate, setSelectedDate] = useState(
-    () => new Date(today.getFullYear(), today.getMonth(), 1),
-  );
+  const selectedDate = getInitialCalendarDate(searchParams);
 
   const year = selectedDate.getFullYear();
   const month = selectedDate.getMonth() + 1;
+
+  useEffect(() => {
+    if (searchParams.get('year') === String(year) && searchParams.get('month') === String(month)) {
+      return;
+    }
+
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+
+        next.set('year', String(year));
+        next.set('month', String(month));
+
+        return next;
+      },
+      { replace: true },
+    );
+  }, [year, month, searchParams, setSearchParams]);
 
   const days = getCalendarDays(year, month);
   const totalWeeks = days.length / 7;
@@ -57,16 +98,31 @@ export const Calendar = () => {
 
   const [yearDraft, setYearDraft] = useState(String(selectedDate.getFullYear()));
 
+  const updateCalendarDate = (date: Date) => {
+    if (date.getFullYear() === year && date.getMonth() + 1 === month) {
+      return;
+    }
+
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+
+      next.set('year', String(date.getFullYear()));
+      next.set('month', String(date.getMonth() + 1));
+
+      return next;
+    });
+  };
+
   const handlePreviousMonth = () => {
-    setSelectedDate((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1));
+    updateCalendarDate(new Date(year, month - 2, 1));
   };
 
   const handleNextMonth = () => {
-    setSelectedDate((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1));
+    updateCalendarDate(new Date(year, month, 1));
   };
 
-  const handleMonthSelect = (month: number) => {
-    setSelectedDate((current) => new Date(current.getFullYear(), month - 1, 1));
+  const handleMonthSelect = (selectedMonth: number) => {
+    updateCalendarDate(new Date(year, selectedMonth - 1, 1));
 
     setIsMonthDropdownOpen(false);
   };
@@ -81,7 +137,7 @@ export const Calendar = () => {
       return;
     }
 
-    setSelectedDate((current) => new Date(parsedYear, current.getMonth(), 1));
+    updateCalendarDate(new Date(parsedYear, month - 1, 1));
 
     setIsEditingYear(false);
   };
@@ -89,7 +145,7 @@ export const Calendar = () => {
   const handleToday = () => {
     const now = new Date();
 
-    setSelectedDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    updateCalendarDate(new Date(now.getFullYear(), now.getMonth(), 1));
   };
 
   useEffect(() => {
@@ -170,6 +226,11 @@ export const Calendar = () => {
   const handleDayClick = (date: Date) => {
     if (!isCalendarAvailable) return;
     setSelectedDay(date);
+  };
+
+  const handleEventSelect = (eventId: string) => {
+    setSelectedDay(null);
+    navigate(`/eventos/${eventId}`);
   };
 
   return (
@@ -364,6 +425,7 @@ export const Calendar = () => {
         <DayModal
           isOpen={Boolean(selectedDay)}
           onClose={() => setSelectedDay(null)}
+          onSelectEvent={handleEventSelect}
           date={selectedDay}
           events={eventsByDate.get(getDateKey(selectedDay)) ?? []}
         />

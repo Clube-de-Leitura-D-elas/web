@@ -8,6 +8,11 @@ import {
   signOut,
 } from './authService';
 import { supabase } from './supabaseClient';
+import { clearCalendarCache } from './calendarService';
+
+jest.mock('./calendarService', () => ({
+  clearCalendarCache: jest.fn(),
+}));
 
 const auth = jest.mocked(supabase.auth);
 
@@ -18,7 +23,9 @@ const expectAuthError = async (promise: Promise<unknown>, code: AuthServiceError
 };
 
 beforeEach(() => {
-  // erros desconhecidos são registrados no console; aqui só poluiriam a saída
+  jest.clearAllMocks();
+
+  // Erros desconhecidos são registrados no console; aqui só poluiriam a saída.
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
@@ -57,17 +64,21 @@ describe('signInWithPassword', () => {
 });
 
 describe('signOut', () => {
-  it('encerra a sessão', async () => {
+  it('encerra a sessão e limpa o cache do calendário', async () => {
     auth.signOut.mockResolvedValue({ error: null });
 
     await expect(signOut()).resolves.toBeUndefined();
+
     expect(auth.signOut).toHaveBeenCalled();
+    expect(clearCalendarCache).toHaveBeenCalledTimes(1);
   });
 
   it('lança erro de domínio quando o Supabase falha', async () => {
     auth.signOut.mockResolvedValue({ error: new Error('falhou') } as never);
 
     await expectAuthError(signOut(), 'unknown');
+
+    expect(clearCalendarCache).not.toHaveBeenCalled();
   });
 });
 
@@ -82,17 +93,22 @@ describe('onSignOut', () => {
     return { unsubscribe, emit: (event: string) => emit(event) };
   };
 
-  it('avisa só quando o evento é SIGNED_OUT', () => {
+  it('avisa e limpa o cache somente quando o evento é SIGNED_OUT', () => {
     const { emit } = setup();
     const callback = jest.fn();
 
     onSignOut(callback);
+
     emit('TOKEN_REFRESHED');
     emit('SIGNED_IN');
+
     expect(callback).not.toHaveBeenCalled();
+    expect(clearCalendarCache).not.toHaveBeenCalled();
 
     emit('SIGNED_OUT');
+
     expect(callback).toHaveBeenCalledTimes(1);
+    expect(clearCalendarCache).toHaveBeenCalledTimes(1);
   });
 
   it('devolve uma função que cancela a assinatura', () => {

@@ -8,13 +8,34 @@ export const EventsList = styled.ul`
 `;
 
 export const EventItem = styled.li`
+  list-style: none;
+`;
+
+export const EventButton = styled.button`
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
+  width: 100%;
   padding: 0.875rem;
   border: 1px solid ${theme.border};
   border-radius: 0.5rem;
   background-color: ${theme.surface};
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: ${({ theme }) => theme.textBrand};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.textBrand};
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
 `;
 
 export const EventDot = styled.span`

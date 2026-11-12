@@ -1,15 +1,22 @@
 import { render, type RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement, ReactNode } from 'react';
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 import { theme } from '../theme/theme';
 
 type RenderWithProvidersOptions = Omit<RenderOptions, 'wrapper'> & {
-  /** Endereço inicial do `MemoryRouter`. */
+  /** Endereço inicial do MemoryRouter. */
   route?: string;
-  /** Padrão da rota que renderiza o elemento, para a página ler `useParams` (ex.: `/grupos/:groupId`). */
+
+  /** Padrão da rota utilizada para disponibilizar os parâmetros via useParams. */
   path?: string;
+
+  /** Exibe os parâmetros da URL para verificações nos testes. */
+  showLocationSearch?: boolean;
+
+  /** Disponibiliza um botão para simular o retorno no histórico. */
+  showHistoryBackButton?: boolean;
 };
 
 /** Mostra o endereço atual, para o teste conferir para onde a tela navegou. */
@@ -18,25 +25,52 @@ export const LocationDisplay = () => {
   return <div data-testid="location">{location.pathname}</div>;
 };
 
+const LocationSearchDisplay = () => {
+  const location = useLocation();
+
+  return <div data-testid="location-search">{location.search}</div>;
+};
+
+const HistoryBackButton = () => {
+  const navigate = useNavigate();
+
+  return (
+    <button type="button" onClick={() => navigate(-1)}>
+      Voltar no histórico
+    </button>
+  );
+};
+
 /**
  * Renderiza com o tema do styled-components e um router em memória, como a aplicação faz em
  * `main.tsx`. Devolve também uma instância do `userEvent`, já pronta para uso.
  */
 export function renderWithProviders(
   ui: ReactElement,
-  { route = '/', path, ...options }: RenderWithProvidersOptions = {},
+  {
+    route = '/',
+    path,
+    showLocationSearch = false,
+    showHistoryBackButton = false,
+    ...options
+  }: RenderWithProvidersOptions = {},
 ) {
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <ThemeProvider theme={theme}>
       <MemoryRouter initialEntries={[route]}>
-        {path ? (
-          <Routes>
-            <Route path={path} element={children} />
-            <Route path="*" element={<LocationDisplay />} />
-          </Routes>
-        ) : (
-          children
-        )}
+        <>
+          {path ? (
+            <Routes>
+              <Route path={path} element={children} />
+              <Route path="*" element={<LocationDisplay />} />
+            </Routes>
+          ) : (
+            children
+          )}
+
+          {showLocationSearch && <LocationSearchDisplay />}
+          {showHistoryBackButton && <HistoryBackButton />}
+        </>
       </MemoryRouter>
     </ThemeProvider>
   );

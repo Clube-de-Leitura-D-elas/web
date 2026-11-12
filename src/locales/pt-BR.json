@@ -433,6 +433,9 @@
   "calendar": {
     "title": "Calendário",
     "dayAriaLabel": "{{day}} de {{month}} de {{year}}",
+    "dayModal": {
+      "eventAriaLabel": "{{time}} - {{group}} - {{city}}"
+    },
     "loading": "Carregando calendário...",
     "subtitle": "Visualize os encontros de todos os grupos do clube.",
     "weekdays": {
