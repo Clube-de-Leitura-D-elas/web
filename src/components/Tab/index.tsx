@@ -8,6 +8,7 @@ export type Tab = {
   label: string;
   children: ReactNode;
   disabled?: boolean;
+  count?: number;
 };
 
 export type TabsProps = {
@@ -91,6 +92,9 @@ export const Tabs = ({ tabs, active, defaultActive, onChange, size = 'md' }: Tab
               onClick={() => selectTab(tab.value)}
             >
               {tab.label}
+              {tab.count !== undefined && (
+                <Styled.Count $active={isActive}>{tab.count}</Styled.Count>
+              )}
             </Styled.TabButton>
           );
         })}

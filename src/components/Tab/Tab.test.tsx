@@ -74,4 +74,18 @@ describe('Tabs', () => {
     expect(screen.getByRole('tab', { name: 'Terceira' })).toHaveAttribute('tabindex', '-1');
     expect(screen.getByRole('tab', { name: 'Segunda' })).toBeDisabled();
   });
+
+  it('mostra o contador junto do rótulo da aba', () => {
+    renderWithProviders(
+      <Tabs
+        tabs={[
+          { value: 'a', label: 'Participantes', count: 10, children: <p>lista</p> },
+          { value: 'b', label: 'Histórico', children: <p>histórico</p> },
+        ]}
+      />,
+    );
+
+    expect(screen.getByRole('tab', { name: 'Participantes 10' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Histórico' })).toBeInTheDocument();
+  });
 });
