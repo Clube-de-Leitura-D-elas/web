@@ -10,6 +10,10 @@ export const getParticipantGroups =
 export const getParticipantPresence =
   fn<typeof actual.getParticipantPresence>().mockName('getParticipantPresence');
 
+export const getParticipantPresenceHistory = fn<
+  typeof actual.getParticipantPresenceHistory
+>().mockName('getParticipantPresenceHistory');
+
 export const updateParticipantStatus =
   fn<typeof actual.updateParticipantStatus>().mockName('updateParticipantStatus');
 

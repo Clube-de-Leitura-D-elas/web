@@ -3,6 +3,7 @@ import type {
   Participant,
   ParticipantGroupsPage,
   ParticipantOption,
+  ParticipantMeetingRecord,
   ParticipantPresence,
   ParticipantZoneOption,
   UpdateParticipantInput,
@@ -114,6 +115,41 @@ export async function getParticipantPresence(
     date: meeting.date,
     present: meeting.present,
   }));
+}
+
+type PresenceHistoryResponse = {
+  participant_id: string;
+  groups: {
+    group_id: string;
+    group_number: number;
+    meetings: {
+      meeting_id: string;
+      date: string;
+      book_title: string;
+      presence_status: 'PRESENT' | 'ABSENT' | null;
+    }[];
+  }[];
+};
+
+export async function getParticipantPresenceHistory(
+  participantId: string,
+): Promise<ParticipantMeetingRecord[]> {
+  const data = await invokeGet<PresenceHistoryResponse>('get-participant-presence-history', {
+    participant_id: participantId,
+  });
+
+  return data.groups
+    .flatMap((group) =>
+      group.meetings.map((meeting) => ({
+        meetingId: meeting.meeting_id,
+        date: meeting.date,
+        bookTitle: meeting.book_title,
+        groupId: group.group_id,
+        groupNumber: group.group_number,
+        present: meeting.presence_status === null ? null : meeting.presence_status === 'PRESENT',
+      })),
+    )
+    .sort((a, b) => b.date.localeCompare(a.date));
 }
 
 export async function updateParticipantStatus(

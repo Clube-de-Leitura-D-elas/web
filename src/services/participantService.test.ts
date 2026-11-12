@@ -2,6 +2,7 @@ import {
   getParticipantById,
   getParticipantGroups,
   getParticipantPresence,
+  getParticipantPresenceHistory,
   updateParticipantStatus,
 } from './participantService';
 import { supabase } from './supabaseClient';
@@ -86,6 +87,76 @@ describe('getParticipantPresence', () => {
       { meetingId: 'm1', date: '2026-09-10', present: false },
     ]);
     expect(invoke).toHaveBeenCalledWith('get-participant-presence?participant_id=p1', {
+      method: 'GET',
+    });
+  });
+});
+
+describe('getParticipantPresenceHistory', () => {
+  it('junta os encontros de todos os grupos, do mais recente ao mais antigo', async () => {
+    respond({
+      participant_id: 'p1',
+      groups: [
+        {
+          group_id: 'g3',
+          group_number: 3,
+          meetings: [
+            {
+              meeting_id: 'm1',
+              date: '2026-09-01T22:00:00Z',
+              book_title: 'A',
+              presence_status: 'PRESENT',
+            },
+          ],
+        },
+        {
+          group_id: 'g12',
+          group_number: 12,
+          meetings: [
+            {
+              meeting_id: 'm2',
+              date: '2026-10-06T22:00:00Z',
+              book_title: 'B',
+              presence_status: 'ABSENT',
+            },
+            {
+              meeting_id: 'm3',
+              date: '2026-08-01T22:00:00Z',
+              book_title: 'C',
+              presence_status: null,
+            },
+          ],
+        },
+      ],
+    });
+
+    await expect(getParticipantPresenceHistory('p1')).resolves.toEqual([
+      {
+        meetingId: 'm2',
+        date: '2026-10-06T22:00:00Z',
+        bookTitle: 'B',
+        groupId: 'g12',
+        groupNumber: 12,
+        present: false,
+      },
+      {
+        meetingId: 'm1',
+        date: '2026-09-01T22:00:00Z',
+        bookTitle: 'A',
+        groupId: 'g3',
+        groupNumber: 3,
+        present: true,
+      },
+      {
+        meetingId: 'm3',
+        date: '2026-08-01T22:00:00Z',
+        bookTitle: 'C',
+        groupId: 'g12',
+        groupNumber: 12,
+        present: null,
+      },
+    ]);
+    expect(invoke).toHaveBeenCalledWith('get-participant-presence-history?participant_id=p1', {
       method: 'GET',
     });
   });
