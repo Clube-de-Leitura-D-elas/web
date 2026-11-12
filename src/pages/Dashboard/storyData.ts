@@ -1,4 +1,4 @@
-import type { Granularity, RegistrationsItem } from '../../types/dashboard';
+import type { ActiveParticipantsItem, Granularity, RegistrationsItem } from '../../types/dashboard';
 
 // Dados de exemplo só para as stories do Dashboard.
 // total 0 no meio: os períodos vazios também aparecem no gráfico.
@@ -19,6 +19,29 @@ export const buildRegistrations = (
       granularity === 'month'
         ? new Date(Date.UTC(year, month - 1 + index, 1))
         : new Date(Date.UTC(year, month - 1, day + index * 7));
+
+    return { period: date.toISOString().slice(0, 10), total: zeroed ? 0 : total };
+  });
+};
+
+const FIRST_TOTAL = 640;
+const LAST_TOTAL = 984;
+
+// Um ponto por mês de `from` até o mês de `to`, crescendo de ~640 a 984 sem nunca cair
+// (o total é um acumulado).
+export const buildActiveParticipants = (
+  from: string,
+  to: string,
+  zeroed = false,
+): ActiveParticipantsItem[] => {
+  const [fromYear, fromMonth] = from.split('-').map(Number);
+  const [toYear, toMonth] = to.split('-').map(Number);
+  const count = (toYear - fromYear) * 12 + (toMonth - fromMonth) + 1;
+
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(Date.UTC(fromYear, fromMonth - 1 + index, 1));
+    const progress = count === 1 ? 1 : index / (count - 1);
+    const total = FIRST_TOTAL + Math.floor(progress * (LAST_TOTAL - FIRST_TOTAL));
 
     return { period: date.toISOString().slice(0, 10), total: zeroed ? 0 : total };
   });

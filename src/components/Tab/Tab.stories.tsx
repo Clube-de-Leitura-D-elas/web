@@ -82,3 +82,67 @@ export const Controlado: Story = {
     return <ControlledExample />;
   },
 };
+
+// Só a lista de abas, sem painel: o conteúdo fica fora do componente (ex.: ao lado do título de um card).
+export const SemPainel: Story = {
+  render: () => {
+    const WithoutPanelExample = () => {
+      const [active, setActive] = useState('1y');
+
+      return (
+        <div style={{ maxWidth: 480 }}>
+          <Tabs
+            active={active}
+            onChange={setActive}
+            showPanels={false}
+            panelId="painel-periodo"
+            tabs={[
+              { value: '6m', label: '6 meses' },
+              { value: '1y', label: '1 ano' },
+              { value: '2y', label: '2 anos' },
+            ]}
+          />
+          <p
+            role="tabpanel"
+            id="painel-periodo"
+            aria-labelledby={`tab-${active}`}
+            style={{ marginTop: 16 }}
+          >
+            Período escolhido: {active}
+          </p>
+        </div>
+      );
+    };
+
+    return <WithoutPanelExample />;
+  },
+};
+
+// Tamanho compacto, para espaços menores (ex.: linha do título de um card).
+export const Compacta: Story = {
+  args: {
+    size: 'sm',
+    tabs: [
+      { value: 'month', label: 'Mês', children: <p>Visão por mês.</p> },
+      { value: 'week', label: 'Semana', children: <p>Visão por semana.</p> },
+    ],
+  },
+};
+
+// `fit`: a lista ocupa só o tamanho das abas e deixa espaço para outros itens ao lado.
+export const AoLadoDeOutrosItens: Story = {
+  render: () => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, maxWidth: 480 }}>
+      <Tabs
+        size="sm"
+        fit
+        showPanels={false}
+        tabs={[
+          { value: '6m', label: '6 meses' },
+          { value: '1y', label: '1 ano' },
+        ]}
+      />
+      <span>outro item</span>
+    </div>
+  ),
+};

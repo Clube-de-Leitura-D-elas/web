@@ -48,6 +48,21 @@ describe('NewRegistrationsChart', () => {
     expect(screen.getByText(locale.dataState.loading)).toBeInTheDocument();
   });
 
+  it('o conteúdo é um tabpanel rotulado pela aba ativa e controlado por ela', async () => {
+    const { user } = renderWithProviders(<NewRegistrationsChart />);
+    await screen.findByRole('group', { name: text.chartLabel.month });
+
+    const panel = screen.getByRole('tabpanel', { name: text.month });
+    expect(screen.getByRole('tab', { name: text.month })).toHaveAttribute(
+      'aria-controls',
+      panel.id,
+    );
+
+    await user.click(screen.getByRole('tab', { name: text.week }));
+
+    expect(screen.getByRole('tabpanel', { name: text.week })).toBe(panel);
+  });
+
   it('busca os últimos 12 meses, a partir do dia 1, e mostra o gráfico', async () => {
     renderWithProviders(<NewRegistrationsChart />);
 

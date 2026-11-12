@@ -1,4 +1,5 @@
 import { useLocale } from '../../hooks/useLocale';
+import { ActiveParticipantsChart } from './ActiveParticipantsChart';
 import { NewRegistrationsChart } from './NewRegistrationsChart';
 import * as Styled from './styles';
 
@@ -16,6 +17,7 @@ export const Dashboard = () => {
 
       <Styled.ChartsGrid aria-label={text.charts.label}>
         <NewRegistrationsChart />
+        <ActiveParticipantsChart />
       </Styled.ChartsGrid>
     </Styled.Container>
   );
