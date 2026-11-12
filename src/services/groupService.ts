@@ -28,6 +28,26 @@ export function getGroupParticipantsPage(
   return invokeGet('get-group-participants-web', { groupId, page, pageSize });
 }
 
+const ALL_PARTICIPANTS_PAGE_SIZE = 100;
+
+export const getAllGroupParticipants = async (
+  groupId: string,
+): Promise<Page<GroupParticipantListItem>> => {
+  const items: GroupParticipantListItem[] = [];
+
+  for (let page = 1; ; page += 1) {
+    const result = await getGroupParticipantsPage(groupId, {
+      page,
+      pageSize: ALL_PARTICIPANTS_PAGE_SIZE,
+    });
+    items.push(...result.items);
+
+    if (result.items.length === 0 || items.length >= result.total) {
+      return { items, total: result.total };
+    }
+  }
+};
+
 export function getGroupMeetingsPage(
   groupId: string,
   { page, pageSize }: TablePageRequest,
