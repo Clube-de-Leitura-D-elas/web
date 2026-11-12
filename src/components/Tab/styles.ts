@@ -1,10 +1,10 @@
 import styled, { css } from 'styled-components';
 import type { TabSize } from '.';
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ $fit: boolean }>`
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: ${({ $fit }) => ($fit ? 'auto' : '100%')};
 `;
 
 export const TabList = styled.div<{ $size: TabSize }>`
@@ -40,11 +40,17 @@ export const TabButton = styled.button<{ $active: boolean; $size: TabSize }>`
           padding: 0 1.5rem;
           font-size: 1.125rem;
         `
-      : css`
-          height: 2.5rem;
-          padding: 0 1rem;
-          font-size: 1rem;
-        `}
+      : $size === 'sm'
+        ? css`
+            height: 2.5rem;
+            padding: 0 0.75rem;
+            font-size: 1rem;
+          `
+        : css`
+            height: 2.5rem;
+            padding: 0 1rem;
+            font-size: 1rem;
+          `}
 
   ${({ theme, $active }) =>
     $active &&

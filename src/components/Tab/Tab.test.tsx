@@ -93,6 +93,43 @@ describe('Tabs sem painel', () => {
     expect(screen.getByRole('tab', { name: 'Primeira' })).not.toHaveAttribute('aria-controls');
   });
 
+  it('com panelId, as abas controlam o painel externo', () => {
+    renderWithProviders(
+      <>
+        <Tabs
+          tabs={[
+            { value: 'one', label: 'Primeira' },
+            { value: 'two', label: 'Segunda' },
+          ]}
+          showPanels={false}
+          panelId="painel-externo"
+        />
+        <div role="tabpanel" id="painel-externo" aria-labelledby="tab-one">
+          conteúdo externo
+        </div>
+      </>,
+    );
+
+    const panel = screen.getByRole('tabpanel', { name: 'Primeira' });
+    expect(panel).toHaveTextContent('conteúdo externo');
+    expect(screen.getByRole('tab', { name: 'Primeira' })).toHaveAttribute(
+      'aria-controls',
+      panel.id,
+    );
+    expect(screen.getByRole('tab', { name: 'Segunda' })).toHaveAttribute('aria-controls', panel.id);
+  });
+
+  it('ocupa 100% da largura, e só o tamanho das abas com fit', () => {
+    const tabs = [{ value: 'one', label: 'Primeira' }];
+    const { rerender } = renderWithProviders(<Tabs tabs={tabs} showPanels={false} />);
+
+    expect(screen.getByRole('tablist').parentElement).toHaveStyle({ width: '100%' });
+
+    rerender(<Tabs tabs={tabs} showPanels={false} fit />);
+
+    expect(screen.getByRole('tablist').parentElement).toHaveStyle({ width: 'auto' });
+  });
+
   it('continua trocando de aba e avisando onChange', async () => {
     const onChange = jest.fn();
     const { user } = renderWithProviders(

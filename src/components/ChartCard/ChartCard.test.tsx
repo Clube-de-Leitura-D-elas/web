@@ -28,13 +28,17 @@ describe('ChartCard com ação', () => {
     expect(within(region).getByRole('button', { name: '6 meses' })).toBeInTheDocument();
   });
 
-  it('não reserva espaço para a ação quando ela não é passada', () => {
-    const { container } = renderWithProviders(
+  it('sem ação, a região mostra só o título e o conteúdo', () => {
+    renderWithProviders(
       <ChartCard title="Novas inscrições">
         <p>conteúdo do gráfico</p>
       </ChartCard>,
     );
 
-    expect(container.querySelectorAll('h2 + *')).toHaveLength(0);
+    const region = screen.getByRole('region', { name: 'Novas inscrições' });
+    expect(within(region).getByRole('heading', { name: 'Novas inscrições' })).toBeInTheDocument();
+    expect(region).toHaveTextContent('conteúdo do gráfico');
+    expect(within(region).queryByRole('button')).not.toBeInTheDocument();
+    expect(within(region).queryByRole('tablist')).not.toBeInTheDocument();
   });
 });

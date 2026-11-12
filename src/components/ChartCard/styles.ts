@@ -26,16 +26,6 @@ export const Action = styled.div`
   flex-wrap: wrap;
   gap: 0.75rem;
   min-width: 0;
-
-  /* o Tabs ocupa 100% da largura por padrão: aqui cada item ocupa só o próprio tamanho */
-  > div {
-    width: auto;
-  }
-
-  /* abas mais justas: título, abas e lupas cabem na mesma linha em cards de ~700px */
-  [role='tab'] {
-    padding: 0 0.75rem;
-  }
 `;
 
 export const Title = styled.h2`

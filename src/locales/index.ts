@@ -10,6 +10,7 @@
  *
  *   interpolate(locale.table.goToPage, { page: 2 }); // "Ir para a página 2"
  */
+import { formatNumber } from '../utils/number';
 import ptBR from './pt-BR.json';
 
 export const locale = ptBR;
@@ -19,5 +20,6 @@ export const interpolate = (template: string, values: Record<string, string | nu
     key in values ? String(values[key]) : match,
   );
 
+// O número entra com separador de milhar (1.234), como o resto da interface.
 export const pluralize = (forms: { one: string; other: string }, count: number) =>
-  interpolate(count === 1 ? forms.one : forms.other, { count });
+  interpolate(count === 1 ? forms.one : forms.other, { count: formatNumber(count) });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { ChartCard } from '../../components/ChartCard';
 import { DataState, type DataStatus } from '../../components/DataState';
 import { Tabs } from '../../components/Tab';
@@ -14,6 +14,8 @@ const CHART_MIN_HEIGHT = '16rem';
 export const NewRegistrationsChart = () => {
   const { dashboard } = useLocale();
   const text = dashboard.registrations;
+
+  const panelId = useId();
 
   const [granularity, setGranularity] = useState<Granularity>('month');
   // muda a cada "Tentar novamente", para refazer a busca mesmo com a mesma granularidade
@@ -99,6 +101,9 @@ export const NewRegistrationsChart = () => {
           active={granularity}
           onChange={handleGranularityChange}
           showPanels={false}
+          size="sm"
+          fit
+          panelId={panelId}
           tabs={[
             { value: 'month', label: text.month },
             { value: 'week', label: text.week },
@@ -106,7 +111,9 @@ export const NewRegistrationsChart = () => {
         />
       }
     >
-      {content}
+      <div role="tabpanel" id={panelId} aria-labelledby={`tab-${granularity}`}>
+        {content}
+      </div>
     </ChartCard>
   );
 };

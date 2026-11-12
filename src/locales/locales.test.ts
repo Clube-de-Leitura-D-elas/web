@@ -27,4 +27,8 @@ describe('pluralize', () => {
     expect(pluralize(forms, 0)).toBe('0 grupos');
     expect(pluralize(forms, 3)).toBe('3 grupos');
   });
+
+  it('formata o número com separador de milhar', () => {
+    expect(pluralize(forms, 1234)).toBe('1.234 grupos');
+  });
 });

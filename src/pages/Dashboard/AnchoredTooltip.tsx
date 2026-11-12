@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react';
 import {
   Tooltip,
   useActiveTooltipDataPoints,
@@ -16,9 +17,6 @@ export type PeriodDatum = {
 
 // espaço entre o ponto (topo da barra ou ponto da linha) e o tooltip
 const TOOLTIP_GAP = 8;
-// tamanho aproximado do tooltip: pontos altos e os das pontas não o empurram para fora do gráfico
-const TOOLTIP_HEIGHT = 60;
-const TOOLTIP_HALF_WIDTH = 84;
 
 type AnchoredTooltipProps = {
   formatValue: (total: number) => string;
@@ -33,26 +31,38 @@ export const AnchoredTooltip = ({ formatValue }: AnchoredTooltipProps) => {
   const plotArea = usePlotArea();
   const datum = useActiveTooltipDataPoints<PeriodDatum>()?.[0];
 
+  // Tamanho real da caixa, medido depois de renderizar: o texto muda (valores maiores, outro
+  // idioma) e um tamanho fixo deixaria o tooltip sair do gráfico nas pontas. A atualização roda
+  // antes da pintura, então a posição já sai corrigida.
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const measureBox = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    const { offsetWidth: width, offsetHeight: height } = node;
+    setSize((current) =>
+      current.width === width && current.height === height ? current : { width, height },
+    );
+  }, []);
+
+  const halfWidth = size.width / 2;
   const x = datum ? xScale?.(datum.label, { position: 'middle' }) : undefined;
   const pointTop = datum ? yScale?.(datum.total) : undefined;
-  // em telas estreitas, os pontos das pontas deixam o tooltip dentro do gráfico
-  const maxX = plotArea ? plotArea.x + plotArea.width - TOOLTIP_HALF_WIDTH : undefined;
+  // nas pontas, a caixa fica inteira dentro do gráfico em vez de centrada no ponto
+  const maxX = plotArea ? plotArea.x + plotArea.width - halfWidth : undefined;
   const position =
     x === undefined || pointTop === undefined
       ? undefined
       : {
-          x:
-            maxX === undefined
-              ? x
-              : Math.min(Math.max(x, TOOLTIP_HALF_WIDTH), Math.max(maxX, TOOLTIP_HALF_WIDTH)),
-          y: Math.max(pointTop - TOOLTIP_GAP, TOOLTIP_HEIGHT),
+          x: maxX === undefined ? x : Math.min(Math.max(x, halfWidth), Math.max(maxX, halfWidth)),
+          y: Math.max(pointTop - TOOLTIP_GAP, size.height),
         };
 
   const renderTooltip = ({ active, payload }: TooltipContentProps) => {
     if (!active || !payload?.length) return null;
 
     const current = payload[0].payload as PeriodDatum;
-    return <PeriodTooltip title={current.label} value={formatValue(current.total)} />;
+    return (
+      <PeriodTooltip boxRef={measureBox} title={current.label} value={formatValue(current.total)} />
+    );
   };
 
   return (

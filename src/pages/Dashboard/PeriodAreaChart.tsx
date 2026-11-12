@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import { useTheme } from 'styled-components';
+import { formatNumber } from '../../utils/number';
 import * as Styled from './styles';
 import { AnchoredTooltip, type PeriodDatum } from './AnchoredTooltip';
 import { pickTickLabels } from './tickLabels';
@@ -16,9 +17,6 @@ type PeriodAreaChartProps = {
 // cobre a linha
 const CHART_TOP_MARGIN = 68;
 const CHART_HEIGHT = 300;
-
-// milhares com ponto (1.000), como no resto do painel
-const numberFormatter = new Intl.NumberFormat('pt-BR');
 
 // Linha com preenchimento por período (ex.: total de participantes mês a mês). As cores vêm do
 // tema: o Recharts recebe cor como prop.
@@ -60,7 +58,7 @@ export const PeriodAreaChart = ({ data, formatValue, ariaLabel }: PeriodAreaChar
             tick={tick}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value: number) => numberFormatter.format(value)}
+            tickFormatter={formatNumber}
             width={44}
           />
           <AnchoredTooltip formatValue={formatValue} />

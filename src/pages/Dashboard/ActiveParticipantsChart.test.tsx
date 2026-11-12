@@ -42,6 +42,19 @@ describe('ActiveParticipantsChart', () => {
       expect(screen.getByText(locale.dataState.loading)).toBeInTheDocument();
     });
 
+    it('o conteúdo é um tabpanel rotulado pela aba ativa e controlado por ela', async () => {
+      const { user } = renderWithProviders(<ActiveParticipantsChart />);
+      await chart();
+
+      const panel = screen.getByRole('tabpanel', { name: text.ranges['1y'] });
+      expect(tab('1y')).toHaveAttribute('aria-controls', panel.id);
+      expect(tab('6m')).toHaveAttribute('aria-controls', panel.id);
+
+      await user.click(tab('6m'));
+
+      expect(screen.getByRole('tabpanel', { name: text.ranges['6m'] })).toBe(panel);
+    });
+
     it('busca 60 meses de uma vez, a partir do dia 1, e mostra o gráfico', async () => {
       renderWithProviders(<ActiveParticipantsChart />);
 
@@ -245,6 +258,45 @@ describe('ActiveParticipantsChart', () => {
       dateNow.mockReturnValue(1_400);
       fireEvent.wheel(area, { deltaY: 100 });
       expect(tab('5y')).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('um gesto longo, com eventos a menos de 250 ms um do outro, dá um passo só', async () => {
+      const dateNow = jest.spyOn(Date, 'now');
+      renderWithProviders(<ActiveParticipantsChart />);
+      const area = await chart();
+
+      // inércia do trackpad: o gesto dura 600 ms, bem mais que a janela de 250 ms
+      for (const time of [1_000, 1_200, 1_400, 1_600]) {
+        dateNow.mockReturnValue(time);
+        fireEvent.wheel(area, { deltaY: 100 });
+      }
+      expect(tab('2y')).toHaveAttribute('aria-selected', 'true');
+
+      // depois de 300 ms sem eventos começa outro gesto
+      dateNow.mockReturnValue(1_900);
+      fireEvent.wheel(area, { deltaY: 100 });
+      expect(tab('5y')).toHaveAttribute('aria-selected', 'true');
+    });
+
+    describe('sem gráfico (carregando, erro ou vazio)', () => {
+      beforeEach(() => {
+        jest.spyOn(Date, 'now').mockReturnValue(1_000);
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+      });
+
+      it.each([
+        ['carregando', () => pending<ActiveParticipantsItem[]>(), locale.dataState.loading],
+        ['vazio', () => Promise.resolve([]), text.empty],
+        ['erro', () => Promise.reject(new Error('500')), locale.dataState.error],
+      ])('%s: a página rola e o período não muda', async (_state, response, message) => {
+        jest.mocked(getActiveParticipants).mockReturnValue(response());
+        renderWithProviders(<ActiveParticipantsChart />);
+        const area = await screen.findByText(message);
+
+        // fireEvent devolve true quando ninguém chamou o preventDefault
+        expect(fireEvent.wheel(area, { deltaY: -100 })).toBe(true);
+        expect(tab('1y')).toHaveAttribute('aria-selected', 'true');
+      });
     });
 
     it('o scroll não refaz a busca', async () => {

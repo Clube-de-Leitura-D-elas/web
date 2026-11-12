@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useId, useRef, useState } from 'react';
 import { ChartCard } from '../../components/ChartCard';
 import { DataState, type DataStatus } from '../../components/DataState';
 import { Tabs } from '../../components/Tab';
@@ -26,6 +26,8 @@ const WHEEL_THROTTLE_MS = 250;
 export const ActiveParticipantsChart = () => {
   const { dashboard } = useLocale();
   const text = dashboard.activeParticipants;
+
+  const panelId = useId();
 
   const [range, setRange] = useState<RangeValue>(DEFAULT_RANGE);
   // muda a cada "Tentar novamente", para refazer a busca
@@ -61,10 +63,23 @@ export const ActiveParticipantsChart = () => {
     };
   }, [attempt]);
 
+  const items = result?.attempt === attempt ? result.items : undefined;
+
+  // os meses sem entrada já vêm preenchidos: "sem dados" é lista vazia ou tudo zerado
+  const status: DataStatus =
+    items === undefined
+      ? 'loading'
+      : items === null
+        ? 'error'
+        : items.every(({ total }) => total === 0)
+          ? 'empty'
+          : 'ready';
+
   // Scroll do mouse sobre o gráfico: para cima aproxima, para baixo afasta. O listener é nativo
   // porque o `onWheel` do React é passivo e não deixa chamar `preventDefault`.
   const handleWheel = useEffectEvent((event: WheelEvent) => {
-    if (event.deltaY === 0) return;
+    // carregando, erro ou vazio: não há gráfico para ampliar e a página deve rolar normalmente
+    if (status !== 'ready' || event.deltaY === 0) return;
 
     const direction = event.deltaY < 0 ? 'in' : 'out';
     const next = stepRange(range, direction);
@@ -75,14 +90,19 @@ export const ActiveParticipantsChart = () => {
     if (next === range) {
       // nas pontas não há o que ampliar e a página rola; só o fim do gesto que chegou à ponta
       // continua bloqueado, para a página não pular no meio dele
-      if (sameGesture) event.preventDefault();
+      if (sameGesture) {
+        lastWheelAt.current = now;
+        event.preventDefault();
+      }
       return;
     }
 
     event.preventDefault();
+    // todo evento consumido renova a marca: o gesto (com a inércia do trackpad) só termina depois
+    // de WHEEL_THROTTLE_MS sem eventos, e cada gesto dá um único passo
+    lastWheelAt.current = now;
     if (sameGesture) return;
 
-    lastWheelAt.current = now;
     wheelPointer.current = { x: event.clientX, y: event.clientY };
     setRange(next);
   });
@@ -116,18 +136,6 @@ export const ActiveParticipantsChart = () => {
     return () => element.removeEventListener('wheel', handleWheel);
   }, []);
 
-  const items = result?.attempt === attempt ? result.items : undefined;
-
-  // os meses sem entrada já vêm preenchidos: "sem dados" é lista vazia ou tudo zerado
-  const status: DataStatus =
-    items === undefined
-      ? 'loading'
-      : items === null
-        ? 'error'
-        : items.every(({ total }) => total === 0)
-          ? 'empty'
-          : 'ready';
-
   const canZoomIn = stepRange(range, 'in') !== range;
   const canZoomOut = stepRange(range, 'out') !== range;
 
@@ -140,6 +148,9 @@ export const ActiveParticipantsChart = () => {
             active={range}
             onChange={(value) => setRange(value as RangeValue)}
             showPanels={false}
+            size="sm"
+            fit
+            panelId={panelId}
             tabs={RANGE_OPTIONS.map(({ value }) => ({ value, label: text.ranges[value] }))}
           />
           <ZoomControls
@@ -153,7 +164,7 @@ export const ActiveParticipantsChart = () => {
         </>
       }
     >
-      <div ref={chartAreaRef}>
+      <div ref={chartAreaRef} role="tabpanel" id={panelId} aria-labelledby={`tab-${range}`}>
         {status === 'ready' && items ? (
           <PeriodAreaChart
             data={lastMonths(items, monthsOf(range)).map(({ period, total }) => ({
