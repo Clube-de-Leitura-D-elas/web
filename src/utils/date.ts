@@ -73,6 +73,79 @@ export const formatEventDateTime = (iso: string): string => {
   return `${get('day')} de ${capitalizedMonth}, ${time}`;
 };
 
+const shortDateFormatter = new Intl.DateTimeFormat(LOCALE, {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'America/Sao_Paulo',
+});
+
+export const formatShortDate = (iso: string): string => {
+  const date = new Date(iso);
+  if (!isValid(date)) return '';
+
+  const parts = shortDateFormatter.formatToParts(date);
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
+
+  return `${get('day')} ${get('month').replace('.', '')} ${get('year')}`;
+};
+
+const meetingPartsFormatter = new Intl.DateTimeFormat(LOCALE, {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+  timeZone: 'America/Sao_Paulo',
+});
+
+const getMeetingParts = (date: Date) => {
+  const parts = meetingPartsFormatter.formatToParts(date);
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
+  const weekday = get('weekday').split('-')[0];
+  const minute = get('minute');
+
+  return {
+    weekday: weekday.charAt(0).toUpperCase() + weekday.slice(1),
+    day: get('day'),
+    month: get('month').replace('.', ''),
+    time: minute === '00' ? `${get('hour')}h` : `${get('hour')}h${minute}`,
+  };
+};
+
+export const formatMeetingSummary = (iso: string): string => {
+  const date = new Date(iso);
+  if (!isValid(date)) return '';
+
+  const { weekday, day, month, time } = getMeetingParts(date);
+  return `${weekday.slice(0, 3)}, ${day} ${month} · ${time}`;
+};
+
+export const formatWeekdayTime = (iso: string): string => {
+  const date = new Date(iso);
+  if (!isValid(date)) return '';
+
+  const { weekday, time } = getMeetingParts(date);
+  return `${weekday}, ${time}`;
+};
+
+const dateBadgeFormatter = new Intl.DateTimeFormat(LOCALE, {
+  day: '2-digit',
+  month: 'short',
+  timeZone: 'America/Sao_Paulo',
+});
+
+export const formatDateBadge = (iso: string): { day: string; month: string } | null => {
+  const date = new Date(iso);
+  if (!isValid(date)) return null;
+
+  const parts = dateBadgeFormatter.formatToParts(date);
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
+
+  return { day: get('day'), month: get('month').replace('.', '') };
+};
+
 // "24 ago, 19h" ou "24 ago, 19h30"
 export const formatMeetingDate = (iso: string): string => {
   const date = new Date(iso);
