@@ -1,29 +1,30 @@
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { renderWithProviders } from '../../test/render';
 import { Avatar } from '.';
 
-const initialsOf = (name: string) =>
-  renderWithProviders(<Avatar name={name} />).container.firstElementChild!.textContent;
-
 describe('Avatar', () => {
   it('usa a primeira letra do primeiro e do último nome', () => {
-    expect(initialsOf('Ana Beatriz Souza')).toBe('AS');
+    renderWithProviders(<Avatar name="Ana Beatriz Souza" />);
+
+    expect(screen.getByText('AS')).toBeInTheDocument();
   });
 
   it('usa só uma letra, em maiúscula, quando há um nome', () => {
-    expect(initialsOf('  joseane ')).toBe('J');
+    renderWithProviders(<Avatar name="  joseane " />);
+
+    expect(screen.getByText('J')).toBeInTheDocument();
   });
 
   it('fica vazio para nome vazio', () => {
-    expect(initialsOf('   ')).toBe('');
+    const { container } = renderWithProviders(<Avatar name="   " />);
+
+    expect(container).toHaveTextContent(/^$/);
   });
 
   it('mostra as iniciais sem foto e fica fora da árvore de acessibilidade', () => {
     const { container } = renderWithProviders(<Avatar name="Joseane Alves" />);
 
-    const avatar = container.firstElementChild!;
-    expect(avatar).toHaveTextContent('JA');
-    expect(avatar).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByText('JA')).toHaveAttribute('aria-hidden', 'true');
     expect(container.querySelector('img')).not.toBeInTheDocument();
   });
 
@@ -46,6 +47,6 @@ describe('Avatar', () => {
     fireEvent.error(container.querySelector('img')!);
 
     expect(container.querySelector('img')).not.toBeInTheDocument();
-    expect(container.firstElementChild).toHaveTextContent('JA');
+    expect(screen.getByText('JA')).toBeInTheDocument();
   });
 });
