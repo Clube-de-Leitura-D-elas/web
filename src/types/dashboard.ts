@@ -9,3 +9,10 @@ export type RegistrationsItem = {
 export type RegistrationsResponse = {
   items: RegistrationsItem[];
 };
+
+export type DashboardKpisResponse = {
+  groups: {
+    active: number;
+    total: number;
+  };
+};

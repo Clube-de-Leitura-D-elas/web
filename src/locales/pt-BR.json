@@ -656,7 +656,11 @@
     "title": "Dashboard",
     "subtitle": "Acompanhe os principais indicadores do clube.",
     "kpis": {
-      "label": "Indicadores"
+      "label": "Indicadores",
+      "groups": {
+        "title": "Grupos",
+        "description": "Total de grupos cadastrados"
+      }
     },
     "charts": {
       "label": "Gráficos"
