@@ -21,6 +21,10 @@ beforeEach(() => {
       active: 2,
       total: 5,
     },
+    meetings: {
+      currentMonth: 1,
+      previousMonth: 2,
+    },
   });
 });
 
@@ -51,12 +55,23 @@ describe('Dashboard', () => {
     ).toBeInTheDocument();
   });
 
-  it('mostra o indicador de grupos na área dos indicadores', async () => {
+  it('mostra o indicador de grupos e encontros na área dos indicadores', async () => {
     renderWithProviders(<Dashboard />);
 
     const kpis = screen.getByRole('region', { name: text.kpis.label });
 
-    expect(await screen.findByText(text.kpis.groups.title)).toBeInTheDocument();
-    expect(kpis).toContainElement(screen.getByText('5'));
+    const groupsKpi = await screen.findByRole('region', {
+      name: text.kpis.groups.title,
+    });
+
+    const meetingsKpi = await screen.findByRole('region', {
+      name: text.kpis.meetings.title,
+    });
+
+    expect(kpis).toContainElement(groupsKpi);
+    expect(kpis).toContainElement(meetingsKpi);
+
+    expect(groupsKpi).toHaveTextContent('5');
+    expect(meetingsKpi).toHaveTextContent('1');
   });
 });
