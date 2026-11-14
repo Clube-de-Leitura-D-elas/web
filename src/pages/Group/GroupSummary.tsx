@@ -1,5 +1,6 @@
 import { LuBookOpen, LuCalendar, LuMapPin, LuUserRoundX } from 'react-icons/lu';
 import { Avatar } from '../../components/Avatar';
+import { Tag } from '../../components/Tag';
 import { useLocale } from '../../hooks/useLocale';
 import { interpolate, pluralize } from '../../locales';
 import type { GroupDetails } from '../../types/group';
@@ -48,9 +49,11 @@ export const GroupSummary = ({ group }: GroupSummaryProps) => {
           {meeting ? (
             <Styled.SummaryValue>
               {formatMeetingSummary(meeting.date)}
-              <Styled.MeetingPill $confirmed={meeting.confirmed}>
-                {meeting.confirmed ? text.summary.statusConfirmed : text.summary.statusPending}
-              </Styled.MeetingPill>
+              <Styled.SummaryTag>
+                <Tag color={meeting.confirmed ? 'success' : 'warning'}>
+                  {meeting.confirmed ? text.summary.statusConfirmed : text.summary.statusPending}
+                </Tag>
+              </Styled.SummaryTag>
             </Styled.SummaryValue>
           ) : (
             <Styled.SummaryValue>{text.summary.noNextMeeting}</Styled.SummaryValue>

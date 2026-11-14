@@ -4,6 +4,7 @@ import { Skeleton } from '../../components/Skeleton';
 import { useLocale } from '../../hooks/useLocale';
 import { interpolate, pluralize } from '../../locales';
 import type { GroupMeetingHistoryItem, GroupParticipantListItem } from '../../types/group';
+import { formatRating, getFirstName } from '../../utils/format';
 import { needsAttention } from './attendance';
 import * as Styled from './styles';
 
@@ -22,20 +23,13 @@ type GroupStatsProps = {
 const RECENT_MEETINGS = 3;
 const ATTENTION_PREVIEW = 3;
 
-const ratingFormatter = new Intl.NumberFormat('pt-BR', {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-});
-
-const firstName = (name: string) => name.split(' ')[0];
-
 export const GroupStats = ({ activeCount, members, meetings }: GroupStatsProps) => {
   const { group_details: text } = useLocale();
   const stats = text.stats;
 
   const renderValue = (status: AsyncList<unknown>['status'], value: () => ReactNode) => {
     if (status === 'loading') return <Skeleton width="5rem" height="2.5rem" />;
-    if (status === 'error') return '—';
+    if (status === 'error') return text.notInformed;
     return value();
   };
 
@@ -84,7 +78,9 @@ export const GroupStats = ({ activeCount, members, meetings }: GroupStatsProps) 
       <Styled.StatCard $enter={170}>
         <Styled.StatLabel>{stats.attendance}</Styled.StatLabel>
         <Styled.StatValue>
-          {renderValue(meetings.status, () => (recentTotal > 0 ? `${attendancePercent}%` : '—'))}
+          {renderValue(meetings.status, () =>
+            recentTotal > 0 ? `${attendancePercent}%` : text.notInformed,
+          )}
         </Styled.StatValue>
         {meetings.status === 'ready' && recentTotal > 0 && (
           <Styled.Bar aria-hidden="true">
@@ -106,10 +102,10 @@ export const GroupStats = ({ activeCount, members, meetings }: GroupStatsProps) 
         <Styled.StatValue>
           {renderValue(meetings.status, () =>
             rating === null ? (
-              '—'
+              text.notInformed
             ) : (
               <>
-                {ratingFormatter.format(rating)}
+                {formatRating(rating)}
                 <LuStar aria-hidden />
               </>
             ),
@@ -143,7 +139,7 @@ export const GroupStats = ({ activeCount, members, meetings }: GroupStatsProps) 
               {attention.slice(0, ATTENTION_PREVIEW).map(({ member, reason }) => (
                 <li key={member.id}>
                   {interpolate(reason === 'low' ? stats.lowAttendance : stats.incomplete, {
-                    name: firstName(member.name),
+                    name: getFirstName(member.name),
                   })}
                 </li>
               ))}

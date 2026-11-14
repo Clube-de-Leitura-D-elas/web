@@ -71,6 +71,11 @@ export const enter = (delay = 0) => css`
   ${reducedMotion}
 `;
 
+export const fade = (delay = 0) => css`
+  animation: ${fadeIn} 0.45s ease-out ${delay}ms backwards;
+  ${reducedMotion}
+`;
+
 export const pop = (delay = 0) => css`
   animation: ${popIn} 0.35s ${EASE_OUT} ${delay}ms backwards;
   ${reducedMotion}

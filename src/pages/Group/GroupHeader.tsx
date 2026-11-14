@@ -1,5 +1,6 @@
 import { LuMapPin, LuPencil } from 'react-icons/lu';
 import { ActionMenu } from '../../components/ActionMenu';
+import { Tag } from '../../components/Tag';
 import { useLocale } from '../../hooks/useLocale';
 import { interpolate } from '../../locales';
 import type { GroupDetails } from '../../types/group';
@@ -32,10 +33,12 @@ export const GroupHeader = ({
       <Styled.HeaderInfo>
         <Styled.TitleRow>
           <Styled.Title>{groupName}</Styled.Title>
-          <Styled.StatusPill key={String(isActive)} $active={isActive}>
-            <Styled.StatusDot $live={isActive} aria-hidden="true" />
-            {isActive ? text.header.statusActive : text.header.statusClosed}
-          </Styled.StatusPill>
+          <Styled.StatusTag key={String(isActive)}>
+            <Tag color={isActive ? 'success' : 'neutral'}>
+              <Styled.StatusDot $live={isActive} aria-hidden="true" />
+              {isActive ? text.header.statusActive : text.header.statusClosed}
+            </Tag>
+          </Styled.StatusTag>
         </Styled.TitleRow>
 
         <Styled.Subline>

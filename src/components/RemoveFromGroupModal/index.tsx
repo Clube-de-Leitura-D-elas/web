@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LuCheck, LuTriangleAlert } from 'react-icons/lu';
 import { useLocale } from '../../hooks/useLocale';
 import { interpolate } from '../../locales';
+import { getFirstName } from '../../utils/format';
 import { Button } from '../Button';
 import { Dropdown } from '../Dropdown';
 import { Modal } from '../Modal';
@@ -44,7 +45,7 @@ const RemoveFromGroupModalContent = ({
     ? newCoordinatorId
     : null;
   const blocked = isCoordinator && successorId === null;
-  const firstName = personName.split(' ')[0];
+  const firstName = getFirstName(personName);
 
   const handleClose = () => {
     if (!saving) onClose();
