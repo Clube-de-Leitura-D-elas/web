@@ -464,6 +464,10 @@
         "one": "{{count}} encontro",
         "other": "{{count}} encontros"
       },
+      "lastMeetings": {
+        "one": "Último encontro",
+        "other": "Últimos {{count}} encontros"
+      },
       "votes": {
         "one": "{{count}} voto",
         "other": "{{count}} votos"

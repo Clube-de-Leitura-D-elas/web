@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import logo from '../../assets/logo-delas.png';
 import { Avatar } from '.';
 
 const meta = {
@@ -44,6 +45,10 @@ export const Small: Story = { args: { size: 'sm' } };
 export const Large: Story = { args: { size: 'lg' } };
 
 export const ExtraLarge: Story = { args: { size: 'xl' } };
+
+export const WithPhoto: Story = {
+  args: { photo: logo, size: 'xl' },
+};
 
 export const BrokenPhoto: Story = {
   args: { photo: 'https://exemplo.invalid/foto.jpg', size: 'lg' },

@@ -151,7 +151,11 @@ export const GroupDetails = () => {
   const loadMembers = useCallback(() => {
     const key = `${groupId}:${participantsVersion}`;
     if (membersRequest.current?.key !== key) {
-      membersRequest.current = { key, promise: getAllGroupParticipants(groupId) };
+      const promise = getAllGroupParticipants(groupId);
+      membersRequest.current = { key, promise };
+      promise.catch(() => {
+        if (membersRequest.current?.promise === promise) membersRequest.current = null;
+      });
     }
     return membersRequest.current.promise;
   }, [groupId, participantsVersion]);
@@ -214,7 +218,7 @@ export const GroupDetails = () => {
   const refreshGroup = useCallback(async () => {
     try {
       const updatedGroup = await getGroupDetails(groupId);
-      setResult({ id: groupId, group: updatedGroup });
+      setResult((prev) => (prev?.id === groupId ? { id: groupId, group: updatedGroup } : prev));
     } catch (err) {
       console.error(err);
     } finally {
@@ -407,7 +411,8 @@ export const GroupDetails = () => {
 
   const fetchParticipants = useCallback(
     async ({ page, pageSize }: TablePageRequest): Promise<TablePage> => {
-      const { items } = await loadMembers();
+      const { items, total } = await loadMembers();
+      setMembersState({ key: groupId, list: { status: 'ready', items, total } });
       const table = text.table;
       const actions = text.participantActions;
       const sorted = [...items].sort((a, b) => Number(b.is_coordinator) - Number(a.is_coordinator));
@@ -489,7 +494,7 @@ export const GroupDetails = () => {
 
       return { rows, total: sorted.length };
     },
-    [loadMembers, text, isLastCoordinator, navigate, changeCoordinator, openRemove],
+    [groupId, loadMembers, text, isLastCoordinator, navigate, changeCoordinator, openRemove],
   );
 
   const meetingColumns: TableColumn[] = useMemo(

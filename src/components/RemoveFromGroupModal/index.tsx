@@ -40,7 +40,10 @@ const RemoveFromGroupModalContent = ({
   const { removeFromGroup: text } = useLocale();
   const [newCoordinatorId, setNewCoordinatorId] = useState<string | null>(null);
 
-  const blocked = isCoordinator && newCoordinatorId === null;
+  const successorId = candidates.some((candidate) => candidate.id === newCoordinatorId)
+    ? newCoordinatorId
+    : null;
+  const blocked = isCoordinator && successorId === null;
   const firstName = personName.split(' ')[0];
 
   const handleClose = () => {
@@ -96,7 +99,7 @@ const RemoveFromGroupModalContent = ({
           <Button
             variant="danger"
             disabled={blocked || saving}
-            onClick={() => onConfirm(isCoordinator ? newCoordinatorId : null)}
+            onClick={() => onConfirm(isCoordinator ? successorId : null)}
           >
             {saving ? text.removing : text.confirm}
           </Button>
