@@ -4,11 +4,12 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { DefaultLayout } from '../../layouts/DefaultLayout';
 
 import { locale } from '../../locales';
+import { getAllGroupParticipants, getGroupDetails } from '../../services/groupService';
 import {
   getCities,
   getParticipantById,
-  getParticipantGroups,
-  getParticipantPresence,
+  getAllParticipantGroups,
+  getParticipantPresenceHistory,
   getZones,
   updateParticipant,
   updateParticipantStatus,
@@ -16,8 +17,8 @@ import {
 import type {
   Participant,
   ParticipantGroup,
+  ParticipantMeetingRecord,
   ParticipantOption,
-  ParticipantPresence,
   ParticipantZoneOption,
 } from '../../types/participant';
 
@@ -99,33 +100,20 @@ const groups: ParticipantGroup[] = [
   },
 ];
 
-const presence: ParticipantPresence[] = [
-  {
-    meetingId: '31111111-1111-1111-1111-111111111111',
-    date: '2026-09-10T17:30:00',
-    present: true,
-  },
-  {
-    meetingId: '32222222-2222-2222-2222-222222222222',
-    date: '2026-09-08T17:30:00',
-    present: true,
-  },
-  {
-    meetingId: '33333333-3333-3333-3333-333333333333',
-    date: '2026-09-03T17:30:00',
-    present: false,
-  },
-  {
-    meetingId: '34444444-4444-4444-4444-444444444444',
-    date: '2026-09-01T17:30:00',
-    present: true,
-  },
-  {
-    meetingId: '35555555-5555-5555-5555-555555555555',
-    date: '2026-08-27T17:30:00',
-    present: false,
-  },
-];
+const meetingHistory: ParticipantMeetingRecord[] = [
+  ['2026-10-22T22:30:00Z', 'O Avesso da Pele', 3, false],
+  ['2026-10-06T22:30:00Z', 'Pequeno Manual Antirracista', 12, true],
+  ['2026-09-24T22:30:00Z', 'Tudo é Rio', 3, true],
+  ['2026-09-08T22:30:00Z', 'Um Defeito de Cor', 12, false],
+  ['2026-08-27T22:30:00Z', 'Torto Arado', 3, true],
+].map(([date, bookTitle, groupNumber, present], index) => ({
+  meetingId: `meeting-${index}`,
+  date: date as string,
+  bookTitle: bookTitle as string,
+  groupId: `group-${groupNumber}`,
+  groupNumber: groupNumber as number,
+  present: present as boolean,
+}));
 
 const meta = {
   title: 'Pages/Participant',
@@ -154,22 +142,52 @@ const meta = {
       return participant;
     });
 
-    mocked(getParticipantPresence).mockImplementation(async () => {
-      await wait(REQUEST_DELAY);
+    mocked(getGroupDetails).mockImplementation(async (groupId) => ({
+      id: groupId,
+      number: 3,
+      description: 'Quinta à noite',
+      city: 'São Paulo',
+      zone: null,
+      is_active: true,
+      active_participants_count: 8,
+      coordinators: [
+        { id: participant.id, name: participant.name, email: participant.email, photo: null },
+      ],
+      next_meeting: null,
+    }));
 
-      return presence;
+    mocked(getAllGroupParticipants).mockResolvedValue({
+      items: [
+        {
+          id: participant.id,
+          name: participant.name,
+          entry_date: null,
+          attendance: [],
+          email: participant.email,
+          is_coordinator: true,
+        },
+        {
+          id: 'carla',
+          name: 'Carla Mendes',
+          entry_date: null,
+          attendance: [],
+          email: null,
+          is_coordinator: false,
+        },
+      ],
+      total: 2,
     });
 
-    mocked(getParticipantGroups).mockImplementation(async (_participantId, page, pageSize) => {
+    mocked(getParticipantPresenceHistory).mockImplementation(async () => {
       await wait(REQUEST_DELAY);
 
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
+      return meetingHistory;
+    });
 
-      return {
-        groups: groups.slice(start, end),
-        total: groups.length,
-      };
+    mocked(getAllParticipantGroups).mockImplementation(async () => {
+      await wait(REQUEST_DELAY);
+
+      return groups;
     });
 
     mocked(updateParticipantStatus).mockImplementation(async (_participantId, active) => {
@@ -197,8 +215,6 @@ export const Default: Story = {};
 export const Loading: Story = {
   beforeEach: () => {
     mocked(getParticipantById).mockImplementation(() => new Promise(() => {}));
-
-    mocked(getParticipantPresence).mockImplementation(() => new Promise(() => {}));
   },
 };
 
@@ -210,10 +226,7 @@ export const LoadError: Story = {
 
 export const WithoutGroups: Story = {
   beforeEach: () => {
-    mocked(getParticipantGroups).mockResolvedValue({
-      groups: [],
-      total: 0,
-    });
+    mocked(getAllParticipantGroups).mockResolvedValue([]);
   },
 };
 
@@ -221,10 +234,9 @@ export const WithoutEntryDate: Story = {
   beforeEach: () => {
     mocked(getParticipantById).mockResolvedValue({ ...participant, entryDate: null });
 
-    mocked(getParticipantGroups).mockResolvedValue({
-      groups: groups.map((group) => ({ ...group, entryDate: null })),
-      total: groups.length,
-    });
+    mocked(getAllParticipantGroups).mockResolvedValue(
+      groups.map((group) => ({ ...group, entryDate: null })),
+    );
   },
 };
 

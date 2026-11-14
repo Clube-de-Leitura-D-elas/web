@@ -21,6 +21,8 @@ const isValid = (date: Date) => !Number.isNaN(date.getTime());
 
 // "mar/2024"
 export const formatMonthYear = (iso: string): string => {
+  if (DATE_ONLY.test(iso)) return formatMonthLabel(iso);
+
   const date = new Date(iso);
   if (!isValid(date)) return '';
 
@@ -256,4 +258,36 @@ export const formatDayMonth = (period: string): string => {
   if (!date) return '';
 
   return civilDayMonthFormatter.format(date);
+};
+
+const birthdayFormatter = new Intl.DateTimeFormat(LOCALE, {
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'UTC',
+});
+
+export const formatBirthday = (value: string | null | undefined): string => {
+  const date = value ? parseCivilDate(value.slice(0, 10)) : null;
+  if (!date) return '';
+
+  return birthdayFormatter.format(date);
+};
+
+export const getElapsedTime = (
+  iso: string | null | undefined,
+  now: Date = new Date(),
+): { years: number; months: number } | null => {
+  if (!iso) return null;
+  const civil = parseCivilDate(iso);
+  const start = civil
+    ? new Date(civil.getUTCFullYear(), civil.getUTCMonth(), civil.getUTCDate())
+    : new Date(iso);
+  if (!isValid(start) || start > now) return null;
+
+  const totalMonths =
+    (now.getFullYear() - start.getFullYear()) * 12 +
+    (now.getMonth() - start.getMonth()) -
+    (now.getDate() < start.getDate() ? 1 : 0);
+
+  return { years: Math.floor(totalMonths / 12), months: totalMonths % 12 };
 };

@@ -3,6 +3,8 @@ import type {
   Participant,
   ParticipantGroupsPage,
   ParticipantOption,
+  ParticipantGroup,
+  ParticipantMeetingRecord,
   ParticipantPresence,
   ParticipantZoneOption,
   UpdateParticipantInput,
@@ -102,6 +104,19 @@ export async function getParticipantGroups(
   };
 }
 
+const ALL_GROUPS_PAGE_SIZE = 100;
+
+export async function getAllParticipantGroups(participantId: string): Promise<ParticipantGroup[]> {
+  const groups: ParticipantGroup[] = [];
+
+  for (let page = 1; ; page += 1) {
+    const result = await getParticipantGroups(participantId, page, ALL_GROUPS_PAGE_SIZE);
+    groups.push(...result.groups);
+
+    if (result.groups.length === 0 || groups.length >= result.total) return groups;
+  }
+}
+
 export async function getParticipantPresence(
   participantId: string,
 ): Promise<ParticipantPresence[]> {
@@ -114,6 +129,41 @@ export async function getParticipantPresence(
     date: meeting.date,
     present: meeting.present,
   }));
+}
+
+type PresenceHistoryResponse = {
+  participant_id: string;
+  groups: {
+    group_id: string;
+    group_number: number;
+    meetings: {
+      meeting_id: string;
+      date: string;
+      book_title: string;
+      presence_status: 'PRESENT' | 'ABSENT' | null;
+    }[];
+  }[];
+};
+
+export async function getParticipantPresenceHistory(
+  participantId: string,
+): Promise<ParticipantMeetingRecord[]> {
+  const data = await invokeGet<PresenceHistoryResponse>('get-participant-presence-history', {
+    participant_id: participantId,
+  });
+
+  return data.groups
+    .flatMap((group) =>
+      group.meetings.map((meeting) => ({
+        meetingId: meeting.meeting_id,
+        date: meeting.date,
+        bookTitle: meeting.book_title,
+        groupId: group.group_id,
+        groupNumber: group.group_number,
+        present: meeting.presence_status === null ? null : meeting.presence_status === 'PRESENT',
+      })),
+    )
+    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 }
 
 export async function updateParticipantStatus(

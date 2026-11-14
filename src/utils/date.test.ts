@@ -1,4 +1,6 @@
 import {
+  formatBirthday,
+  getElapsedTime,
   formatDateBadge,
   formatDayMonth,
   formatEntryDate,
@@ -16,6 +18,10 @@ import {
 describe('formatMonthYear', () => {
   it('formata como mês abreviado sem ponto e ano', () => {
     expect(formatMonthYear('2024-03-15T12:00:00Z')).toBe('mar/2024');
+  });
+
+  it('trata a data sem hora como o próprio dia, sem voltar um mês', () => {
+    expect(formatMonthYear('2025-01-01')).toBe('jan/2025');
   });
 
   it('usa o fuso local para decidir o mês', () => {
@@ -181,5 +187,43 @@ describe('formatWeekdayTime', () => {
 
   it('devolve texto vazio para data inválida', () => {
     expect(formatWeekdayTime('invalido')).toBe('');
+  });
+});
+
+describe('formatBirthday', () => {
+  it('mostra dia e mês por extenso, sem o ano', () => {
+    expect(formatBirthday('1990-10-24')).toBe('24 de outubro');
+  });
+
+  it('aceita o timestamp e usa só a data', () => {
+    expect(formatBirthday('1990-03-01T00:00:00Z')).toBe('1 de março');
+  });
+
+  it('devolve texto vazio quando não há data ou ela é inválida', () => {
+    expect(formatBirthday(null)).toBe('');
+    expect(formatBirthday('1990-13-40')).toBe('');
+  });
+});
+
+describe('getElapsedTime', () => {
+  const now = new Date(2026, 10, 12);
+
+  it('conta anos e meses completos', () => {
+    expect(getElapsedTime('2024-03-15', now)).toEqual({ years: 2, months: 7 });
+  });
+
+  it('trata a data sem hora como o dia civil, sem antecipar o mês', () => {
+    expect(getElapsedTime('2026-10-13', now)).toEqual({ years: 0, months: 0 });
+    expect(getElapsedTime('2026-10-12', now)).toEqual({ years: 0, months: 1 });
+  });
+
+  it('não conta o mês ainda incompleto', () => {
+    expect(getElapsedTime('2026-10-20', now)).toEqual({ years: 0, months: 0 });
+  });
+
+  it('devolve null sem data, com data inválida ou no futuro', () => {
+    expect(getElapsedTime(null, now)).toBeNull();
+    expect(getElapsedTime('invalido', now)).toBeNull();
+    expect(getElapsedTime('2027-01-01', now)).toBeNull();
   });
 });
