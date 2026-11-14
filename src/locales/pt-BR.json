@@ -209,6 +209,7 @@
     },
     "meetings": {
       "title": "Últimos encontros",
+      "loading": "Carregando os últimos encontros...",
       "group": "Grupo {{number}}",
       "present": "Presente",
       "absent": "Faltou",

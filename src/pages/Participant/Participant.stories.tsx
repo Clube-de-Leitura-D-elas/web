@@ -7,7 +7,7 @@ import { locale } from '../../locales';
 import {
   getCities,
   getParticipantById,
-  getParticipantGroups,
+  getAllParticipantGroups,
   getParticipantPresence,
   getParticipantPresenceHistory,
   getZones,
@@ -183,16 +183,10 @@ const meta = {
       return meetingHistory;
     });
 
-    mocked(getParticipantGroups).mockImplementation(async (_participantId, page, pageSize) => {
+    mocked(getAllParticipantGroups).mockImplementation(async () => {
       await wait(REQUEST_DELAY);
 
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-
-      return {
-        groups: groups.slice(start, end),
-        total: groups.length,
-      };
+      return groups;
     });
 
     mocked(updateParticipantStatus).mockImplementation(async (_participantId, active) => {
@@ -233,10 +227,7 @@ export const LoadError: Story = {
 
 export const WithoutGroups: Story = {
   beforeEach: () => {
-    mocked(getParticipantGroups).mockResolvedValue({
-      groups: [],
-      total: 0,
-    });
+    mocked(getAllParticipantGroups).mockResolvedValue([]);
   },
 };
 
@@ -244,10 +235,9 @@ export const WithoutEntryDate: Story = {
   beforeEach: () => {
     mocked(getParticipantById).mockResolvedValue({ ...participant, entryDate: null });
 
-    mocked(getParticipantGroups).mockResolvedValue({
-      groups: groups.map((group) => ({ ...group, entryDate: null })),
-      total: groups.length,
-    });
+    mocked(getAllParticipantGroups).mockResolvedValue(
+      groups.map((group) => ({ ...group, entryDate: null })),
+    );
   },
 };
 

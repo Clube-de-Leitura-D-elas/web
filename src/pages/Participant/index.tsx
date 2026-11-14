@@ -14,7 +14,7 @@ import { getAllGroupParticipants, updateGroupParticipant } from '../../services/
 import {
   getCities,
   getParticipantById,
-  getParticipantGroups,
+  getAllParticipantGroups,
   getParticipantPresence,
   getParticipantPresenceHistory,
   getZones,
@@ -38,8 +38,6 @@ import { ParticipantStats, type GroupsState } from './ParticipantStats';
 import * as Styled from './styles';
 
 const text = locale.participant_details;
-
-const GROUPS_PAGE_SIZE = 100;
 
 type ToastState = {
   id: number;
@@ -164,12 +162,11 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
   const loadGroups = useCallback(() => {
     if (!participantId) return Promise.resolve([]);
     if (groupsRequest.current?.version !== groupsVersion) {
-      groupsRequest.current = {
-        version: groupsVersion,
-        promise: getParticipantGroups(participantId, 1, GROUPS_PAGE_SIZE).then(
-          (result) => result.groups,
-        ),
-      };
+      const promise = getAllParticipantGroups(participantId);
+      groupsRequest.current = { version: groupsVersion, promise };
+      promise.catch(() => {
+        if (groupsRequest.current?.promise === promise) groupsRequest.current = null;
+      });
     }
     return groupsRequest.current.promise;
   }, [participantId, groupsVersion]);
@@ -239,7 +236,11 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
 
   const fetchGroupsPage: TableFetchPage = useCallback(
     async ({ page, pageSize }) => {
-      const groups = await loadGroups();
+      const request = loadGroups();
+      const groups = await request;
+      if (groupsRequest.current?.promise === request) {
+        setGroupsState({ status: 'ready', groups });
+      }
       const start = (page - 1) * pageSize;
 
       return {

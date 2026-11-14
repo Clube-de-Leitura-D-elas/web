@@ -4,7 +4,7 @@ import { getAllGroupParticipants, updateGroupParticipant } from '../../services/
 import {
   getCities,
   getParticipantById,
-  getParticipantGroups,
+  getAllParticipantGroups,
   getParticipantPresence,
   getParticipantPresenceHistory,
   getZones,
@@ -16,7 +16,7 @@ import { ParticipantDetails } from '.';
 
 jest.mock('../../services/participantService', () => ({
   getParticipantById: jest.fn(),
-  getParticipantGroups: jest.fn(),
+  getAllParticipantGroups: jest.fn(),
   getParticipantPresence: jest.fn(),
   getParticipantPresenceHistory: jest.fn(),
   updateParticipantStatus: jest.fn(),
@@ -63,13 +63,10 @@ beforeEach(() => {
     { meetingId: 'm2', date: '2026-09-08', present: false },
     { meetingId: 'm3', date: '2026-09-03', present: true },
   ]);
-  jest.mocked(getParticipantGroups).mockResolvedValue({
-    groups: [
-      { id: 'g3', number: 3, city: 'São Paulo', isCoordinator: true, entryDate: '2024-03-01' },
-      { id: 'g12', number: 12, city: null, isCoordinator: false, entryDate: null },
-    ],
-    total: 2,
-  });
+  jest.mocked(getAllParticipantGroups).mockResolvedValue([
+    { id: 'g3', number: 3, city: 'São Paulo', isCoordinator: true, entryDate: '2024-03-01' },
+    { id: 'g12', number: 12, city: null, isCoordinator: false, entryDate: null },
+  ]);
   jest.mocked(getParticipantPresenceHistory).mockResolvedValue([
     {
       meetingId: 'm1',
@@ -120,7 +117,7 @@ describe('ParticipantDetails', () => {
     expect(await waitForPage()).toBeInTheDocument();
     expect(getParticipantById).toHaveBeenCalledWith('p1');
     expect(getParticipantPresence).toHaveBeenCalledWith('p1');
-    expect(getParticipantGroups).toHaveBeenCalledWith('p1', 1, 100);
+    expect(getAllParticipantGroups).toHaveBeenCalledWith('p1');
     const profile = screen.getByRole('complementary', { name: text.profile.label });
     expect(within(profile).getByText('Advogada · Porto Alegre')).toBeInTheDocument();
     expect(within(profile).getByText(text.status.active)).toBeInTheDocument();
@@ -255,7 +252,7 @@ describe('ParticipantDetails', () => {
   });
 
   it('mostra o estado vazio quando não participa de nenhum grupo', async () => {
-    jest.mocked(getParticipantGroups).mockResolvedValue({ groups: [], total: 0 });
+    jest.mocked(getAllParticipantGroups).mockResolvedValue([]);
 
     renderPage();
 
@@ -265,12 +262,40 @@ describe('ParticipantDetails', () => {
     expect(screen.getByText(text.stats.noGroups)).toBeInTheDocument();
   });
 
+  it('tenta carregar os grupos de novo pela tabela e atualiza os indicadores', async () => {
+    jest
+      .mocked(getAllParticipantGroups)
+      .mockRejectedValueOnce(new Error('rede'))
+      .mockRejectedValueOnce(new Error('rede'));
+    const { user } = renderPage();
+    await waitForPage();
+
+    await user.click(await screen.findByRole('button', { name: locale.table.retry }));
+
+    expect(await screen.findByRole('link', { name: 'Grupo 03' })).toBeInTheDocument();
+    expect(getAllParticipantGroups).toHaveBeenCalledTimes(3);
+    expect(
+      screen.getByText(interpolate(text.stats.groupsSub, { coordinator: 1, member: 1 })),
+    ).toBeInTheDocument();
+  });
+
+  it('mostra o carregamento dos últimos encontros', async () => {
+    jest.mocked(getParticipantPresenceHistory).mockReturnValue(pending());
+
+    renderPage();
+    await waitForPage();
+
+    const meetings = screen.getByRole('region', { name: text.meetings.title });
+    expect(within(meetings).getByRole('status')).toHaveTextContent(text.meetings.loading);
+  });
+
   it('mostra os últimos encontros com a presença', async () => {
     renderPage();
     await waitForPage();
 
     const meetings = await screen.findByRole('region', { name: text.meetings.title });
     const first = within(meetings).getByText('O Avesso da Pele').closest('li')!;
+    expect(within(first).getByText('22 out 2026')).toBeInTheDocument();
     expect(within(first).getByText('Grupo 03')).toBeInTheDocument();
     expect(within(first).getByText(text.meetings.absent)).toBeInTheDocument();
     const second = within(meetings).getByText('Pequeno Manual Antirracista').closest('li')!;
@@ -342,7 +367,7 @@ describe('ParticipantDetails', () => {
       expect(screen.getByRole('status')).toHaveTextContent(
         interpolate(text.groups.removed, { name: 'Joseane', number: '12' }),
       );
-      expect(jest.mocked(getParticipantGroups).mock.calls.length).toBeGreaterThan(1);
+      expect(jest.mocked(getAllParticipantGroups).mock.calls.length).toBeGreaterThan(1);
     });
 
     it('como única coordenadora, escolhe quem assume antes de sair', async () => {

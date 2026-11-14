@@ -444,6 +444,7 @@ export const MeetingList = styled.ul`
 `;
 
 export const MeetingItem = styled.li<{ $index: number }>`
+  position: relative;
   display: flex;
   align-items: center;
   gap: 1rem;
