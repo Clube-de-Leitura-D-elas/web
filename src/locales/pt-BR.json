@@ -480,6 +480,7 @@
       "demoted": "{{name}} deixou a coordenação",
       "removed": "{{name}} foi removida do grupo",
       "removedWithCoordinator": "{{name}} foi removida do grupo · {{coordinator}} é a nova coordenadora",
+      "rollbackError": "Não foi possível remover {{name}}, e {{coordinator}} continua como coordenadora. Confira o grupo antes de tentar de novo.",
       "undo": "Desfazer",
       "undone": "Ação desfeita",
       "error": "Não foi possível atualizar a participante. Tente novamente.",

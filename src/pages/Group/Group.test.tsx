@@ -644,6 +644,56 @@ describe('GroupDetails', () => {
       expect(updateGroupParticipant).toHaveBeenNthCalledWith(3, 'g1', 'p3', 'demote');
     });
 
+    it('avisa quando não consegue desfazer a promoção da sucessora', async () => {
+      jest
+        .mocked(updateGroupParticipant)
+        .mockResolvedValueOnce()
+        .mockRejectedValueOnce(new Error(actions.error))
+        .mockRejectedValueOnce(new Error('rede'));
+      const { user } = renderPage();
+
+      await openMenu(user, 'Ana Souza');
+      await user.click(screen.getByRole('menuitem', { name: actions.remove }));
+      const dialog = await screen.findByRole('dialog');
+      await user.click(
+        within(dialog).getByRole('button', {
+          name: new RegExp(locale.removeFromGroup.newCoordinator),
+        }),
+      );
+      await user.click(screen.getByRole('option', { name: 'Carla Dias' }));
+      await user.click(
+        within(dialog).getByRole('button', { name: locale.removeFromGroup.confirm }),
+      );
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+        interpolate(actions.rollbackError, { name: 'Ana', coordinator: 'Carla' }),
+      );
+    });
+
+    it('fecha a remoção pendente ao trocar de grupo', async () => {
+      jest
+        .mocked(getGroupDetails)
+        .mockImplementation(async (id) =>
+          id === 'g2' ? { ...group, id: 'g2', number: 8, description: 'Sul' } : group,
+        );
+      const { user } = renderWithProviders(
+        <>
+          <GroupDetails />
+          <Link to="/grupos/g2">Ir para o grupo 08</Link>
+        </>,
+        { route: '/grupos/g1', path: '/grupos/:groupId' },
+      );
+
+      await openMenu(user, 'Bia Lima');
+      await user.click(screen.getByRole('menuitem', { name: actions.remove }));
+      expect(await screen.findByRole('dialog')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('link', { name: 'Ir para o grupo 08' }));
+
+      expect(await screen.findByRole('heading', { name: 'Grupo 08 — Sul' })).toBeInTheDocument();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
     it('mantém o modal aberto com o erro quando a remoção falha', async () => {
       jest.mocked(updateGroupParticipant).mockRejectedValue(new Error(actions.error));
       const { user } = renderPage();

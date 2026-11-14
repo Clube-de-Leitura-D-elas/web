@@ -97,8 +97,11 @@ export const GroupDetails = () => {
   const [zones, setZones] = useState<GroupZoneOption[]>([]);
   const [optionsError, setOptionsError] = useState(false);
 
-  const [removeTarget, setRemoveTarget] = useState<GroupParticipantListItem | null>(null);
-  const [removeCandidates, setRemoveCandidates] = useState<CoordinatorCandidate[]>([]);
+  const [removal, setRemoval] = useState<{
+    groupId: string;
+    participant: GroupParticipantListItem;
+    candidates: CoordinatorCandidate[];
+  } | null>(null);
   const [removing, setRemoving] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -288,19 +291,23 @@ export const GroupDetails = () => {
       setRemoveError(null);
       try {
         const { items } = await loadMembers();
-        setRemoveCandidates(
-          items
+        setRemoval({
+          groupId,
+          participant,
+          candidates: items
             .filter((member) => member.id !== participant.id && !member.is_coordinator)
             .map(({ id, name }) => ({ id, name })),
-        );
-        setRemoveTarget(participant);
+        });
       } catch (err) {
         console.error(err);
         showToast({ variant: 'error', message: text.participantActions.error });
       }
     },
-    [loadMembers, showToast, text],
+    [groupId, loadMembers, showToast, text],
   );
+
+  const removeTarget = removal?.groupId === groupId ? removal.participant : null;
+  const removeCandidates = removal?.groupId === groupId ? removal.candidates : [];
 
   const removeNeedsSuccessor =
     removeTarget !== null &&
@@ -321,10 +328,22 @@ export const GroupDetails = () => {
       await updateGroupParticipant(groupId, removeTarget.id, 'remove');
     } catch (err) {
       console.error(err);
+      let rolledBack = true;
       if (promoted && newCoordinatorId) {
-        await updateGroupParticipant(groupId, newCoordinatorId, 'demote').catch(console.error);
+        await updateGroupParticipant(groupId, newCoordinatorId, 'demote').catch((rollbackErr) => {
+          console.error(rollbackErr);
+          rolledBack = false;
+        });
       }
-      setRemoveError(errorMessage(err, text.participantActions.error));
+      const successor = removeCandidates.find((candidate) => candidate.id === newCoordinatorId);
+      setRemoveError(
+        rolledBack || !successor
+          ? errorMessage(err, text.participantActions.error)
+          : interpolate(text.participantActions.rollbackError, {
+              name: getFirstName(removeTarget.name),
+              coordinator: getFirstName(successor.name),
+            }),
+      );
       await refreshGroup();
       setRemoving(false);
       return;
@@ -340,7 +359,7 @@ export const GroupDetails = () => {
           })
         : interpolate(text.participantActions.removed, { name: getFirstName(removeTarget.name) }),
     });
-    setRemoveTarget(null);
+    setRemoval(null);
     setRemoving(false);
   };
 
@@ -737,7 +756,7 @@ export const GroupDetails = () => {
         candidates={removeCandidates}
         saving={removing}
         error={removeError}
-        onClose={() => setRemoveTarget(null)}
+        onClose={() => setRemoval(null)}
         onConfirm={confirmRemove}
       />
 
