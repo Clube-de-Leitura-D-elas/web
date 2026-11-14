@@ -1,7 +1,9 @@
 import { interpolate, locale } from '../../locales';
 import type { ParticipantMeetingRecord } from '../../types/participant';
 import { Skeleton } from '../../components/Skeleton';
+import { Tag } from '../../components/Tag';
 import { formatDateBadge, formatShortDate } from '../../utils/date';
+import { formatGroupNumber } from '../../utils/format';
 import * as Styled from './styles';
 
 const text = locale.participant_details.meetings;
@@ -65,13 +67,13 @@ export const ParticipantRecentMeetings = ({ state }: ParticipantRecentMeetingsPr
                   <Styled.MeetingBook>{meeting.bookTitle}</Styled.MeetingBook>
                   <Styled.MeetingGroup>
                     {interpolate(text.group, {
-                      number: String(meeting.groupNumber).padStart(2, '0'),
+                      number: formatGroupNumber(meeting.groupNumber),
                     })}
                   </Styled.MeetingGroup>
                 </Styled.MeetingInfo>
-                <Styled.Pill
-                  $tone={
-                    meeting.present === null ? 'neutral' : meeting.present ? 'success' : 'danger'
+                <Tag
+                  color={
+                    meeting.present === null ? 'neutral' : meeting.present ? 'success' : 'error'
                   }
                 >
                   {meeting.present === null
@@ -79,7 +81,7 @@ export const ParticipantRecentMeetings = ({ state }: ParticipantRecentMeetingsPr
                     : meeting.present
                       ? text.present
                       : text.absent}
-                </Styled.Pill>
+                </Tag>
               </Styled.MeetingItem>
             );
           })}

@@ -1,11 +1,14 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import { interpolate, locale } from '../../locales';
-import { getAllGroupParticipants, updateGroupParticipant } from '../../services/groupService';
+import {
+  getAllGroupParticipants,
+  getGroupDetails,
+  updateGroupParticipant,
+} from '../../services/groupService';
 import {
   getCities,
   getParticipantById,
   getAllParticipantGroups,
-  getParticipantPresence,
   getParticipantPresenceHistory,
   getZones,
   updateParticipantStatus,
@@ -17,7 +20,6 @@ import { ParticipantDetails } from '.';
 jest.mock('../../services/participantService', () => ({
   getParticipantById: jest.fn(),
   getAllParticipantGroups: jest.fn(),
-  getParticipantPresence: jest.fn(),
   getParticipantPresenceHistory: jest.fn(),
   updateParticipantStatus: jest.fn(),
   getCities: jest.fn().mockResolvedValue([]),
@@ -26,6 +28,7 @@ jest.mock('../../services/participantService', () => ({
 
 jest.mock('../../services/groupService', () => ({
   getAllGroupParticipants: jest.fn(),
+  getGroupDetails: jest.fn(),
   updateGroupParticipant: jest.fn(),
 }));
 
@@ -58,11 +61,6 @@ const waitForPage = () => screen.findByRole('heading', { name: 'Joseane Alves' }
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.mocked(getParticipantById).mockResolvedValue(participant);
-  jest.mocked(getParticipantPresence).mockResolvedValue([
-    { meetingId: 'm1', date: '2026-09-10', present: true },
-    { meetingId: 'm2', date: '2026-09-08', present: false },
-    { meetingId: 'm3', date: '2026-09-03', present: true },
-  ]);
   jest.mocked(getAllParticipantGroups).mockResolvedValue([
     { id: 'g3', number: 3, city: 'São Paulo', isCoordinator: true, entryDate: '2024-03-01' },
     { id: 'g12', number: 12, city: null, isCoordinator: false, entryDate: null },
@@ -116,7 +114,7 @@ describe('ParticipantDetails', () => {
 
     expect(await waitForPage()).toBeInTheDocument();
     expect(getParticipantById).toHaveBeenCalledWith('p1');
-    expect(getParticipantPresence).toHaveBeenCalledWith('p1');
+    expect(getParticipantPresenceHistory).toHaveBeenCalledWith('p1');
     expect(getAllParticipantGroups).toHaveBeenCalledWith('p1');
     const profile = screen.getByRole('complementary', { name: text.profile.label });
     expect(within(profile).getByText('Advogada · Porto Alegre')).toBeInTheDocument();
@@ -177,6 +175,18 @@ describe('ParticipantDetails', () => {
     expect(value(text.details.appRole)).toHaveTextContent(text.details.roles.MANAGER);
   });
 
+  it('mostra a zona mesmo sem cidade', async () => {
+    jest.mocked(getParticipantById).mockResolvedValue({ ...participant, city: null });
+
+    renderPage();
+    await waitForPage();
+
+    const profile = screen.getByRole('complementary', { name: text.profile.label });
+    expect(within(profile).getByText(text.details.city).nextElementSibling).toHaveTextContent(
+      /^Zona Leste$/,
+    );
+  });
+
   it('usa "não informado" para os dados vazios', async () => {
     jest.mocked(getParticipantById).mockResolvedValue({
       ...participant,
@@ -222,13 +232,13 @@ describe('ParticipantDetails', () => {
     await waitForPage();
 
     const stats = screen.getByRole('region', { name: text.stats.label });
-    expect(within(stats).getByText('67%')).toBeInTheDocument();
+    expect(await within(stats).findByText('50%')).toBeInTheDocument();
     expect(
       within(stats).getByRole('img', {
-        name: interpolate(text.stats.presenceAria, { present: 2, total: 3 }),
+        name: interpolate(text.stats.presenceAria, { present: 1, total: 2 }),
       }),
     ).toBeInTheDocument();
-    expect(within(stats).getByText('2 de 3 últimos encontros')).toBeInTheDocument();
+    expect(within(stats).getByText('1 de 2 últimos encontros')).toBeInTheDocument();
     expect(
       await within(stats).findByText(
         interpolate(text.stats.groupsSub, { coordinator: 1, member: 1 }),
@@ -372,6 +382,17 @@ describe('ParticipantDetails', () => {
 
     it('como única coordenadora, escolhe quem assume antes de sair', async () => {
       jest.mocked(updateGroupParticipant).mockResolvedValue();
+      jest.mocked(getGroupDetails).mockResolvedValue({
+        id: 'g3',
+        number: 3,
+        description: 'Quinta à noite',
+        city: 'São Paulo',
+        zone: null,
+        is_active: true,
+        active_participants_count: 2,
+        coordinators: [{ id: 'p1', name: 'Joseane Alves', email: null, photo: null }],
+        next_meeting: null,
+      });
       jest.mocked(getAllGroupParticipants).mockResolvedValue({
         items: [
           {
@@ -417,6 +438,35 @@ describe('ParticipantDetails', () => {
           coordinator: 'Carla',
         }),
       );
+    });
+
+    it('com outra coordenadora ativa, sai sem precisar escolher sucessora', async () => {
+      jest.mocked(updateGroupParticipant).mockResolvedValue();
+      jest.mocked(getAllGroupParticipants).mockResolvedValue({ items: [], total: 0 });
+      jest.mocked(getGroupDetails).mockResolvedValue({
+        id: 'g3',
+        number: 3,
+        description: 'Quinta à noite',
+        city: 'São Paulo',
+        zone: null,
+        is_active: true,
+        active_participants_count: 2,
+        coordinators: [
+          { id: 'p1', name: 'Joseane Alves', email: null, photo: null },
+          { id: 'p9', name: 'Carla Mendes', email: null, photo: null },
+        ],
+        next_meeting: null,
+      });
+      const { user } = renderPage();
+
+      await openRemove(user, '03');
+      const dialog = await screen.findByRole('dialog');
+      await user.click(
+        within(dialog).getByRole('button', { name: locale.removeFromGroup.confirm }),
+      );
+
+      expect(updateGroupParticipant).toHaveBeenCalledTimes(1);
+      expect(updateGroupParticipant).toHaveBeenCalledWith('g3', 'p1', 'remove');
     });
 
     it('mantém o modal aberto com o erro quando a remoção falha', async () => {

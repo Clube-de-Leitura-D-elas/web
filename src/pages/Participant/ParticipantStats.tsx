@@ -1,18 +1,22 @@
 import { Skeleton } from '../../components/Skeleton';
 import { interpolate, locale, pluralize } from '../../locales';
-import type { ParticipantGroup, ParticipantPresence } from '../../types/participant';
+import type { ParticipantGroup } from '../../types/participant';
+import type { MeetingsState } from './ParticipantRecentMeetings';
 import { formatMonthYear, getElapsedTime } from '../../utils/date';
 import * as Styled from './styles';
 
 const text = locale.participant_details.stats;
+const emptyValue = locale.participant_details.groups.emptyValue;
 
 export type GroupsState = {
   status: 'loading' | 'ready' | 'error';
   groups: ParticipantGroup[];
 };
 
+const RECENT_PRESENCE = 5;
+
 type ParticipantStatsProps = {
-  presence: ParticipantPresence[];
+  meetings: MeetingsState;
   groups: GroupsState;
   entryDate: string | null;
 };
@@ -29,7 +33,7 @@ const describeGroups = (groups: ParticipantGroup[]) => {
 
 const describeTenure = (entryDate: string | null) => {
   const elapsed = getElapsedTime(entryDate);
-  if (!elapsed || !entryDate) return { value: '—', sub: text.noEntryDate };
+  if (!elapsed || !entryDate) return { value: emptyValue, sub: text.noEntryDate };
 
   const since = formatMonthYear(entryDate);
   if (elapsed.years > 0) {
@@ -51,7 +55,10 @@ const describeTenure = (entryDate: string | null) => {
   };
 };
 
-export const ParticipantStats = ({ presence, groups, entryDate }: ParticipantStatsProps) => {
+export const ParticipantStats = ({ meetings, groups, entryDate }: ParticipantStatsProps) => {
+  const presence = meetings.meetings
+    .filter((meeting) => meeting.present !== null)
+    .slice(0, RECENT_PRESENCE);
   const presentCount = presence.filter((item) => item.present).length;
   const percent = presence.length > 0 ? Math.round((presentCount / presence.length) * 100) : 0;
   const tenure = describeTenure(entryDate);
@@ -60,7 +67,15 @@ export const ParticipantStats = ({ presence, groups, entryDate }: ParticipantSta
     <Styled.StatsGrid aria-label={text.label}>
       <Styled.StatCard $enter={100}>
         <Styled.StatLabel>{text.presence}</Styled.StatLabel>
-        <Styled.StatValue>{presence.length > 0 ? `${percent}%` : '—'}</Styled.StatValue>
+        <Styled.StatValue>
+          {meetings.status === 'loading' ? (
+            <Skeleton width="5rem" height="2.5rem" />
+          ) : presence.length > 0 ? (
+            `${percent}%`
+          ) : (
+            emptyValue
+          )}
+        </Styled.StatValue>
         {presence.length > 0 && (
           <Styled.PresenceDots
             role="img"
@@ -70,14 +85,21 @@ export const ParticipantStats = ({ presence, groups, entryDate }: ParticipantSta
             })}
           >
             {presence.map((item, index) => (
-              <Styled.PresenceDot key={item.meetingId} $present={item.present} $index={index} />
+              <Styled.PresenceDot
+                key={item.meetingId}
+                $present={item.present === true}
+                $index={index}
+              />
             ))}
           </Styled.PresenceDots>
         )}
         <Styled.StatSub>
-          {presence.length > 0
-            ? interpolate(text.presenceSub, { present: presentCount, total: presence.length })
-            : text.noPresence}
+          {meetings.status === 'error'
+            ? text.unavailable
+            : meetings.status === 'ready' &&
+              (presence.length > 0
+                ? interpolate(text.presenceSub, { present: presentCount, total: presence.length })
+                : text.noPresence)}
         </Styled.StatSub>
       </Styled.StatCard>
 
@@ -87,7 +109,7 @@ export const ParticipantStats = ({ presence, groups, entryDate }: ParticipantSta
           {groups.status === 'loading' ? (
             <Skeleton width="3rem" height="2.5rem" />
           ) : groups.status === 'error' ? (
-            '—'
+            emptyValue
           ) : (
             groups.groups.length
           )}

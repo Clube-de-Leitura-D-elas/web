@@ -10,12 +10,16 @@ import {
 import { Table, type TableColumn, type TableFetchPage } from '../../components/Table';
 import { Toast, type ToastVariant } from '../../components/Toast';
 import { interpolate, locale } from '../../locales';
-import { getAllGroupParticipants, updateGroupParticipant } from '../../services/groupService';
+import {
+  getAllGroupParticipants,
+  getGroupDetails,
+  updateGroupParticipant,
+} from '../../services/groupService';
+import { Tag } from '../../components/Tag';
 import {
   getCities,
   getParticipantById,
   getAllParticipantGroups,
-  getParticipantPresence,
   getParticipantPresenceHistory,
   getZones,
   updateParticipant,
@@ -26,10 +30,10 @@ import type {
   ParticipantFormValues,
   ParticipantGroup,
   ParticipantOption,
-  ParticipantPresence,
   ParticipantZoneOption,
 } from '../../types/participant';
 import { formatEntryDate } from '../../utils/date';
+import { formatGroupNumber, getFirstName } from '../../utils/format';
 import { ParticipantDetailsSkeleton } from './ParticipantDetailsSkeleton';
 import { ParticipantModal } from './ParticipantModal';
 import { ParticipantProfileCard } from './ParticipantProfileCard';
@@ -50,10 +54,6 @@ type RemoveState = {
   needsSuccessor: boolean;
   candidates: CoordinatorCandidate[];
 };
-
-const firstName = (name: string) => name.split(' ')[0];
-
-const groupNumber = (number: number) => String(number).padStart(2, '0');
 
 const groupColumns: TableColumn[] = [
   { key: 'number', label: text.groups.columns.name, align: 'left' },
@@ -79,7 +79,6 @@ export const ParticipantDetails = () => {
 
 const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
   const [participant, setParticipant] = useState<Participant | null>(null);
-  const [presence, setPresence] = useState<ParticipantPresence[]>([]);
   const [loading, setLoading] = useState(Boolean(participantId));
   const [loadError, setLoadError] = useState<string | null>(participantId ? null : text.loadError);
 
@@ -118,12 +117,9 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
 
     let ignore = false;
 
-    Promise.all([getParticipantById(participantId), getParticipantPresence(participantId)])
-      .then(([participantData, presenceData]) => {
-        if (ignore) return;
-
-        setParticipant(participantData);
-        setPresence(presenceData);
+    getParticipantById(participantId)
+      .then((participantData) => {
+        if (!ignore) setParticipant(participantData);
       })
       .catch(() => {
         if (!ignore) setLoadError(text.loadError);
@@ -157,6 +153,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
     };
   }, []);
 
+  const openingRemove = useRef(false);
   const groupsRequest = useRef<{ version: number; promise: Promise<ParticipantGroup[]> }>(null);
 
   const loadGroups = useCallback(() => {
@@ -216,12 +213,18 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
         return;
       }
 
+      if (openingRemove.current) return;
+      openingRemove.current = true;
       try {
-        const { items } = await getAllGroupParticipants(group.id);
-        const coordinators = items.filter((member) => member.is_coordinator);
+        const [details, { items }] = await Promise.all([
+          getGroupDetails(group.id),
+          getAllGroupParticipants(group.id),
+        ]);
         setRemoveState({
           group,
-          needsSuccessor: coordinators.length <= 1,
+          needsSuccessor:
+            details.coordinators.length <= 1 &&
+            details.coordinators.some((coordinator) => coordinator.id === participantId),
           candidates: items
             .filter((member) => member.id !== participantId && !member.is_coordinator)
             .map(({ id, name }) => ({ id, name })),
@@ -229,6 +232,8 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
       } catch (error) {
         console.error(error);
         showToast(text.groups.removeError, 'error');
+      } finally {
+        openingRemove.current = false;
       }
     },
     [participantId, showToast],
@@ -246,14 +251,16 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
       return {
         rows: groups.slice(start, start + pageSize).map((group) => {
           const entryDate = formatEntryDate(group.entryDate);
-          const label = interpolate(text.groups.groupName, { number: groupNumber(group.number) });
+          const label = interpolate(text.groups.groupName, {
+            number: formatGroupNumber(group.number),
+          });
 
           return {
             number: <Styled.GroupName>{label}</Styled.GroupName>,
             status: (
-              <Styled.Pill $tone={group.isCoordinator ? 'brand' : 'neutral'}>
+              <Tag color={group.isCoordinator ? 'primary' : 'neutral'}>
                 {group.isCoordinator ? text.groups.roles.coordinator : text.groups.roles.member}
-              </Styled.Pill>
+              </Tag>
             ),
             city: group.city ?? text.groups.emptyValue,
             entryDate: (
@@ -264,7 +271,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
             actions: (
               <ActionMenu
                 ariaLabel={interpolate(text.groups.actionsAriaLabel, {
-                  number: groupNumber(group.number),
+                  number: formatGroupNumber(group.number),
                 })}
                 items={[
                   { label: text.groups.viewGroup, onClick: () => navigate(`/grupos/${group.id}`) },
@@ -306,9 +313,9 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
 
     const successor = candidates.find((candidate) => candidate.id === newCoordinatorId);
     const values = {
-      name: firstName(participant.name),
-      number: groupNumber(group.number),
-      coordinator: successor ? firstName(successor.name) : '',
+      name: getFirstName(participant.name),
+      number: formatGroupNumber(group.number),
+      coordinator: successor ? getFirstName(successor.name) : '',
     };
     showToast(
       interpolate(successor ? text.groups.removedWithCoordinator : text.groups.removed, values),
@@ -330,7 +337,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
       setParticipant((current) => (current ? { ...current, active } : current));
       showToast(
         interpolate(active ? text.status.activated : text.status.deactivated, {
-          name: firstName(participant.name),
+          name: getFirstName(participant.name),
         }),
       );
     } catch {
@@ -447,7 +454,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
 
         <Styled.MainColumn>
           <ParticipantStats
-            presence={presence}
+            meetings={meetingsState}
             groups={groupsState}
             entryDate={participant.entryDate}
           />
@@ -463,7 +470,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
             {groupsCount === 0 ? (
               <Styled.EmptyState>
                 <strong>
-                  {interpolate(text.groups.empty, { name: firstName(participant.name) })}
+                  {interpolate(text.groups.empty, { name: getFirstName(participant.name) })}
                 </strong>
                 <span>{text.groups.emptyHint}</span>
               </Styled.EmptyState>
@@ -498,7 +505,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
         isOpen={removeState !== null}
         personName={participant.name}
         groupLabel={interpolate(text.groups.groupName, {
-          number: groupNumber(removeState?.group.number ?? 0),
+          number: formatGroupNumber(removeState?.group.number ?? 0),
         })}
         isCoordinator={removeState?.needsSuccessor ?? false}
         candidates={removeState?.candidates}

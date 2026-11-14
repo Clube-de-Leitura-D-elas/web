@@ -1,6 +1,7 @@
 import { LuInstagram, LuMail, LuPencil, LuPhone } from 'react-icons/lu';
 import { Avatar } from '../../components/Avatar';
 import { Button } from '../../components/Button';
+import { Tag } from '../../components/Tag';
 import { interpolate, locale } from '../../locales';
 import type { Participant } from '../../types/participant';
 import { formatBirthday, formatEntryDate } from '../../utils/date';
@@ -36,11 +37,10 @@ export const ParticipantProfileCard = ({
 }: ParticipantProfileCardProps) => {
   const instagram = participant.instagram?.replace(/^@/, '');
   const subline = joinParts(participant.job, participant.city);
-  const location = participant.city
-    ? participant.zone
+  const location =
+    participant.city && participant.zone
       ? interpolate(text.details.location, { city: participant.city, zone: participant.zone })
-      : participant.city
-    : text.notInformed;
+      : (participant.city ?? participant.zone ?? text.notInformed);
 
   return (
     <Styled.ProfileCard aria-label={text.profile.label} $enter={40}>
@@ -56,14 +56,13 @@ export const ParticipantProfileCard = ({
         </Styled.NameBlock>
 
         <Styled.Pills>
-          <Styled.StatusPill
-            key={String(participant.active)}
-            $tone={participant.active ? 'success' : 'neutral'}
-          >
-            <Styled.Dot aria-hidden="true" />
-            {participant.active ? text.status.active : text.status.inactive}
-          </Styled.StatusPill>
-          {isCoordinator && <Styled.Pill $tone="brand">{text.profile.coordinatorTag}</Styled.Pill>}
+          <Styled.StatusTag key={String(participant.active)}>
+            <Tag color={participant.active ? 'success' : 'neutral'}>
+              <Styled.Dot aria-hidden="true" />
+              {participant.active ? text.status.active : text.status.inactive}
+            </Tag>
+          </Styled.StatusTag>
+          {isCoordinator && <Tag color="primary">{text.profile.coordinatorTag}</Tag>}
         </Styled.Pills>
       </Styled.Identity>
 

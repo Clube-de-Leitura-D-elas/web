@@ -1,38 +1,19 @@
 import styled, { css } from 'styled-components';
 import { Button } from '../../components/Button';
 import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
-import { EASE_OUT, enter, pop, pulse, reducedMotion } from '../../theme/motion';
+import { EASE_OUT, enter, fade, pop, pulse, reducedMotion } from '../../theme/motion';
 import { theme } from '../../theme/theme';
 
 const entrance = ({ $enter }: { $enter?: number }) => ($enter === undefined ? '' : enter($enter));
+
+const fadeEntrance = ({ $enter }: { $enter?: number }) =>
+  $enter === undefined ? '' : fade($enter);
 
 const surfaceCard = css`
   border: 1px solid ${theme.border};
   border-radius: 0.875rem;
   background-color: ${theme.surface};
 `;
-
-const pill = css`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.125rem 0.625rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  line-height: 1.125rem;
-  white-space: nowrap;
-`;
-
-export type PillTone = 'success' | 'neutral' | 'brand' | 'warning' | 'danger';
-
-const PILL_COLORS: Record<PillTone, { background: string; color: string }> = {
-  success: { background: theme.successLight, color: theme.successDark },
-  neutral: { background: theme.surfaceSunken, color: theme.text },
-  brand: { background: theme.surfaceBrandSoft, color: theme.textBrand },
-  warning: { background: theme.warningLight, color: theme.warningDark },
-  danger: { background: theme.errorLight, color: theme.errorDark },
-};
 
 export const Page = styled.div`
   width: 100%;
@@ -144,15 +125,8 @@ export const Pills = styled.div`
   gap: 0.5rem;
 `;
 
-export const Pill = styled.span<{ $tone: PillTone }>`
-  ${pill}
-  background-color: ${({ $tone }) => PILL_COLORS[$tone].background};
-  color: ${({ $tone }) => PILL_COLORS[$tone].color};
-`;
-
-export const StatusPill = styled(Pill)`
-  padding: 0.25rem 0.625rem;
-  font-size: 0.8125rem;
+export const StatusTag = styled.span`
+  display: inline-flex;
   ${pop(160)}
 `;
 
@@ -362,7 +336,7 @@ export const PresenceDot = styled.span<{ $present: boolean; $index: number }>`
 export const Card = styled.section<{ $enter?: number }>`
   ${surfaceCard}
   min-width: 0;
-  ${entrance}
+  ${fadeEntrance}
 `;
 
 export const CardHeader = styled.div`
@@ -385,7 +359,12 @@ export const CardTitle = styled.h2`
 `;
 
 export const Count = styled.span`
-  ${pill}
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.125rem;
   padding: 0.0625rem 0.5rem;
   background-color: ${theme.surfaceSunken};
   color: ${theme.text};
