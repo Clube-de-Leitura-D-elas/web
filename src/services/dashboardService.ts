@@ -1,6 +1,7 @@
 import type {
   ActiveParticipantsItem,
   ActiveParticipantsResponse,
+  DashboardKpisResponse,
   Granularity,
   RegistrationsItem,
   RegistrationsResponse,
@@ -33,4 +34,8 @@ export async function getActiveParticipants(
   );
 
   return data.items;
+}
+
+export async function getDashboardKpis(): Promise<DashboardKpisResponse> {
+  return invokeGet<DashboardKpisResponse>('get-dashboard-kpis-web', {});
 }

@@ -1,12 +1,17 @@
 import { screen } from '@testing-library/react';
 import { locale } from '../../locales';
-import { getActiveParticipants, getRegistrations } from '../../services/dashboardService';
+import {
+  getActiveParticipants,
+  getDashboardKpis,
+  getRegistrations,
+} from '../../services/dashboardService';
 import { renderWithProviders } from '../../test/render';
 import { Dashboard } from '.';
 
 jest.mock('../../services/dashboardService', () => ({
   getRegistrations: jest.fn(),
   getActiveParticipants: jest.fn(),
+  getDashboardKpis: jest.fn(),
 }));
 
 const text = locale.dashboard;
@@ -20,6 +25,12 @@ beforeEach(() => {
     { period: '2026-10-01', total: 980 },
     { period: '2026-11-01', total: 984 },
   ]);
+  jest.mocked(getDashboardKpis).mockResolvedValue({
+    groups: {
+      active: 2,
+      total: 5,
+    },
+  });
 });
 
 // espera os dois gráficos carregarem, para nenhuma atualização de estado sobrar depois do teste
@@ -61,5 +72,14 @@ describe('Dashboard', () => {
       screen.getByRole('region', { name: text.activeParticipants.title }),
     );
     await waitForCharts();
+  });
+
+  it('mostra o indicador de grupos na área dos indicadores', async () => {
+    renderWithProviders(<Dashboard />);
+
+    const kpis = screen.getByRole('region', { name: text.kpis.label });
+
+    expect(await screen.findByText(text.kpis.groups.title)).toBeInTheDocument();
+    expect(kpis).toContainElement(screen.getByText('5'));
   });
 });

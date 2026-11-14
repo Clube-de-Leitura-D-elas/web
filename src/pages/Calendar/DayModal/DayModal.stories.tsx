@@ -64,6 +64,7 @@ const meta = {
     date: new Date(2026, 9, 15, 12),
     events: mockEvents,
     onClose: () => {},
+    onSelectEvent: () => {},
   },
 } satisfies Meta<typeof DayModal>;
 

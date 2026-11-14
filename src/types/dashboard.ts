@@ -20,3 +20,10 @@ export type ActiveParticipantsItem = {
 export type ActiveParticipantsResponse = {
   items: ActiveParticipantsItem[];
 };
+
+export type DashboardKpisResponse = {
+  groups: {
+    active: number;
+    total: number;
+  };
+};
