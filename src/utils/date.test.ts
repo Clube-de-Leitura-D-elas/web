@@ -20,6 +20,10 @@ describe('formatMonthYear', () => {
     expect(formatMonthYear('2024-03-15T12:00:00Z')).toBe('mar/2024');
   });
 
+  it('trata a data sem hora como o próprio dia, sem voltar um mês', () => {
+    expect(formatMonthYear('2025-01-01')).toBe('jan/2025');
+  });
+
   it('usa o fuso local para decidir o mês', () => {
     // 01/04 às 01h UTC ainda é 31/03 em São Paulo
     expect(formatMonthYear('2024-04-01T01:00:00Z')).toBe('mar/2024');

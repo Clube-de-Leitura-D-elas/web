@@ -21,6 +21,8 @@ const isValid = (date: Date) => !Number.isNaN(date.getTime());
 
 // "mar/2024"
 export const formatMonthYear = (iso: string): string => {
+  if (DATE_ONLY.test(iso)) return formatMonthLabel(iso);
+
   const date = new Date(iso);
   if (!isValid(date)) return '';
 

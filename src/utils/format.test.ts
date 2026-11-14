@@ -1,4 +1,11 @@
-import { formatRating, getFirstName } from './format';
+import { formatGroupNumber, formatRating, getFirstName } from './format';
+
+describe('formatGroupNumber', () => {
+  it('completa com zero à esquerda', () => {
+    expect(formatGroupNumber(3)).toBe('03');
+    expect(formatGroupNumber(12)).toBe('12');
+  });
+});
 
 describe('formatRating', () => {
   it('usa vírgula e uma casa decimal', () => {
