@@ -12,6 +12,23 @@ export const Container = styled.button<{ $variant: ButtonVariant; $size: ButtonS
   font-size: 1rem;
   font-weight: bold;
   white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.12s ease;
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:active:not(:disabled) {
+      transform: none;
+    }
+  }
 
   ${({ theme, $variant }) => {
     switch ($variant) {

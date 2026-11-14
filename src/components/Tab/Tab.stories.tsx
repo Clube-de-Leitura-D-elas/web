@@ -82,3 +82,22 @@ export const Controlado: Story = {
     return <ControlledExample />;
   },
 };
+
+export const ComContador: Story = {
+  render: () => (
+    <div style={{ maxWidth: 560 }}>
+      <Tabs
+        size="lg"
+        tabs={[
+          { value: 'participantes', label: 'Participantes', count: 10, children: <p>Lista.</p> },
+          {
+            value: 'historico',
+            label: 'Histórico de encontros',
+            count: 14,
+            children: <p>Encontros.</p>,
+          },
+        ]}
+      />
+    </div>
+  ),
+};

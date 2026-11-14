@@ -1,4 +1,5 @@
-import styled, { css } from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
+import { EASE_OUT, reducedMotion } from '../../theme/motion';
 import { theme } from '../../theme/theme';
 
 export const Container = styled.div`
@@ -23,7 +24,21 @@ export const TriggerButton = styled.button`
   }
 `;
 
+const menuIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+`;
+
 export const MenuDropdown = styled.div`
+  animation: ${menuIn} 0.18s ${EASE_OUT} both;
+  ${reducedMotion}
   position: fixed;
   z-index: 50;
   background-color: ${theme.background};

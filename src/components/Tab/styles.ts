@@ -83,6 +83,25 @@ export const TabButton = styled.button<{ $active: boolean; $size: TabSize }>`
   }
 `;
 
+export const Count = styled.span<{ $active: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  margin-left: 0.5rem;
+  padding: 0.0625rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.125rem;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+  background-color: ${({ theme, $active }) =>
+    $active ? theme.surfaceBrandSoft : theme.surfaceSunken};
+  color: ${({ theme, $active }) => ($active ? theme.textBrand : theme.text)};
+`;
+
 export const Panel = styled.div`
   padding-top: 1rem;
   color: ${({ theme }) => theme.text};

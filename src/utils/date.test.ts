@@ -1,9 +1,13 @@
 import {
+  formatDateBadge,
   formatDayMonth,
   formatEntryDate,
+  formatMeetingSummary,
   formatMeetingDate,
   formatMonthLabel,
   formatMonthYear,
+  formatShortDate,
+  formatWeekdayTime,
   getRegistrationsRange,
 } from './date';
 
@@ -125,5 +129,57 @@ describe('formatDayMonth', () => {
 
   it('devolve texto vazio para valor inválido', () => {
     expect(formatDayMonth('')).toBe('');
+  });
+});
+
+describe('formatShortDate', () => {
+  it('formata dia, mês abreviado e ano', () => {
+    expect(formatShortDate('2026-08-24T22:00:00Z')).toBe('24 ago 2026');
+  });
+
+  it('usa o dia de São Paulo, não o de UTC', () => {
+    expect(formatShortDate('2026-07-11T01:30:00Z')).toBe('10 jul 2026');
+  });
+
+  it('devolve texto vazio para data inválida', () => {
+    expect(formatShortDate('invalido')).toBe('');
+  });
+});
+
+describe('formatDateBadge', () => {
+  it('separa dia com dois dígitos e mês abreviado sem ponto', () => {
+    expect(formatDateBadge('2026-08-04T22:00:00Z')).toEqual({ day: '04', month: 'ago' });
+  });
+
+  it('usa o dia de São Paulo, não o de UTC', () => {
+    expect(formatDateBadge('2026-09-01T01:00:00Z')).toEqual({ day: '31', month: 'ago' });
+  });
+
+  it('devolve null para data inválida', () => {
+    expect(formatDateBadge('invalido')).toBeNull();
+  });
+});
+
+describe('formatMeetingSummary', () => {
+  it('formata dia da semana abreviado, dia, mês e hora em São Paulo', () => {
+    expect(formatMeetingSummary('2026-11-12T22:30:00Z')).toBe('Qui, 12 nov · 19h30');
+  });
+
+  it('omite os minutos em hora cheia', () => {
+    expect(formatMeetingSummary('2026-11-14T13:00:00Z')).toBe('Sáb, 14 nov · 10h');
+  });
+
+  it('devolve texto vazio para data inválida', () => {
+    expect(formatMeetingSummary('invalido')).toBe('');
+  });
+});
+
+describe('formatWeekdayTime', () => {
+  it('formata o dia da semana por extenso e a hora', () => {
+    expect(formatWeekdayTime('2026-10-22T22:30:00Z')).toBe('Quinta, 19h30');
+  });
+
+  it('devolve texto vazio para data inválida', () => {
+    expect(formatWeekdayTime('invalido')).toBe('');
   });
 });

@@ -1,164 +1,94 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router';
-import { LuCalendar, LuMapPin, LuStar, LuUserRound } from 'react-icons/lu';
-import { BackButton } from '../../components/BackButton';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { LuStar } from 'react-icons/lu';
 import { ActionMenu } from '../../components/ActionMenu';
-import * as Styled from './styles';
-import { GroupModal } from './GroupModal';
+import { Avatar } from '../../components/Avatar';
+import { Breadcrumb } from '../../components/Breadcrumb';
+import { DataState } from '../../components/DataState';
 import { Modal } from '../../components/Modal';
+import {
+  RemoveFromGroupModal,
+  type CoordinatorCandidate,
+} from '../../components/RemoveFromGroupModal';
+import { Tag } from '../../components/Tag';
 import { Tabs } from '../../components/Tab';
-import { Skeleton } from '../../components/Skeleton';
 import {
   Table,
   type TableColumn,
-  type TablePageRequest,
   type TablePage,
+  type TablePageRequest,
 } from '../../components/Table';
+import { Toast, type ToastVariant } from '../../components/Toast';
 import { useLocale } from '../../hooks/useLocale';
-import { interpolate } from '../../locales';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
+import { interpolate, pluralize } from '../../locales';
 import {
+  getAllGroupParticipants,
   getGroupCities,
   getGroupDetails,
   getGroupMeetingsPage,
-  getGroupParticipantsPage,
   getGroupZones,
   updateGroupLocation,
-  updateGroupStatus,
   updateGroupParticipant,
+  updateGroupStatus,
 } from '../../services/groupService';
 import type {
   GroupDetails as GroupDetailsData,
   GroupFormValues,
   GroupMeetingHistoryItem,
   GroupOption,
-  GroupParticipantAction,
-  GroupZoneOption,
   GroupParticipantListItem,
+  GroupZoneOption,
 } from '../../types/group';
+import type { Page } from '../../types/participantList';
+import { formatEntryDate, formatShortDate, formatWeekdayTime } from '../../utils/date';
+import { formatRating, getFirstName } from '../../utils/format';
+import { getAttendance, isIncomplete } from './attendance';
+import { GroupDetailsSkeleton } from './GroupDetailsSkeleton';
+import { GroupHeader } from './GroupHeader';
+import { GroupModal } from './GroupModal';
+import { GroupStats, type AsyncList } from './GroupStats';
+import { GroupSummary } from './GroupSummary';
+import * as Styled from './styles';
 
 type GroupDetailsTab = 'participants' | 'history';
 
-const formatHistoryDate = (iso: string) => {
-  const parts = new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'America/Sao_Paulo',
-  }).formatToParts(new Date(iso));
-  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
-  const month = get('month').replace('.', '');
-
-  return `${get('day')} ${month.charAt(0).toUpperCase()}${month.slice(1)} ${get('year')}`;
+type ToastState = {
+  id: number;
+  message: string;
+  variant: ToastVariant;
+  undo?: () => void;
 };
 
-const formatNextMeetingDate = (iso: string) => {
-  const date = new Date(iso);
-  const day = new Intl.DateTimeFormat('pt-BR', {
-    day: 'numeric',
-    month: 'long',
-    timeZone: 'America/Sao_Paulo',
-  }).format(date);
-  const timeParts = new Intl.DateTimeFormat('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'America/Sao_Paulo',
-    hourCycle: 'h23',
-  }).formatToParts(date);
+const STATS_MEETINGS_PAGE = { page: 1, pageSize: 100 };
 
-  const hour = timeParts.find((p) => p.type === 'hour')?.value ?? '';
-  const minute = timeParts.find((p) => p.type === 'minute')?.value ?? '';
-  const formattedTime = minute === '00' ? `${hour}h` : `${hour}h${minute}`;
-  const [d, , month] = day.split(' ');
-  return `${d} de ${month.charAt(0).toUpperCase()}${month.slice(1)}, ${formattedTime}`;
-};
+const LOADING_LIST: AsyncList<never> = { status: 'loading', items: [], total: 0 };
 
-const GroupDetailsSkeleton = () => {
-  return (
-    <Styled.Container>
-      <Skeleton width="5rem" height="0.875rem" />
-
-      <Styled.Header>
-        <Styled.HeaderInfo>
-          <Skeleton width="13rem" height="2rem" />
-          <Skeleton width="10rem" height="1rem" />
-        </Styled.HeaderInfo>
-
-        <Styled.HeaderActions>
-          <Skeleton width="5.5rem" height="2.5rem" />
-          <Skeleton width="5.5rem" height="2.5rem" />
-        </Styled.HeaderActions>
-      </Styled.Header>
-
-      <Styled.CardsRow>
-        <Styled.Card>
-          <Skeleton width="8rem" height="1.25rem" />
-
-          <Styled.CoordinatorRow>
-            <Skeleton width="2.5rem" height="2.5rem" variant="circular" />
-
-            <Styled.CoordinatorInfo>
-              <Skeleton width="7rem" height="1rem" />
-              <Skeleton width="5rem" height="0.75rem" />
-            </Styled.CoordinatorInfo>
-          </Styled.CoordinatorRow>
-
-          <Skeleton width="6rem" height="1.75rem" />
-        </Styled.Card>
-
-        <Styled.Card>
-          <Styled.MeetingHeader>
-            <Skeleton width="9rem" height="1.25rem" />
-            <Skeleton width="5rem" height="1.25rem" />
-          </Styled.MeetingHeader>
-
-          <Styled.MeetingBody>
-            <Skeleton width="2.5rem" height="2.5rem" />
-
-            <Styled.MeetingInfo>
-              <Skeleton width="9rem" height="1.1rem" />
-              <Skeleton width="7rem" height="0.85rem" />
-              <Skeleton width="8rem" height="0.85rem" />
-            </Styled.MeetingInfo>
-          </Styled.MeetingBody>
-        </Styled.Card>
-      </Styled.CardsRow>
-      <Styled.SkeletonTabs>
-        <Skeleton width="6rem" height="2rem" />
-        <Skeleton width="7rem" height="2rem" />
-      </Styled.SkeletonTabs>
-
-      <Styled.TableContainer>
-        <Styled.SkeletonTable>
-          {Array.from({ length: 5 }).map((_, rowIndex) => (
-            <Styled.SkeletonTableRow key={rowIndex}>
-              <Skeleton width="30%" height="1rem" />
-              <Skeleton width="20%" height="1rem" />
-              <Skeleton width="15%" height="1rem" />
-              <Skeleton width="10%" height="1rem" />
-            </Styled.SkeletonTableRow>
-          ))}
-        </Styled.SkeletonTable>
-      </Styled.TableContainer>
-    </Styled.Container>
-  );
-};
+const errorMessage = (err: unknown, fallback: string) =>
+  err instanceof Error && err.message ? err.message : fallback;
 
 export const GroupDetails = () => {
   const locale = useLocale();
+  const text = locale.group_details;
   const { groupId = '' } = useParams<{ groupId: string }>();
+
+  const [result, setResult] = useState<{ id: string; group: GroupDetailsData | null } | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [activeTab, setActiveTab] = useState<GroupDetailsTab>('participants');
+  const [participantsVersion, setParticipantsVersion] = useState(0);
+  const [membersState, setMembersState] = useState<{
+    key: string;
+    list: AsyncList<GroupParticipantListItem>;
+  } | null>(null);
+  const [meetingsState, setMeetingsState] = useState<{
+    key: string;
+    list: AsyncList<GroupMeetingHistoryItem>;
+  } | null>(null);
 
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<GroupDetailsTab>('participants');
-  const [participantsVersion, setParticipantsVersion] = useState(0);
-  const [selectedParticipant, setSelectedParticipant] = useState<GroupParticipantListItem | null>(
-    null,
-  );
-  const [participantAction, setParticipantAction] = useState<GroupParticipantAction | null>(null);
-  const [savingParticipant, setSavingParticipant] = useState(false);
-  const [participantError, setParticipantError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ id: string; group: GroupDetailsData | null } | null>(null);
 
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [savingLocation, setSavingLocation] = useState(false);
@@ -167,12 +97,17 @@ export const GroupDetails = () => {
   const [zones, setZones] = useState<GroupZoneOption[]>([]);
   const [optionsError, setOptionsError] = useState(false);
 
-  const location = useLocation();
+  const [removal, setRemoval] = useState<{
+    groupId: string;
+    participant: GroupParticipantListItem;
+    candidates: CoordinatorCandidate[];
+  } | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
+
+  const isMobile = useMediaQuery(MOBILE_QUERY);
   const navigate = useNavigate();
-  const handleBack = () => {
-    if (location.key === 'default') navigate('/grupos');
-    else navigate(-1);
-  };
 
   useEffect(() => {
     let ignore = false;
@@ -189,7 +124,7 @@ export const GroupDetails = () => {
     return () => {
       ignore = true;
     };
-  }, [groupId]);
+  }, [groupId, loadAttempt]);
 
   useEffect(() => {
     let ignore = false;
@@ -211,20 +146,224 @@ export const GroupDetails = () => {
     };
   }, []);
 
+  const membersRequest = useRef<{ key: string; promise: Promise<Page<GroupParticipantListItem>> }>(
+    null,
+  );
+
+  const loadMembers = useCallback(() => {
+    const key = `${groupId}:${participantsVersion}`;
+    if (membersRequest.current?.key !== key) {
+      const promise = getAllGroupParticipants(groupId);
+      membersRequest.current = { key, promise };
+      promise.catch(() => {
+        if (membersRequest.current?.promise === promise) membersRequest.current = null;
+      });
+    }
+    return membersRequest.current.promise;
+  }, [groupId, participantsVersion]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    loadMembers()
+      .then(({ items, total }) => {
+        if (!ignore) setMembersState({ key: groupId, list: { status: 'ready', items, total } });
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!ignore) {
+          setMembersState({ key: groupId, list: { status: 'error', items: [], total: 0 } });
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [groupId, loadMembers]);
+
+  const meetingsRequest = useRef<{
+    key: string;
+    promise: Promise<Page<GroupMeetingHistoryItem>>;
+  }>(null);
+
+  const loadMeetings = useCallback(() => {
+    if (meetingsRequest.current?.key !== groupId) {
+      const promise = getGroupMeetingsPage(groupId, STATS_MEETINGS_PAGE);
+      meetingsRequest.current = { key: groupId, promise };
+      promise.catch(() => {
+        if (meetingsRequest.current?.promise === promise) meetingsRequest.current = null;
+      });
+    }
+    return meetingsRequest.current.promise;
+  }, [groupId]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    loadMeetings()
+      .then(({ items, total }) => {
+        if (!ignore) setMeetingsState({ key: groupId, list: { status: 'ready', items, total } });
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!ignore) {
+          setMeetingsState({ key: groupId, list: { status: 'error', items: [], total: 0 } });
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [groupId, loadMeetings]);
+
   const loading = result?.id !== groupId;
   const group = result?.group ?? null;
   const isLastCoordinator = group?.coordinators.length === 1;
+  const members = membersState?.key === groupId ? membersState.list : LOADING_LIST;
+  const meetings = meetingsState?.key === groupId ? meetingsState.list : LOADING_LIST;
 
-  const openParticipantAction = (
-    participant: GroupParticipantListItem,
-    action: GroupParticipantAction,
-  ) => {
-    setSelectedParticipant(participant);
-    setParticipantAction(action);
-    setParticipantError(null);
+  const showToast = useCallback(
+    (next: Omit<ToastState, 'id' | 'variant'> & { variant?: ToastVariant }) =>
+      setToast({ variant: 'success', ...next, id: Date.now() }),
+    [],
+  );
+
+  const handleRetry = () => {
+    setResult(null);
+    setLoadAttempt((attempt) => attempt + 1);
   };
 
-  const handleOpenModal = () => {
+  const refreshGroup = useCallback(async () => {
+    try {
+      const updatedGroup = await getGroupDetails(groupId);
+      setResult((prev) => (prev?.id === groupId ? { id: groupId, group: updatedGroup } : prev));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setParticipantsVersion((version) => version + 1);
+    }
+  }, [groupId]);
+
+  const applyCoordinatorChange = useCallback(
+    async (participantId: string, action: 'promote' | 'demote'): Promise<string | null> => {
+      try {
+        await updateGroupParticipant(groupId, participantId, action);
+        return null;
+      } catch (err) {
+        console.error(err);
+        return errorMessage(err, text.participantActions.error);
+      } finally {
+        await refreshGroup();
+      }
+    },
+    [groupId, refreshGroup, text],
+  );
+
+  const changeCoordinator = useCallback(
+    async (participant: GroupParticipantListItem, action: 'promote' | 'demote') => {
+      const failure = await applyCoordinatorChange(participant.id, action);
+      if (failure) {
+        showToast({ variant: 'error', message: failure });
+        return;
+      }
+
+      const inverse = action === 'promote' ? 'demote' : 'promote';
+      showToast({
+        message: interpolate(
+          action === 'promote' ? text.participantActions.promoted : text.participantActions.demoted,
+          { name: getFirstName(participant.name) },
+        ),
+        undo: async () => {
+          const undoFailure = await applyCoordinatorChange(participant.id, inverse);
+          showToast(
+            undoFailure
+              ? { variant: 'error', message: undoFailure }
+              : { message: text.participantActions.undone },
+          );
+        },
+      });
+    },
+    [applyCoordinatorChange, showToast, text],
+  );
+
+  const openRemove = useCallback(
+    async (participant: GroupParticipantListItem) => {
+      setRemoveError(null);
+      try {
+        const { items } = await loadMembers();
+        setRemoval({
+          groupId,
+          participant,
+          candidates: items
+            .filter((member) => member.id !== participant.id && !member.is_coordinator)
+            .map(({ id, name }) => ({ id, name })),
+        });
+      } catch (err) {
+        console.error(err);
+        showToast({ variant: 'error', message: text.participantActions.error });
+      }
+    },
+    [groupId, loadMembers, showToast, text],
+  );
+
+  const removeTarget = removal?.groupId === groupId ? removal.participant : null;
+  const removeCandidates = removal?.groupId === groupId ? removal.candidates : [];
+
+  const removeNeedsSuccessor =
+    removeTarget !== null &&
+    isLastCoordinator === true &&
+    group?.coordinators[0]?.id === removeTarget.id;
+
+  const confirmRemove = async (newCoordinatorId: string | null) => {
+    if (!removeTarget || removing) return;
+
+    setRemoving(true);
+    setRemoveError(null);
+    let promoted = false;
+    try {
+      if (newCoordinatorId) {
+        await updateGroupParticipant(groupId, newCoordinatorId, 'promote');
+        promoted = true;
+      }
+      await updateGroupParticipant(groupId, removeTarget.id, 'remove');
+    } catch (err) {
+      console.error(err);
+      let rolledBack = true;
+      if (promoted && newCoordinatorId) {
+        await updateGroupParticipant(groupId, newCoordinatorId, 'demote').catch((rollbackErr) => {
+          console.error(rollbackErr);
+          rolledBack = false;
+        });
+      }
+      const successor = removeCandidates.find((candidate) => candidate.id === newCoordinatorId);
+      setRemoveError(
+        rolledBack || !successor
+          ? errorMessage(err, text.participantActions.error)
+          : interpolate(text.participantActions.rollbackError, {
+              name: getFirstName(removeTarget.name),
+              coordinator: getFirstName(successor.name),
+            }),
+      );
+      await refreshGroup();
+      setRemoving(false);
+      return;
+    }
+
+    await refreshGroup();
+    const successor = removeCandidates.find((candidate) => candidate.id === newCoordinatorId);
+    showToast({
+      message: successor
+        ? interpolate(text.participantActions.removedWithCoordinator, {
+            name: getFirstName(removeTarget.name),
+            coordinator: getFirstName(successor.name),
+          })
+        : interpolate(text.participantActions.removed, { name: getFirstName(removeTarget.name) }),
+    });
+    setRemoval(null);
+    setRemoving(false);
+  };
+
+  const handleOpenStatusModal = () => {
     setStatusError(null);
     setIsCloseModalOpen(true);
   };
@@ -272,9 +411,7 @@ export const GroupDetails = () => {
     } catch (err) {
       // Deu erro: mantém o modal aberto e mostra a mensagem.
       console.error(err);
-      setLocationError(
-        err instanceof Error && err.message ? err.message : locale.group_details.modal.modalError,
-      );
+      setLocationError(errorMessage(err, text.modal.modalError));
     } finally {
       setSavingLocation(false);
     }
@@ -287,431 +424,341 @@ export const GroupDetails = () => {
       setIsSubmitting(true);
       setStatusError(null);
 
-      const targetStatus = !isActive;
-      const updatedStatus = await updateGroupStatus(groupId, targetStatus);
+      const updatedStatus = await updateGroupStatus(groupId, !group.is_active);
       setResult((prev) =>
         prev && prev.group ? { ...prev, group: { ...prev.group, is_active: updatedStatus } } : prev,
       );
       setIsCloseModalOpen(false);
     } catch (err) {
       console.error(err);
-      setStatusError(locale.group_details.updateStatusError);
+      setStatusError(text.updateStatusError);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const refreshGroup = async () => {
-    try {
-      const updatedGroup = await getGroupDetails(groupId);
-      setResult({ id: groupId, group: updatedGroup });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      // a tabela busca por conta própria, então atualiza mesmo se o card não recarregar
-      setParticipantsVersion((version) => version + 1);
-    }
-  };
-
-  const confirmParticipantAction = async () => {
-    if (!selectedParticipant || !participantAction || savingParticipant) return;
-
-    // O card pode ter mudado com o modal aberto (ex.: depois de um 409).
-    const removesCoordinator =
-      selectedParticipant.is_coordinator &&
-      (participantAction === 'demote' || participantAction === 'remove');
-    if (removesCoordinator && isLastCoordinator) {
-      setParticipantError(locale.group_details.participantActions.lastCoordinatorHint);
-      return;
-    }
-
-    setSavingParticipant(true);
-    setParticipantError(null);
-    try {
-      await updateGroupParticipant(groupId, selectedParticipant.id, participantAction);
-    } catch (err) {
-      console.error(err);
-      setParticipantError(
-        err instanceof Error && err.message
-          ? err.message
-          : locale.group_details.participantActions.error,
-      );
-      // O servidor pode ter mudado (ex.: 409); recarrega o card e a tabela para refletir o estado real.
-      await refreshGroup();
-      setSavingParticipant(false);
-      return;
-    }
-
-    // A escrita deu certo: fecha o modal mesmo que o recarregamento falhe, para não repetir a ação.
-    await refreshGroup();
-    setSelectedParticipant(null);
-    setParticipantAction(null);
-    setSavingParticipant(false);
-  };
-
-  //aba 1
   const participantColumns: TableColumn[] = useMemo(
     () => [
-      { key: 'name', label: locale.group_details.table.columns.name, align: 'left' },
-      { key: 'entryDate', label: locale.group_details.table.columns.entryDate, align: 'center' },
-      { key: 'attendance', label: locale.group_details.table.columns.attendance, align: 'center' },
-      { key: 'email', label: locale.group_details.table.columns.email, align: 'center' },
+      {
+        key: 'participant',
+        label: text.table.columns.participant,
+        align: 'left',
+        width: '42%',
+      },
+      { key: 'entryDate', label: text.table.columns.entryDate, align: 'left', width: '18%' },
+      { key: 'attendance', label: text.table.columns.attendance, align: 'left' },
       {
         key: 'actions',
-        label: locale.group_details.table.columns.actions,
+        label: <Styled.VisuallyHidden>{text.table.columns.actions}</Styled.VisuallyHidden>,
         align: 'right',
-        width: '6rem',
+        width: '4.5rem',
         ignoreRowClick: true,
       },
     ],
-    [locale],
+    [text],
   );
 
   const fetchParticipants = useCallback(
-    async (request: TablePageRequest): Promise<TablePage> => {
-      void participantsVersion;
-      const { items, total } = await getGroupParticipantsPage(groupId, request);
+    async ({ page, pageSize }: TablePageRequest): Promise<TablePage> => {
+      const request = loadMembers();
+      const { items, total } = await request;
+      if (membersRequest.current?.promise === request) {
+        setMembersState({ key: groupId, list: { status: 'ready', items, total } });
+      }
+      const table = text.table;
+      const actions = text.participantActions;
+      const sorted = [...items].sort((a, b) => Number(b.is_coordinator) - Number(a.is_coordinator));
+      const start = (page - 1) * pageSize;
 
-      const rows = items.map((p: GroupParticipantListItem) => ({
-        name: (
-          <Styled.NameCell>
-            <Styled.ParticipantName>{p.name}</Styled.ParticipantName>
-            {p.is_coordinator && (
-              <Styled.CoordinatorTag>
-                {locale.group_details.table.coordinatorTag}
-              </Styled.CoordinatorTag>
-            )}
-          </Styled.NameCell>
-        ),
-        entryDate: p.entry_date
-          ? new Date(p.entry_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
-          : locale.group_details.table.emptyValue,
-        attendance: (
-          <Styled.AttendanceList>
-            {p.attendance.length > 0
-              ? p.attendance.map((mark, index) => (
-                  <Styled.AttendanceMark
-                    key={index}
-                    $present={mark === 'P'}
-                    aria-label={
-                      mark === 'P'
-                        ? locale.group_details.table.present
-                        : locale.group_details.table.absent
-                    }
-                  >
-                    <span aria-hidden="true">{mark}</span>
-                  </Styled.AttendanceMark>
-                ))
-              : locale.group_details.table.emptyValue}
-          </Styled.AttendanceList>
-        ),
-        email: p.email || locale.group_details.table.emptyValue,
-        actions: (
-          <ActionMenu
-            ariaLabel={interpolate(locale.group_details.table.actionsAriaLabel, {
-              name: p.name,
-            })}
-            items={[
-              {
-                label: p.is_coordinator
-                  ? locale.group_details.participantActions.demote
-                  : locale.group_details.participantActions.promote,
-                // o grupo precisa manter ao menos uma coordenadora
-                disabled: p.is_coordinator && isLastCoordinator,
-                hint:
-                  p.is_coordinator && isLastCoordinator
-                    ? locale.group_details.participantActions.lastCoordinatorHint
-                    : undefined,
-                onClick: () => openParticipantAction(p, p.is_coordinator ? 'demote' : 'promote'),
-              },
-              {
-                label: locale.group_details.participantActions.remove,
-                variant: 'danger' as const,
-                disabled: p.is_coordinator && isLastCoordinator,
-                onClick: () => openParticipantAction(p, 'remove'),
-              },
-            ]}
-          />
-        ),
-        rowHref: `/participantes/${p.id}`,
-      }));
+      const rows = sorted.slice(start, start + pageSize).map((p) => {
+        const attendance = getAttendance(p.attendance);
+        const entryDate = formatEntryDate(p.entry_date);
+        const lockedCoordinator = p.is_coordinator && isLastCoordinator;
 
-      return { rows, total };
+        return {
+          participant: (
+            <Styled.ParticipantCell>
+              <Avatar name={p.name} />
+              <Styled.ParticipantInfo>
+                <Styled.NameRow>
+                  <Styled.Name>{p.name}</Styled.Name>
+                  {p.is_coordinator && <Tag color="primary">{table.coordinatorTag}</Tag>}
+                  {isIncomplete(p) && <Tag color="warning">{table.incompleteTag}</Tag>}
+                </Styled.NameRow>
+                <Styled.Email $missing={!p.email}>{p.email || table.noEmail}</Styled.Email>
+              </Styled.ParticipantInfo>
+            </Styled.ParticipantCell>
+          ),
+          entryDate: (
+            <Styled.EntryDate $missing={!entryDate}>
+              {entryDate || table.noEntryDate}
+            </Styled.EntryDate>
+          ),
+          attendance:
+            attendance.total > 0 ? (
+              <Styled.Attendance>
+                <Styled.Dots
+                  role="img"
+                  aria-label={interpolate(table.attendanceAria, {
+                    present: attendance.present,
+                    total: attendance.total,
+                  })}
+                >
+                  {p.attendance.map((mark, index) => (
+                    <Styled.Dot key={index} $present={mark === 'P'} $index={index} />
+                  ))}
+                </Styled.Dots>
+                <Styled.Percent $low={attendance.low}>{attendance.percent}%</Styled.Percent>
+                {attendance.low && <Tag color="warning">{table.lowTag}</Tag>}
+              </Styled.Attendance>
+            ) : (
+              <Styled.Muted>{table.noAttendance}</Styled.Muted>
+            ),
+          actions: (
+            <ActionMenu
+              ariaLabel={interpolate(table.actionsAriaLabel, { name: p.name })}
+              items={[
+                {
+                  label: actions.viewProfile,
+                  onClick: () => navigate(`/participantes/${p.id}`),
+                },
+                {
+                  label: p.is_coordinator ? actions.demote : actions.promote,
+                  disabled: lockedCoordinator,
+                  hint: lockedCoordinator ? actions.lastCoordinatorHint : undefined,
+                  onClick: () => changeCoordinator(p, p.is_coordinator ? 'demote' : 'promote'),
+                },
+                {
+                  label: actions.remove,
+                  variant: 'danger' as const,
+                  onClick: () => openRemove(p),
+                },
+              ]}
+            />
+          ),
+          rowHref: `/participantes/${p.id}`,
+        };
+      });
+
+      return { rows, total: sorted.length };
     },
-    [groupId, locale, participantsVersion, isLastCoordinator],
+    [groupId, loadMembers, text, isLastCoordinator, navigate, changeCoordinator, openRemove],
   );
 
-  //aba 2
   const meetingColumns: TableColumn[] = useMemo(
     () => [
-      { key: 'date', label: locale.group_details.history.columns.date, align: 'left' },
-      { key: 'book', label: locale.group_details.history.columns.book, align: 'left' },
-      { key: 'place', label: locale.group_details.history.columns.place, align: 'left' },
-      { key: 'attendance', label: locale.group_details.history.columns.attendance, align: 'left' },
-      { key: 'rating', label: locale.group_details.history.columns.rating, align: 'left' },
-      {
-        key: 'actions',
-        label: locale.group_details.history.columns.actions,
-        align: 'right',
-        width: '6rem',
-        ignoreRowClick: true,
-      },
+      { key: 'date', label: text.history.columns.date, align: 'left', width: '17%' },
+      { key: 'book', label: text.history.columns.book, align: 'left', width: '27%' },
+      { key: 'place', label: text.history.columns.place, align: 'left', width: '20%' },
+      { key: 'attendance', label: text.history.columns.attendance, align: 'left', width: '18%' },
+      { key: 'rating', label: text.history.columns.rating, align: 'left' },
     ],
-    [locale],
+    [text],
   );
 
   const fetchMeetings = useCallback(
     async (request: TablePageRequest): Promise<TablePage> => {
-      const { items, total } = await getGroupMeetingsPage(groupId, request);
+      const statsRequest = loadMeetings();
+      const loaded = await statsRequest;
+      if (meetingsRequest.current?.promise === statsRequest) {
+        setMeetingsState({
+          key: groupId,
+          list: { status: 'ready', items: loaded.items, total: loaded.total },
+        });
+      }
+      const start = (request.page - 1) * request.pageSize;
+      const end = start + request.pageSize;
+      const { items, total } =
+        end <= loaded.items.length || loaded.items.length >= loaded.total
+          ? { items: loaded.items.slice(start, end), total: loaded.total }
+          : await getGroupMeetingsPage(groupId, request);
+      const history = text.history;
 
       const rows = items.map((m: GroupMeetingHistoryItem) => {
-        const date = formatHistoryDate(m.date);
         const percent =
           m.attendance_total > 0
             ? Math.round((m.attendance_present / m.attendance_total) * 100)
             : 0;
 
         return {
-          date: date,
-          book: interpolate(locale.group_details.history.book, {
-            title: m.book_title,
-            author: m.book_author,
-          }),
-          place: interpolate(locale.group_details.nextMeeting.location, {
-            place: m.place || locale.group_details.notInformed,
-            neighborhood: m.neighborhood || locale.group_details.notInformed,
-          }),
+          date: (
+            <Styled.Stacked>
+              <Styled.Strong>{formatShortDate(m.date)}</Styled.Strong>
+              <Styled.Muted>{formatWeekdayTime(m.date)}</Styled.Muted>
+            </Styled.Stacked>
+          ),
+          book: (
+            <Styled.Stacked>
+              <Styled.Strong>{m.book_title}</Styled.Strong>
+              <Styled.Muted>{m.book_author}</Styled.Muted>
+            </Styled.Stacked>
+          ),
+          place: (
+            <Styled.Stacked>
+              <Styled.Strong $weight={600}>{m.place || text.notInformed}</Styled.Strong>
+              {m.neighborhood && <Styled.Muted>{m.neighborhood}</Styled.Muted>}
+            </Styled.Stacked>
+          ),
           attendance: (
-            <Styled.Muted>
-              {interpolate(locale.group_details.history.attendance, {
-                present: m.attendance_present,
-                total: m.attendance_total,
-                percent,
-              })}
-            </Styled.Muted>
+            <Styled.MeterRow>
+              <Styled.Bar aria-hidden="true">
+                <Styled.BarFill $percent={percent} />
+              </Styled.Bar>
+              <Styled.Strong>
+                {interpolate(history.attendance, {
+                  present: m.attendance_present,
+                  total: m.attendance_total,
+                })}
+              </Styled.Strong>
+            </Styled.MeterRow>
           ),
           rating:
             m.average_rating === null ? (
-              locale.group_details.table.emptyValue
+              <Styled.Muted>{history.noRating}</Styled.Muted>
             ) : (
               <Styled.Rating>
                 <LuStar aria-hidden />
-                {m.average_rating.toFixed(1)}
-                <Styled.Muted>
-                  {interpolate(locale.group_details.history.votes, { count: m.votes_count })}
-                </Styled.Muted>
+                {formatRating(m.average_rating)}
+                <Styled.Muted>{pluralize(history.votes, m.votes_count)}</Styled.Muted>
               </Styled.Rating>
             ),
-          actions: (
-            <Styled.ActionsButton
-              type="button"
-              aria-label={interpolate(locale.group_details.history.actionsAriaLabel, { date })}
-            >
-              ⋮
-            </Styled.ActionsButton>
-          ),
           rowHref: `/eventos/${m.id}`,
         };
       });
 
       return { rows, total };
     },
-    [groupId, locale],
+    [groupId, text, loadMeetings],
   );
 
   const tabsConfig = useMemo(
     () => [
       {
         value: 'participants',
-        label: locale.group_details.tabs.participants,
+        label: text.tabs.participants,
+        count: members.status === 'ready' ? members.total : undefined,
         children: (
-          <Styled.TableContainer>
+          <Styled.TabContent>
             <Table
               columns={participantColumns}
               fetchPage={fetchParticipants}
-              pageSize={6}
-              itemLabel={locale.group_details.table.itemLabel}
+              pageSize={8}
+              itemLabel={text.table.itemLabel}
             />
-          </Styled.TableContainer>
+            <Styled.Legend aria-hidden="true">
+              <span>
+                <Styled.Dot $present />
+                {text.table.legendPresent}
+              </span>
+              <span>
+                <Styled.Dot $present={false} />
+                {text.table.legendAbsent}
+              </span>
+            </Styled.Legend>
+          </Styled.TabContent>
         ),
       },
       {
         value: 'history',
-        label: locale.group_details.tabs.history,
+        label: text.tabs.history,
+        count: meetings.status === 'ready' ? meetings.total : undefined,
         children: (
-          <Styled.TableContainer>
+          <Styled.TabContent>
             <Table
               columns={meetingColumns}
               fetchPage={fetchMeetings}
               pageSize={6}
-              itemLabel={locale.group_details.history.itemLabel}
+              itemLabel={text.history.itemLabel}
             />
-          </Styled.TableContainer>
+          </Styled.TabContent>
         ),
       },
     ],
-    [locale, participantColumns, fetchParticipants, meetingColumns, fetchMeetings],
+    [
+      text,
+      members.status,
+      members.total,
+      meetings.status,
+      meetings.total,
+      participantColumns,
+      fetchParticipants,
+      meetingColumns,
+      fetchMeetings,
+    ],
+  );
+
+  const breadcrumb = (current: string | null) => (
+    <Breadcrumb
+      ariaLabel={text.breadcrumbLabel}
+      parentLabel={text.breadcrumbGroups}
+      parentTo="/grupos"
+      current={current}
+    />
   );
 
   if (loading) {
     return (
       <div role="status">
-        <Styled.VisuallyHidden>{locale.group_details.loading}</Styled.VisuallyHidden>
+        <Styled.VisuallyHidden>{text.loading}</Styled.VisuallyHidden>
         <GroupDetailsSkeleton />
       </div>
     );
   }
 
   if (!group) {
-    return <Styled.Message>{locale.group_details.loadError}</Styled.Message>;
+    return (
+      <Styled.Container>
+        {breadcrumb(null)}
+        <DataState variant="error" onRetry={handleRetry}>
+          {text.loadError}
+        </DataState>
+      </Styled.Container>
+    );
   }
 
-  const actions = locale.group_details.participantActions;
-  const participantActionText = participantAction
-    ? {
-        promote: {
-          title: actions.promoteTitle,
-          description: actions.promoteDescription,
-          confirm: actions.promote,
-        },
-        demote: {
-          title: actions.demoteTitle,
-          description: actions.demoteDescription,
-          confirm: actions.demote,
-        },
-        remove: {
-          title: actions.removeTitle,
-          description: actions.removeDescription,
-          confirm: actions.remove,
-        },
-      }[participantAction]
-    : null;
-
-  const meeting = group.next_meeting;
   const isActive = group.is_active;
-  const groupName = interpolate(locale.group_details.header.tittle, {
-    number: String(group.number).padStart(2, '0'),
-    description: group.description,
-  });
+  const number = String(group.number).padStart(2, '0');
+  const groupName = interpolate(text.header.tittle, { number, description: group.description });
 
   return (
     <Styled.Container>
-      <BackButton label={locale.group_details.back} onClick={handleBack} />
+      {breadcrumb(interpolate(text.breadcrumbCurrent, { number }))}
 
-      <Styled.Header>
-        <Styled.HeaderInfo>
-          <Styled.Title>{groupName}</Styled.Title>
-          <Styled.Subtitle>
-            {interpolate(locale.group_details.header.subtitle, {
-              city: group.city || locale.group_details.notInformed,
-              count: group.active_participants_count,
-            })}
-          </Styled.Subtitle>
-        </Styled.HeaderInfo>
-        <Styled.HeaderActions>
-          <Styled.EditButton size="md" variant="secondary" onClick={handleOpenLocationModal}>
-            {locale.group_details.header.editLocation}
-          </Styled.EditButton>
-          <Styled.CloseButton size="md" variant="secondary" onClick={handleOpenModal}>
-            {isActive
-              ? locale.group_details.header.closeGroup
-              : locale.group_details.header.reopenGroup}
-          </Styled.CloseButton>
-        </Styled.HeaderActions>
-      </Styled.Header>
-
-      <Styled.CardsRow>
-        <Styled.Card>
-          <Styled.CardLabel>{locale.group_details.coordinator.label}</Styled.CardLabel>
-          {group.coordinators.length > 0 ? (
-            <Styled.CoordinatorList>
-              {group.coordinators.map((coordinator) => (
-                <li key={coordinator.id}>
-                  <Styled.CoordinatorRow>
-                    <Styled.Avatar aria-hidden>
-                      {coordinator.photo ? <img src={coordinator.photo} alt="" /> : <LuUserRound />}
-                    </Styled.Avatar>
-                    <Styled.CoordinatorInfo>
-                      <Styled.CardValue>{coordinator.name}</Styled.CardValue>
-                      <Styled.CardText>
-                        {coordinator.email || locale.group_details.notInformed}
-                      </Styled.CardText>
-                    </Styled.CoordinatorInfo>
-                  </Styled.CoordinatorRow>
-                </li>
-              ))}
-            </Styled.CoordinatorList>
-          ) : (
-            <Styled.CardValue>{locale.group_details.notInformed}</Styled.CardValue>
-          )}
-        </Styled.Card>
-
-        <Styled.Card>
-          <Styled.MeetingHeader>
-            <Styled.CardLabel>{locale.group_details.nextMeeting.label}</Styled.CardLabel>
-            {meeting && (
-              <Styled.MeetingStatus $confirmed={meeting.confirmed}>
-                {meeting.confirmed
-                  ? locale.group_details.nextMeeting.statusConfirmed
-                  : locale.group_details.nextMeeting.statusPending}
-              </Styled.MeetingStatus>
-            )}
-          </Styled.MeetingHeader>
-
-          {meeting ? (
-            <Styled.MeetingBody>
-              <Styled.CalendarIcon aria-hidden>
-                <LuCalendar />
-              </Styled.CalendarIcon>
-              <Styled.MeetingInfo>
-                <Styled.MeetingDate>{formatNextMeetingDate(meeting.date)}</Styled.MeetingDate>
-                <Styled.CardText>
-                  {locale.group_details.nextMeeting.bookLabel}{' '}
-                  <Styled.BookTitle>
-                    {meeting.book_title || locale.group_details.notInformed}
-                  </Styled.BookTitle>{' '}
-                  ({meeting.book_author || locale.group_details.notInformed})
-                </Styled.CardText>
-                <Styled.LocationText>
-                  <LuMapPin aria-hidden />
-                  {interpolate(locale.group_details.nextMeeting.location, {
-                    place: meeting.place || locale.group_details.notInformed,
-                    neighborhood: meeting.neighborhood || locale.group_details.notInformed,
-                  })}
-                </Styled.LocationText>
-              </Styled.MeetingInfo>
-            </Styled.MeetingBody>
-          ) : (
-            <Styled.CardValue>{locale.group_details.notInformed}</Styled.CardValue>
-          )}
-        </Styled.Card>
-      </Styled.CardsRow>
-
-      <Tabs
-        tabs={tabsConfig}
-        active={activeTab}
-        onChange={(value) => setActiveTab(value as GroupDetailsTab)}
-        size="lg"
+      <GroupHeader
+        group={group}
+        groupName={groupName}
+        onEditLocation={handleOpenLocationModal}
+        onToggleStatus={handleOpenStatusModal}
       />
 
-      <Modal
-        isOpen={participantAction !== null && selectedParticipant !== null}
-        onClose={() => {
-          if (savingParticipant) return;
-          setParticipantAction(null);
-          setParticipantError(null);
-          setSelectedParticipant(null);
-        }}
-        title={participantActionText?.title ?? ''}
-        description={interpolate(participantActionText?.description ?? '', {
-          name: selectedParticipant?.name ?? '',
-        })}
-        confirmText={participantActionText?.confirm ?? ''}
-        confirmDisabled={savingParticipant}
-        onConfirm={confirmParticipantAction}
-      >
-        {participantError && <p role="alert">{participantError}</p>}
-      </Modal>
+      <GroupSummary group={group} />
+
+      <GroupStats
+        activeCount={group.active_participants_count}
+        members={members}
+        meetings={meetings}
+      />
+
+      <Styled.TabsCard $enter={320}>
+        <Tabs
+          tabs={tabsConfig}
+          active={activeTab}
+          onChange={(value) => setActiveTab(value as GroupDetailsTab)}
+          size={isMobile ? 'md' : 'lg'}
+        />
+      </Styled.TabsCard>
+
+      <RemoveFromGroupModal
+        isOpen={removeTarget !== null}
+        personName={removeTarget?.name ?? ''}
+        groupLabel={interpolate(text.breadcrumbCurrent, { number })}
+        isCoordinator={removeNeedsSuccessor}
+        candidates={removeCandidates}
+        saving={removing}
+        error={removeError}
+        onClose={() => setRemoval(null)}
+        onConfirm={confirmRemove}
+      />
 
       <GroupModal
         isOpen={isLocationModalOpen}
@@ -722,7 +769,7 @@ export const GroupDetails = () => {
         onClose={handleCloseLocationModal}
         onConfirm={handleUpdateLocation}
         saving={savingLocation}
-        error={locationError ?? (optionsError ? locale.group_details.modal.optionsError : null)}
+        error={locationError ?? (optionsError ? text.modal.optionsError : null)}
       />
 
       <Modal
@@ -730,26 +777,36 @@ export const GroupDetails = () => {
         onClose={() => {
           if (!isSubmitting) setIsCloseModalOpen(false);
         }}
-        title={
-          isActive
-            ? locale.group_details.statusModal.closeTitle
-            : locale.group_details.statusModal.reopenTitle
-        }
+        title={isActive ? text.statusModal.closeTitle : text.statusModal.reopenTitle}
         description={
-          isActive
-            ? locale.group_details.statusModal.closeDescription
-            : locale.group_details.statusModal.reopenDescription
+          isActive ? text.statusModal.closeDescription : text.statusModal.reopenDescription
         }
-        confirmText={
-          isActive
-            ? locale.group_details.statusModal.closeConfirm
-            : locale.group_details.statusModal.reopenConfirm
-        }
+        confirmText={isActive ? text.statusModal.closeConfirm : text.statusModal.reopenConfirm}
         confirmDisabled={isSubmitting}
         onConfirm={handleToggleStatus}
       >
-        {statusError && <p style={{ color: 'red', marginTop: '0.5rem' }}>{statusError}</p>}
+        {statusError && <Styled.FormError role="alert">{statusError}</Styled.FormError>}
       </Modal>
+
+      {toast && (
+        <Toast
+          key={toast.id}
+          variant={toast.variant}
+          onDismiss={() => setToast(null)}
+          actionLabel={toast.undo ? text.participantActions.undo : undefined}
+          onAction={
+            toast.undo
+              ? () => {
+                  const undo = toast.undo;
+                  setToast(null);
+                  undo?.();
+                }
+              : undefined
+          }
+        >
+          {toast.message}
+        </Toast>
+      )}
     </Styled.Container>
   );
 };

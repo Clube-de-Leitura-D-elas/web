@@ -1,6 +1,19 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import type { ModalSize } from './index';
+import { EASE_OUT, fadeIn, reducedMotion } from '../../theme/motion';
 import { theme } from '../../theme/theme';
+
+const dialogIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+`;
 
 const MAX_WIDTH_BY_SIZE: Record<ModalSize, string> = {
   sm: '22.5rem',
@@ -16,6 +29,8 @@ export const Overlay = styled.div`
   overflow-y: auto;
   padding: 1rem;
   background-color: ${theme.overlayScrim};
+  animation: ${fadeIn} 0.2s ease-out both;
+  ${reducedMotion}
 `;
 
 export const Container = styled.div<{ $size: ModalSize }>`
@@ -28,6 +43,8 @@ export const Container = styled.div<{ $size: ModalSize }>`
   border-radius: 0.75rem;
   background-color: ${theme.surface};
   box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.24); // a sombra tem essa cor pois não tem token de elevação
+  animation: ${dialogIn} 0.32s ${EASE_OUT} both;
+  ${reducedMotion}
 `;
 
 export const Header = styled.div`
