@@ -47,4 +47,29 @@ describe('Toast', () => {
     expect(onDismiss).toHaveBeenCalledTimes(1);
     jest.useRealTimers();
   });
+
+  it('pausa enquanto o foco está no toast e retoma ao sair', async () => {
+    jest.useFakeTimers();
+    const onDismiss = jest.fn();
+    renderWithProviders(
+      <>
+        <Toast onDismiss={onDismiss} duration={3000} actionLabel="Desfazer" onAction={jest.fn()}>
+          Pronto
+        </Toast>
+        <button type="button">fora</button>
+      </>,
+    );
+
+    act(() => jest.advanceTimersByTime(2000));
+    act(() => screen.getByRole('button', { name: 'Desfazer' }).focus());
+    act(() => jest.advanceTimersByTime(5000));
+    expect(onDismiss).not.toHaveBeenCalled();
+
+    act(() => screen.getByRole('button', { name: 'fora' }).focus());
+    act(() => jest.advanceTimersByTime(999));
+    expect(onDismiss).not.toHaveBeenCalled();
+    act(() => jest.advanceTimersByTime(1));
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+    jest.useRealTimers();
+  });
 });
