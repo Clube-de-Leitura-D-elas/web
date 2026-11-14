@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { locale } from '../../locales';
 import { getDashboardKpis, getRegistrations } from '../../services/dashboardService';
 import { renderWithProviders } from '../../test/render';
@@ -72,6 +72,6 @@ describe('Dashboard', () => {
     expect(kpis).toContainElement(meetingsKpi);
 
     expect(groupsKpi).toHaveTextContent('5');
-    expect(meetingsKpi).toHaveTextContent('1');
+    expect(within(meetingsKpi).getByText('1', { exact: true })).toBeInTheDocument();
   });
 });
