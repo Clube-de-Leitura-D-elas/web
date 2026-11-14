@@ -247,6 +247,31 @@ describe('GroupDetails', () => {
       expect(within(stats()).getByText('Ana · cadastro incompleto')).toBeInTheDocument();
     });
 
+    it('com mais encontros do que os carregados, deixa claro que a nota é dos últimos', async () => {
+      const meeting = {
+        id: 'm',
+        date: '2026-08-24T22:00:00Z',
+        book_title: 'Torto Arado',
+        book_author: 'Itamar Vieira Junior',
+        place: null,
+        neighborhood: null,
+        attendance_present: 1,
+        attendance_total: 2,
+        average_rating: 4,
+        votes_count: 1,
+      };
+      jest.mocked(getGroupMeetingsPage).mockResolvedValue({
+        items: Array.from({ length: 100 }, (_, index) => ({ ...meeting, id: `m${index}` })),
+        total: 101,
+      });
+
+      renderPage();
+      await waitForPage();
+
+      expect(await within(stats()).findByText('4,0')).toBeInTheDocument();
+      expect(within(stats()).getByText('Últimos 100 encontros · 100 votos')).toBeInTheDocument();
+    });
+
     it('avisa quando não consegue calcular', async () => {
       jest.mocked(getAllGroupParticipants).mockRejectedValue(new Error('rede'));
       jest.mocked(getGroupMeetingsPage).mockRejectedValue(new Error('rede'));
