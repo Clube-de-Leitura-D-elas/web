@@ -298,13 +298,34 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
     const { group, candidates } = removeState;
     setRemoving(true);
     setRemoveError(null);
+    let promoted = false;
     try {
-      if (newCoordinatorId) await updateGroupParticipant(group.id, newCoordinatorId, 'promote');
+      if (newCoordinatorId) {
+        await updateGroupParticipant(group.id, newCoordinatorId, 'promote');
+        promoted = true;
+      }
       await updateGroupParticipant(group.id, participant.id, 'remove');
     } catch (error) {
       console.error(error);
+      let rolledBack = true;
+      if (promoted && newCoordinatorId) {
+        await updateGroupParticipant(group.id, newCoordinatorId, 'demote').catch(
+          (rollbackError) => {
+            console.error(rollbackError);
+            rolledBack = false;
+          },
+        );
+      }
+      const successor = candidates.find((candidate) => candidate.id === newCoordinatorId);
       setRemoveError(
-        error instanceof Error && error.message ? error.message : text.groups.removeError,
+        !rolledBack && successor
+          ? interpolate(text.groups.rollbackError, {
+              name: getFirstName(participant.name),
+              coordinator: getFirstName(successor.name),
+            })
+          : error instanceof Error && error.message
+            ? error.message
+            : text.groups.removeError,
       );
       setGroupsVersion((version) => version + 1);
       setRemoving(false);

@@ -194,6 +194,7 @@
       "remove": "Remover do grupo",
       "removed": "{{name}} foi removida do Grupo {{number}}",
       "removedWithCoordinator": "{{name}} foi removida do Grupo {{number}} · {{coordinator}} assume a coordenação",
+      "rollbackError": "Não foi possível remover {{name}}, e {{coordinator}} continua como coordenadora. Confira o grupo antes de tentar de novo.",
       "removeError": "Não foi possível remover a participante do grupo. Tente novamente.",
       "columns": {
         "name": "GRUPO",

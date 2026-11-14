@@ -469,6 +469,54 @@ describe('ParticipantDetails', () => {
       expect(updateGroupParticipant).toHaveBeenCalledWith('g3', 'p1', 'remove');
     });
 
+    it('desfaz a promoção da sucessora quando a remoção falha', async () => {
+      jest
+        .mocked(updateGroupParticipant)
+        .mockResolvedValueOnce()
+        .mockRejectedValueOnce(new Error(text.groups.removeError))
+        .mockResolvedValue();
+      jest.mocked(getGroupDetails).mockResolvedValue({
+        id: 'g3',
+        number: 3,
+        description: 'Quinta à noite',
+        city: 'São Paulo',
+        zone: null,
+        is_active: true,
+        active_participants_count: 2,
+        coordinators: [{ id: 'p1', name: 'Joseane Alves', email: null, photo: null }],
+        next_meeting: null,
+      });
+      jest.mocked(getAllGroupParticipants).mockResolvedValue({
+        items: [
+          {
+            id: 'p9',
+            name: 'Carla Mendes',
+            entry_date: null,
+            attendance: [],
+            email: null,
+            is_coordinator: false,
+          },
+        ],
+        total: 1,
+      });
+      const { user } = renderPage();
+
+      await openRemove(user, '03');
+      const dialog = await screen.findByRole('dialog');
+      await user.click(
+        within(dialog).getByRole('button', {
+          name: new RegExp(locale.removeFromGroup.newCoordinator),
+        }),
+      );
+      await user.click(screen.getByRole('option', { name: 'Carla Mendes' }));
+      await user.click(
+        within(dialog).getByRole('button', { name: locale.removeFromGroup.confirm }),
+      );
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(text.groups.removeError);
+      expect(updateGroupParticipant).toHaveBeenNthCalledWith(3, 'g3', 'p9', 'demote');
+    });
+
     it('mantém o modal aberto com o erro quando a remoção falha', async () => {
       jest.mocked(updateGroupParticipant).mockRejectedValue(new Error(text.groups.removeError));
       const { user } = renderPage();
