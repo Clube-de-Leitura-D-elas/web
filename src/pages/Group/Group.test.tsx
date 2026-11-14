@@ -81,6 +81,36 @@ const members: GroupParticipantListItem[] = [
   },
 ];
 
+const meetingsPage = {
+  items: [
+    {
+      id: 'm1',
+      date: '2026-08-24T22:00:00Z',
+      book_title: 'Torto Arado',
+      book_author: 'Itamar Vieira Junior',
+      place: null,
+      neighborhood: 'Centro',
+      attendance_present: 3,
+      attendance_total: 4,
+      average_rating: 4.5,
+      votes_count: 2,
+    },
+    {
+      id: 'm2',
+      date: '2026-07-10T22:00:00Z',
+      book_title: 'Quarto de Despejo',
+      book_author: 'Carolina Maria de Jesus',
+      place: 'Café',
+      neighborhood: null,
+      attendance_present: 0,
+      attendance_total: 0,
+      average_rating: null,
+      votes_count: 0,
+    },
+  ],
+  total: 2,
+};
+
 const renderPage = () =>
   renderWithProviders(<GroupDetails />, { route: '/grupos/g1', path: '/grupos/:groupId' });
 
@@ -95,35 +125,7 @@ beforeEach(() => {
   ]);
   jest.mocked(getGroupZones).mockResolvedValue([{ id: 'z1', name: 'Zona Sul', cityId: 'c1' }]);
   jest.mocked(getAllGroupParticipants).mockResolvedValue({ items: members, total: 3 });
-  jest.mocked(getGroupMeetingsPage).mockResolvedValue({
-    items: [
-      {
-        id: 'm1',
-        date: '2026-08-24T22:00:00Z',
-        book_title: 'Torto Arado',
-        book_author: 'Itamar Vieira Junior',
-        place: null,
-        neighborhood: 'Centro',
-        attendance_present: 3,
-        attendance_total: 4,
-        average_rating: 4.5,
-        votes_count: 2,
-      },
-      {
-        id: 'm2',
-        date: '2026-07-10T22:00:00Z',
-        book_title: 'Quarto de Despejo',
-        book_author: 'Carolina Maria de Jesus',
-        place: 'Café',
-        neighborhood: null,
-        attendance_present: 0,
-        attendance_total: 0,
-        average_rating: null,
-        votes_count: 0,
-      },
-    ],
-    total: 2,
-  });
+  jest.mocked(getGroupMeetingsPage).mockResolvedValue(meetingsPage);
 });
 
 describe('GroupDetails', () => {
@@ -361,6 +363,25 @@ describe('GroupDetails', () => {
     expect(within(stats).getByText('de 3')).toBeInTheDocument();
   });
 
+  it('a nova tentativa do histórico recarrega a tabela e os indicadores', async () => {
+    jest
+      .mocked(getGroupMeetingsPage)
+      .mockReset()
+      .mockRejectedValueOnce(new Error('rede'))
+      .mockRejectedValueOnce(new Error('rede'))
+      .mockResolvedValue(meetingsPage);
+    const { user } = renderPage();
+    await waitForPage();
+    const stats = screen.getByRole('region', { name: text.stats.label });
+    await waitFor(() => expect(within(stats).getAllByText(text.stats.unavailable)).toHaveLength(2));
+
+    await user.click(screen.getByRole('tab', { name: new RegExp(text.tabs.history) }));
+    await user.click(await screen.findByRole('button', { name: locale.table.retry }));
+
+    expect(await screen.findByText('24 ago 2026')).toBeInTheDocument();
+    expect(within(stats).getByText('75%')).toBeInTheDocument();
+  });
+
   it('mostra o histórico de encontros na segunda aba', async () => {
     const { user } = renderPage();
     await waitForPage();
@@ -368,7 +389,8 @@ describe('GroupDetails', () => {
     await user.click(screen.getByRole('tab', { name: new RegExp(text.tabs.history) }));
 
     const first = (await screen.findByText('24 ago 2026')).closest('tr')!;
-    expect(getGroupMeetingsPage).toHaveBeenCalledWith('g1', { page: 1, pageSize: 6 });
+    expect(getGroupMeetingsPage).toHaveBeenCalledTimes(1);
+    expect(getGroupMeetingsPage).toHaveBeenCalledWith('g1', { page: 1, pageSize: 100 });
     expect(within(first).getByText('Segunda, 19h')).toBeInTheDocument();
     expect(within(first).getByText('Torto Arado')).toBeInTheDocument();
     expect(within(first).getByText('Itamar Vieira Junior')).toBeInTheDocument();
@@ -576,6 +598,50 @@ describe('GroupDetails', () => {
       expect(await screen.findByRole('status')).toHaveTextContent(
         interpolate(actions.removedWithCoordinator, { name: 'Ana', coordinator: 'Carla' }),
       );
+    });
+
+    it('busca a lista de participantes ao abrir a remoção se ela não tinha carregado', async () => {
+      jest.mocked(getAllGroupParticipants).mockRejectedValueOnce(new Error('rede'));
+      jest.mocked(updateGroupParticipant).mockResolvedValue();
+      const { user } = renderPage();
+
+      await openMenu(user, 'Ana Souza');
+      await user.click(screen.getByRole('menuitem', { name: actions.remove }));
+      const dialog = await screen.findByRole('dialog');
+
+      await user.click(
+        within(dialog).getByRole('button', {
+          name: new RegExp(locale.removeFromGroup.newCoordinator),
+        }),
+      );
+      expect(screen.getByRole('option', { name: 'Bia Lima' })).toBeInTheDocument();
+    });
+
+    it('desfaz a promoção da sucessora quando a remoção falha', async () => {
+      jest
+        .mocked(updateGroupParticipant)
+        .mockResolvedValueOnce()
+        .mockRejectedValueOnce(new Error(actions.error))
+        .mockResolvedValue();
+      const { user } = renderPage();
+
+      await openMenu(user, 'Ana Souza');
+      await user.click(screen.getByRole('menuitem', { name: actions.remove }));
+      const dialog = await screen.findByRole('dialog');
+      await user.click(
+        within(dialog).getByRole('button', {
+          name: new RegExp(locale.removeFromGroup.newCoordinator),
+        }),
+      );
+      await user.click(screen.getByRole('option', { name: 'Carla Dias' }));
+      await user.click(
+        within(dialog).getByRole('button', { name: locale.removeFromGroup.confirm }),
+      );
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(actions.error);
+      expect(updateGroupParticipant).toHaveBeenNthCalledWith(1, 'g1', 'p3', 'promote');
+      expect(updateGroupParticipant).toHaveBeenNthCalledWith(2, 'g1', 'p1', 'remove');
+      expect(updateGroupParticipant).toHaveBeenNthCalledWith(3, 'g1', 'p3', 'demote');
     });
 
     it('mantém o modal aberto com o erro quando a remoção falha', async () => {

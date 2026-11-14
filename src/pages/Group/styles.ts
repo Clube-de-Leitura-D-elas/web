@@ -1,10 +1,13 @@
 import styled, { css } from 'styled-components';
 import { Button } from '../../components/Button';
 import { MOBILE_QUERY } from '../../layouts/DefaultLayout/styles';
-import { EASE_OUT, enter, growX, pop, pulse, reducedMotion } from '../../theme/motion';
+import { EASE_OUT, enter, fade, growX, pop, pulse, reducedMotion } from '../../theme/motion';
 import { theme } from '../../theme/theme';
 
 const entrance = ({ $enter }: { $enter?: number }) => ($enter === undefined ? '' : enter($enter));
+
+const fadeEntrance = ({ $enter }: { $enter?: number }) =>
+  $enter === undefined ? '' : fade($enter);
 
 const surfaceCard = css`
   border: 1px solid ${theme.border};
@@ -33,18 +36,6 @@ const hoverLift = css`
   }
 `;
 
-const pill = css`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.125rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  line-height: 1.125rem;
-  white-space: nowrap;
-`;
-
 export const Container = styled.div`
   width: 100%;
   min-width: 0;
@@ -59,7 +50,7 @@ export const Header = styled.header<{ $enter?: number }>`
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  ${entrance}
+  ${fadeEntrance}
 `;
 
 export const HeaderInfo = styled.div`
@@ -90,12 +81,8 @@ export const Title = styled.h1`
   }
 `;
 
-export const StatusPill = styled.span<{ $active: boolean }>`
-  ${pill}
-  padding: 0.25rem 0.625rem;
-  font-size: 0.8125rem;
-  background-color: ${({ $active }) => ($active ? theme.successLight : theme.surfaceSunken)};
-  color: ${({ $active }) => ($active ? theme.successDark : theme.text)};
+export const StatusTag = styled.span`
+  display: inline-flex;
   ${pop(180)}
 `;
 
@@ -243,12 +230,10 @@ export const SummaryDetail = styled.span`
   font-weight: 500;
 `;
 
-export const MeetingPill = styled.span<{ $confirmed: boolean }>`
-  ${pill}
+export const SummaryTag = styled.span`
+  display: inline-flex;
   margin-left: 0.5rem;
   vertical-align: 0.0625rem;
-  background-color: ${({ $confirmed }) => ($confirmed ? theme.successLight : theme.warningLight)};
-  color: ${({ $confirmed }) => ($confirmed ? theme.successDark : theme.warningDark)};
 `;
 
 export const StatsGrid = styled.section`
@@ -353,7 +338,7 @@ export const TabsCard = styled.section<{ $enter?: number }>`
   ${surfaceCard}
   min-width: 0;
   padding: 0.25rem 1.25rem 0;
-  ${entrance}
+  ${fadeEntrance}
 
   @media ${MOBILE_QUERY} {
     padding: 0.25rem 0.75rem 0;
@@ -363,7 +348,7 @@ export const TabsCard = styled.section<{ $enter?: number }>`
 export const TabContent = styled.div`
   position: relative;
   min-width: 0;
-  ${enter(0)}
+  ${fade(0)}
 
   table {
     min-width: 50rem;
@@ -404,12 +389,6 @@ export const Email = styled.span<{ $missing?: boolean }>`
   font-size: 0.8125rem;
   font-style: ${({ $missing }) => ($missing ? 'italic' : 'normal')};
   overflow-wrap: anywhere;
-`;
-
-export const Pill = styled.span<{ $tone: 'brand' | 'warning' }>`
-  ${pill}
-  background-color: ${({ $tone }) => ($tone === 'brand' ? theme.surfaceBrandSoft : theme.warningLight)};
-  color: ${({ $tone }) => ($tone === 'brand' ? theme.textBrand : theme.warningDark)};
 `;
 
 export const EntryDate = styled.span<{ $missing?: boolean }>`

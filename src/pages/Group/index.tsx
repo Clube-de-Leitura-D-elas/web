@@ -6,7 +6,11 @@ import { Avatar } from '../../components/Avatar';
 import { Breadcrumb } from '../../components/Breadcrumb';
 import { DataState } from '../../components/DataState';
 import { Modal } from '../../components/Modal';
-import { RemoveFromGroupModal } from '../../components/RemoveFromGroupModal';
+import {
+  RemoveFromGroupModal,
+  type CoordinatorCandidate,
+} from '../../components/RemoveFromGroupModal';
+import { Tag } from '../../components/Tag';
 import { Tabs } from '../../components/Tab';
 import {
   Table,
@@ -39,6 +43,7 @@ import type {
 } from '../../types/group';
 import type { Page } from '../../types/participantList';
 import { formatEntryDate, formatShortDate, formatWeekdayTime } from '../../utils/date';
+import { formatRating, getFirstName } from '../../utils/format';
 import { getAttendance, isIncomplete } from './attendance';
 import { GroupDetailsSkeleton } from './GroupDetailsSkeleton';
 import { GroupHeader } from './GroupHeader';
@@ -59,13 +64,6 @@ type ToastState = {
 const STATS_MEETINGS_PAGE = { page: 1, pageSize: 100 };
 
 const LOADING_LIST: AsyncList<never> = { status: 'loading', items: [], total: 0 };
-
-const ratingFormatter = new Intl.NumberFormat('pt-BR', {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-});
-
-const firstName = (name: string) => name.split(' ')[0];
 
 const errorMessage = (err: unknown, fallback: string) =>
   err instanceof Error && err.message ? err.message : fallback;
@@ -100,6 +98,7 @@ export const GroupDetails = () => {
   const [optionsError, setOptionsError] = useState(false);
 
   const [removeTarget, setRemoveTarget] = useState<GroupParticipantListItem | null>(null);
+  const [removeCandidates, setRemoveCandidates] = useState<CoordinatorCandidate[]>([]);
   const [removing, setRemoving] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -179,10 +178,26 @@ export const GroupDetails = () => {
     };
   }, [groupId, loadMembers]);
 
+  const meetingsRequest = useRef<{
+    key: string;
+    promise: Promise<Page<GroupMeetingHistoryItem>>;
+  }>(null);
+
+  const loadMeetings = useCallback(() => {
+    if (meetingsRequest.current?.key !== groupId) {
+      const promise = getGroupMeetingsPage(groupId, STATS_MEETINGS_PAGE);
+      meetingsRequest.current = { key: groupId, promise };
+      promise.catch(() => {
+        if (meetingsRequest.current?.promise === promise) meetingsRequest.current = null;
+      });
+    }
+    return meetingsRequest.current.promise;
+  }, [groupId]);
+
   useEffect(() => {
     let ignore = false;
 
-    getGroupMeetingsPage(groupId, STATS_MEETINGS_PAGE)
+    loadMeetings()
       .then(({ items, total }) => {
         if (!ignore) setMeetingsState({ key: groupId, list: { status: 'ready', items, total } });
       })
@@ -196,7 +211,7 @@ export const GroupDetails = () => {
     return () => {
       ignore = true;
     };
-  }, [groupId]);
+  }, [groupId, loadMeetings]);
 
   const loading = result?.id !== groupId;
   const group = result?.group ?? null;
@@ -253,7 +268,7 @@ export const GroupDetails = () => {
       showToast({
         message: interpolate(
           action === 'promote' ? text.participantActions.promoted : text.participantActions.demoted,
-          { name: firstName(participant.name) },
+          { name: getFirstName(participant.name) },
         ),
         undo: async () => {
           const undoFailure = await applyCoordinatorChange(participant.id, inverse);
@@ -268,32 +283,47 @@ export const GroupDetails = () => {
     [applyCoordinatorChange, showToast, text],
   );
 
-  const openRemove = useCallback((participant: GroupParticipantListItem) => {
-    setRemoveError(null);
-    setRemoveTarget(participant);
-  }, []);
+  const openRemove = useCallback(
+    async (participant: GroupParticipantListItem) => {
+      setRemoveError(null);
+      try {
+        const { items } = await loadMembers();
+        setRemoveCandidates(
+          items
+            .filter((member) => member.id !== participant.id && !member.is_coordinator)
+            .map(({ id, name }) => ({ id, name })),
+        );
+        setRemoveTarget(participant);
+      } catch (err) {
+        console.error(err);
+        showToast({ variant: 'error', message: text.participantActions.error });
+      }
+    },
+    [loadMembers, showToast, text],
+  );
 
   const removeNeedsSuccessor =
     removeTarget !== null &&
     isLastCoordinator === true &&
     group?.coordinators[0]?.id === removeTarget.id;
 
-  const removeCandidates = removeTarget
-    ? members.items
-        .filter((member) => member.id !== removeTarget.id && !member.is_coordinator)
-        .map(({ id, name }) => ({ id, name }))
-    : [];
-
   const confirmRemove = async (newCoordinatorId: string | null) => {
     if (!removeTarget || removing) return;
 
     setRemoving(true);
     setRemoveError(null);
+    let promoted = false;
     try {
-      if (newCoordinatorId) await updateGroupParticipant(groupId, newCoordinatorId, 'promote');
+      if (newCoordinatorId) {
+        await updateGroupParticipant(groupId, newCoordinatorId, 'promote');
+        promoted = true;
+      }
       await updateGroupParticipant(groupId, removeTarget.id, 'remove');
     } catch (err) {
       console.error(err);
+      if (promoted && newCoordinatorId) {
+        await updateGroupParticipant(groupId, newCoordinatorId, 'demote').catch(console.error);
+      }
       setRemoveError(errorMessage(err, text.participantActions.error));
       await refreshGroup();
       setRemoving(false);
@@ -301,14 +331,14 @@ export const GroupDetails = () => {
     }
 
     await refreshGroup();
-    const successor = members.items.find((member) => member.id === newCoordinatorId);
+    const successor = removeCandidates.find((candidate) => candidate.id === newCoordinatorId);
     showToast({
       message: successor
         ? interpolate(text.participantActions.removedWithCoordinator, {
-            name: firstName(removeTarget.name),
-            coordinator: firstName(successor.name),
+            name: getFirstName(removeTarget.name),
+            coordinator: getFirstName(successor.name),
           })
-        : interpolate(text.participantActions.removed, { name: firstName(removeTarget.name) }),
+        : interpolate(text.participantActions.removed, { name: getFirstName(removeTarget.name) }),
     });
     setRemoveTarget(null);
     setRemoving(false);
@@ -433,12 +463,8 @@ export const GroupDetails = () => {
               <Styled.ParticipantInfo>
                 <Styled.NameRow>
                   <Styled.Name>{p.name}</Styled.Name>
-                  {p.is_coordinator && (
-                    <Styled.Pill $tone="brand">{table.coordinatorTag}</Styled.Pill>
-                  )}
-                  {isIncomplete(p) && (
-                    <Styled.Pill $tone="warning">{table.incompleteTag}</Styled.Pill>
-                  )}
+                  {p.is_coordinator && <Tag color="primary">{table.coordinatorTag}</Tag>}
+                  {isIncomplete(p) && <Tag color="warning">{table.incompleteTag}</Tag>}
                 </Styled.NameRow>
                 <Styled.Email $missing={!p.email}>{p.email || table.noEmail}</Styled.Email>
               </Styled.ParticipantInfo>
@@ -464,7 +490,7 @@ export const GroupDetails = () => {
                   ))}
                 </Styled.Dots>
                 <Styled.Percent $low={attendance.low}>{attendance.percent}%</Styled.Percent>
-                {attendance.low && <Styled.Pill $tone="warning">{table.lowTag}</Styled.Pill>}
+                {attendance.low && <Tag color="warning">{table.lowTag}</Tag>}
               </Styled.Attendance>
             ) : (
               <Styled.Muted>{table.noAttendance}</Styled.Muted>
@@ -513,7 +539,20 @@ export const GroupDetails = () => {
 
   const fetchMeetings = useCallback(
     async (request: TablePageRequest): Promise<TablePage> => {
-      const { items, total } = await getGroupMeetingsPage(groupId, request);
+      const statsRequest = loadMeetings();
+      const loaded = await statsRequest;
+      if (meetingsRequest.current?.promise === statsRequest) {
+        setMeetingsState({
+          key: groupId,
+          list: { status: 'ready', items: loaded.items, total: loaded.total },
+        });
+      }
+      const start = (request.page - 1) * request.pageSize;
+      const end = start + request.pageSize;
+      const { items, total } =
+        end <= loaded.items.length || loaded.items.length >= loaded.total
+          ? { items: loaded.items.slice(start, end), total: loaded.total }
+          : await getGroupMeetingsPage(groupId, request);
       const history = text.history;
 
       const rows = items.map((m: GroupMeetingHistoryItem) => {
@@ -560,7 +599,7 @@ export const GroupDetails = () => {
             ) : (
               <Styled.Rating>
                 <LuStar aria-hidden />
-                {ratingFormatter.format(m.average_rating)}
+                {formatRating(m.average_rating)}
                 <Styled.Muted>{pluralize(history.votes, m.votes_count)}</Styled.Muted>
               </Styled.Rating>
             ),
@@ -570,7 +609,7 @@ export const GroupDetails = () => {
 
       return { rows, total };
     },
-    [groupId, text],
+    [groupId, text, loadMeetings],
   );
 
   const tabsConfig = useMemo(
