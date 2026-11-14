@@ -15,7 +15,8 @@ export const Breadcrumb = ({ ariaLabel, parentLabel, parentTo, current }: Breadc
   const navigate = useNavigate();
 
   const handleBack = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (location.key === 'default') return;
+    const modified = event.ctrlKey || event.metaKey || event.shiftKey || event.altKey;
+    if (location.key === 'default' || modified || event.button !== 0) return;
     event.preventDefault();
     navigate(-1);
   };
