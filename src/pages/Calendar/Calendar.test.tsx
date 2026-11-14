@@ -278,7 +278,7 @@ describe('Calendar', () => {
 
     const { user } = renderPage();
 
-    const cityInput = screen.getByLabelText(locale.calendar.filters.city.title);
+    const cityInput = screen.getByLabelText(locale.calendar.filters.city.title) as HTMLInputElement;
 
     await user.type(cityInput, 'Porto');
 
@@ -474,6 +474,8 @@ describe('Calendar', () => {
       id: 'e1',
       groupId: 'g1',
       groupName: 'Clube do Livro',
+      cityId: 'city-1',
+      state: 'RS',
       city: 'Porto Alegre',
       startsAt: `${formatDateKey(date)}T19:00:00`,
       status: 'confirmed',
@@ -483,6 +485,8 @@ describe('Calendar', () => {
       id: 'e2',
       groupId: 'g2',
       groupName: 'Grupo de Tecnologia',
+      cityId: 'city-1',
+      state: 'RS',
       city: 'São Paulo',
       startsAt: `${formatDateKey(nextDate)}T19:00:00`,
       status: 'confirmed',
@@ -549,6 +553,8 @@ describe('Calendar', () => {
       id: 'evento-123',
       groupId: 'grupo-456',
       groupName: 'Clube do Livro',
+      cityId: 'city-1',
+      state: 'RS',
       city: 'Porto Alegre',
       startsAt: '2026-10-15T19:00:00-03:00',
       status: 'confirmed',
