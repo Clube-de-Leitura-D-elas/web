@@ -660,6 +660,14 @@
       "groups": {
         "title": "Grupos",
         "description": "Total de grupos cadastrados"
+      },
+      "meetings": {
+        "title": "Encontros no mês",
+        "description": "Encontros realizados no mês atual",
+        "increase": "{{percentage}}% a mais que no mês anterior",
+        "decrease": "{{percentage}}% a menos que no mês anterior",
+        "same": "Mesmo número de encontros do mês anterior",
+        "noPrevious": "Sem encontros no mês anterior"
       }
     },
     "charts": {

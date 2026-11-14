@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { theme } from '../../theme/theme';
 
 export const Card = styled.section`
@@ -34,8 +34,31 @@ export const Value = styled.span`
   color: ${theme.text};
 `;
 
-export const Description = styled.p`
+export const Description = styled.p<{
+  $variant: 'default' | 'success' | 'danger';
+}>`
+  display: inline-flex;
+  align-self: flex-start;
   margin: 0;
+  padding: 0.35rem 0.6rem;
+  border-radius: 1rem;
   font-size: 0.75rem;
-  color: ${theme.textMuted};
+
+  ${({ theme, $variant }) => css`
+    color: ${
+      $variant === 'success'
+        ? theme.successDark
+        : $variant === 'danger'
+          ? theme.errorDark
+          : theme.textMuted
+    };
+
+    background-color: ${
+      $variant === 'success'
+        ? theme.successLight
+        : $variant === 'danger'
+          ? theme.errorLight
+          : 'transparent'
+    };
+  `}
 `;
