@@ -15,6 +15,7 @@ import { GroupServiceError } from './groupErrors';
 import { invokeGet } from './invokeGet';
 import { supabase } from './supabaseClient';
 import { locale } from '../locales';
+import { clearCalendarCache } from './calendarService';
 
 export function getGroupDetails(groupId: string): Promise<GroupDetails> {
   return invokeGet('get-group-details-web', { groupId });
@@ -42,6 +43,8 @@ export const updateGroupStatus = async (groupId: string, isActive: boolean): Pro
 
   if (error) throw error;
   if (!data) throw new Error('update-group-status-web returned no data');
+
+  clearCalendarCache();
 
   return data.is_active;
 };
@@ -77,6 +80,8 @@ export async function createGroup(payload: CreateGroupPayload): Promise<CreateGr
 
   if (error) throw toGroupServiceError(error);
   if (!data) throw new Error('create-group returned no data');
+
+  clearCalendarCache();
 
   return data;
 }
@@ -118,6 +123,7 @@ export async function updateGroupLocation(
   if (!data) {
     throw new Error(locale.group_details.modal.modalError);
   }
+  clearCalendarCache();
 }
 
 export async function updateGroupParticipant(

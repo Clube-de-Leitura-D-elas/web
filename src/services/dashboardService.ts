@@ -1,4 +1,9 @@
-import type { Granularity, RegistrationsItem, RegistrationsResponse } from '../types/dashboard';
+import type {
+  DashboardKpisResponse,
+  Granularity,
+  RegistrationsItem,
+  RegistrationsResponse,
+} from '../types/dashboard';
 import { invokeGet } from './invokeGet';
 
 // Os períodos sem inscrição já vêm com total 0: o front não preenche lacunas.
@@ -14,4 +19,7 @@ export async function getRegistrations(
   });
 
   return data.items;
+}
+export async function getDashboardKpis(): Promise<DashboardKpisResponse> {
+  return invokeGet<DashboardKpisResponse>('get-dashboard-kpis-web', {});
 }

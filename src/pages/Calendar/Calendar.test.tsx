@@ -105,6 +105,158 @@ describe('Calendar', () => {
     });
   });
 
+  it('restaura o mês e o ano informados na URL', async () => {
+    renderWithProviders(<Calendar />, {
+      route: '/calendario?year=2026&month=10',
+      path: '/calendario',
+      showLocationSearch: true,
+    });
+
+    await waitFor(() => {
+      expect(getCalendarMonth).toHaveBeenCalledWith(2026, 10);
+    });
+
+    expect(screen.getByTestId('location-search')).toHaveTextContent('year=2026&month=10');
+  });
+
+  it('não cria uma entrada no histórico ao selecionar o mês atual', async () => {
+    jest.useFakeTimers({
+      now: new Date(2026, 10, 9),
+      doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
+    });
+
+    try {
+      const { user } = renderWithProviders(<Calendar />, {
+        route: '/calendario?year=2026&month=10',
+        path: '/calendario',
+        showLocationSearch: true,
+        showHistoryBackButton: true,
+      });
+
+      await waitFor(() => {
+        expect(getCalendarMonth).toHaveBeenCalledWith(2026, 10);
+      });
+
+      // Avança de outubro para novembro.
+      await user.click(screen.getByRole('button', { name: nav.nextMonth }));
+
+      await waitFor(() => {
+        expect(getCalendarMonth).toHaveBeenCalledWith(2026, 11);
+      });
+
+      // Novembro já é o mês atual: não deve criar outra entrada.
+      await user.click(screen.getByRole('button', { name: nav.today }));
+
+      // Uma única volta deve retornar diretamente para outubro.
+      await user.click(screen.getByRole('button', { name: 'Voltar no histórico' }));
+
+      await waitFor(() => {
+        const params = new URLSearchParams(screen.getByTestId('location-search').textContent ?? '');
+
+        expect(params.get('year')).toBe('2026');
+        expect(params.get('month')).toBe('10');
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('corrige um mês inválido na URL', async () => {
+    jest.useFakeTimers({
+      now: new Date(2026, 10, 8),
+      doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
+    });
+    try {
+      const now = new Date();
+
+      renderWithProviders(<Calendar />, {
+        route: '/calendario?year=2030&month=13',
+        path: '/calendario',
+        showLocationSearch: true,
+      });
+
+      await waitFor(() => {
+        expect(getCalendarMonth).toHaveBeenCalledWith(2030, now.getMonth() + 1);
+      });
+
+      await waitFor(() => {
+        const params = new URLSearchParams(screen.getByTestId('location-search').textContent ?? '');
+
+        expect(params.get('year')).toBe('2030');
+        expect(params.get('month')).toBe(String(now.getMonth() + 1));
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('atualiza o mês na URL sem remover outros parâmetros', async () => {
+    const { user } = renderWithProviders(<Calendar />, {
+      route: '/calendario?year=2026&month=10&filter=active',
+      path: '/calendario',
+      showLocationSearch: true,
+    });
+
+    await waitFor(() => {
+      expect(getCalendarMonth).toHaveBeenCalledWith(2026, 10);
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: nav.nextMonth,
+      }),
+    );
+
+    await waitFor(() => {
+      const params = new URLSearchParams(screen.getByTestId('location-search').textContent ?? '');
+
+      expect(params.get('year')).toBe('2026');
+      expect(params.get('month')).toBe('11');
+      expect(params.get('filter')).toBe('active');
+    });
+
+    expect(getCalendarMonth).toHaveBeenCalledWith(2026, 11);
+  });
+
+  it('restaura o mês anterior ao voltar no histórico do navegador', async () => {
+    const { user } = renderWithProviders(<Calendar />, {
+      route: '/calendario?year=2026&month=10&filter=active',
+      path: '/calendario',
+      showLocationSearch: true,
+      showHistoryBackButton: true,
+    });
+
+    await waitFor(() => {
+      expect(getCalendarMonth).toHaveBeenCalledWith(2026, 10);
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: nav.nextMonth,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(getCalendarMonth).toHaveBeenCalledWith(2026, 11);
+    });
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Voltar no histórico',
+      }),
+    );
+
+    await waitFor(() => {
+      const params = new URLSearchParams(screen.getByTestId('location-search').textContent ?? '');
+
+      expect(params.get('year')).toBe('2026');
+      expect(params.get('month')).toBe('10');
+      expect(params.get('filter')).toBe('active');
+    });
+
+    expect(getCalendarMonth).toHaveBeenLastCalledWith(2026, 10);
+  });
+
   it('mostra uma mensagem de erro quando o calendário não carrega', async () => {
     jest.mocked(getCalendarMonth).mockRejectedValue(new Error('Erro 500'));
 
@@ -360,5 +512,54 @@ describe('Calendar', () => {
     }).format(date);
 
     expect(await screen.findByRole('dialog', { name: modalTitle })).toBeInTheDocument();
+  });
+
+  it('navega para os detalhes usando o ID do encontro', async () => {
+    const date = new Date(2026, 9, 15);
+
+    const event = {
+      id: 'evento-123',
+      groupId: 'grupo-456',
+      groupName: 'Clube do Livro',
+      city: 'Porto Alegre',
+      startsAt: '2026-10-15T19:00:00-03:00',
+      status: 'confirmed',
+    };
+
+    jest.mocked(getCalendarMonth).mockResolvedValue({
+      year: 2026,
+      month: 10,
+      rangeStart: '2026-10-15',
+      rangeEnd: '2026-10-15',
+      days: [
+        {
+          date: '2026-10-15',
+          inMonth: true,
+          events: [event],
+        },
+      ],
+    });
+
+    const { user } = renderWithProviders(<Calendar />, {
+      route: '/calendario?year=2026&month=10',
+      path: '/calendario',
+    });
+
+    const dayCell = await screen.findByRole('button', {
+      name: `${getCalendarDayLabel(date).replace(/, 0 eventos$/, '')}, 1 evento`,
+    });
+
+    await user.click(dayCell);
+
+    const modal = await screen.findByRole('dialog');
+
+    await user.click(
+      within(modal).getByRole('button', {
+        name: /Clube do Livro/,
+      }),
+    );
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/eventos/evento-123');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

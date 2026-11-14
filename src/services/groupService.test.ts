@@ -11,11 +11,20 @@ import {
 } from './groupService';
 import { locale } from '../locales';
 import { supabase } from './supabaseClient';
+import { clearCalendarCache } from './calendarService';
+
+jest.mock('./calendarService', () => ({
+  clearCalendarCache: jest.fn(),
+}));
 
 const invoke = jest.mocked(supabase.functions.invoke);
 
 const respond = (data: unknown) => invoke.mockResolvedValue({ data, error: null });
 const fail = (error: unknown) => invoke.mockResolvedValue({ data: null, error } as never);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('consultas do grupo', () => {
   it('getGroupDetails busca pelo groupId', async () => {
@@ -47,19 +56,24 @@ describe('consultas do grupo', () => {
 });
 
 describe('updateGroupStatus', () => {
-  it('envia o novo status e devolve o que o backend gravou', async () => {
+  it('atualiza o status do grupo e limpa o cache do calendário', async () => {
     respond({ is_active: false });
 
     await expect(updateGroupStatus('g1', false)).resolves.toBe(false);
+
     expect(invoke).toHaveBeenCalledWith('update-group-status-web', {
       body: { group_id: 'g1', is_active: false },
     });
+
+    expect(clearCalendarCache).toHaveBeenCalledTimes(1);
   });
 
   it('falha quando a resposta vem vazia', async () => {
     respond(null);
 
     await expect(updateGroupStatus('g1', true)).rejects.toThrow('returned no data');
+
+    expect(clearCalendarCache).not.toHaveBeenCalled();
   });
 });
 
@@ -101,12 +115,17 @@ describe('createGroup', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
-  it('envia o payload e devolve o grupo criado', async () => {
+  it('cria o grupo e limpa o cache do calendário', async () => {
     const created = { id: 'g43', number: 43 };
     respond(created);
 
     await expect(createGroup(payload)).resolves.toBe(created);
-    expect(invoke).toHaveBeenCalledWith('create-group', { body: payload });
+
+    expect(invoke).toHaveBeenCalledWith('create-group', {
+      body: payload,
+    });
+
+    expect(clearCalendarCache).toHaveBeenCalledTimes(1);
   });
 
   it('traduz o 409 para duplicate_number', async () => {
@@ -131,5 +150,7 @@ describe('createGroup', () => {
     respond(null);
 
     await expect(createGroup(payload)).rejects.toThrow('returned no data');
+
+    expect(clearCalendarCache).not.toHaveBeenCalled();
   });
 });

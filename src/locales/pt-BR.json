@@ -433,6 +433,9 @@
   "calendar": {
     "title": "Calendário",
     "dayAriaLabel": "{{day}} de {{month}} de {{year}}",
+    "dayModal": {
+      "eventAriaLabel": "{{time}} - {{group}} - {{city}}"
+    },
     "loading": "Carregando calendário...",
     "subtitle": "Visualize os encontros de todos os grupos do clube.",
     "weekdays": {
@@ -653,7 +656,11 @@
     "title": "Dashboard",
     "subtitle": "Acompanhe os principais indicadores do clube.",
     "kpis": {
-      "label": "Indicadores"
+      "label": "Indicadores",
+      "groups": {
+        "title": "Grupos",
+        "description": "Total de grupos cadastrados"
+      }
     },
     "charts": {
       "label": "Gráficos"

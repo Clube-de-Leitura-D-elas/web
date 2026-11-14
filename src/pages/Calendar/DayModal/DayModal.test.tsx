@@ -1,8 +1,9 @@
-import { screen } from '@testing-library/react';
 import { renderWithProviders } from '../../../test/render';
 import { DayModal } from '.';
 import type { CalendarEvent } from '../../../types/calendar';
 import ptBR from '../../../locales/pt-BR.json';
+import { fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 const mockEvents: CalendarEvent[] = [
   {
@@ -74,5 +75,55 @@ describe('DayModal', () => {
     expect(screen.queryByRole('button', { name: 'Cancelar' })).not.toBeInTheDocument();
 
     expect(screen.queryByRole('button', { name: 'Confirmar' })).not.toBeInTheDocument();
+  });
+
+  it('seleciona o encontro utilizando seu identificador', () => {
+    const onSelectEvent = jest.fn();
+
+    renderWithProviders(
+      <DayModal
+        isOpen
+        onClose={jest.fn()}
+        onSelectEvent={onSelectEvent}
+        date={new Date(2026, 9, 15, 12)}
+        events={mockEvents}
+      />,
+    );
+
+    const eventButton = screen.getByRole('button', {
+      name: /14:00 - Grupo de Tecnologia - Canoas/,
+    });
+
+    fireEvent.click(eventButton);
+
+    expect(onSelectEvent).toHaveBeenCalledWith('1');
+  });
+
+  it('permite selecionar o encontro pelo teclado', async () => {
+    const onSelectEvent = jest.fn();
+    const user = userEvent.setup();
+
+    renderWithProviders(
+      <DayModal
+        isOpen
+        onClose={jest.fn()}
+        onSelectEvent={onSelectEvent}
+        date={new Date(2026, 9, 15, 12)}
+        events={mockEvents}
+      />,
+    );
+
+    const eventButton = screen.getByRole('button', {
+      name: /14:00 - Grupo de Tecnologia - Canoas/,
+    });
+
+    eventButton.focus();
+
+    expect(eventButton).toHaveFocus();
+
+    await user.keyboard('{Enter}');
+
+    expect(onSelectEvent).toHaveBeenCalledTimes(1);
+    expect(onSelectEvent).toHaveBeenCalledWith('1');
   });
 });

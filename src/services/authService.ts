@@ -2,6 +2,7 @@ import { isAuthApiError } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient';
 import { AuthServiceError } from './authErrors';
 import { ADMIN_ROLES, APP_ROLES, type AppRole } from '../types/auth';
+import { clearCalendarCache } from './calendarService';
 
 export type LoginPayload = {
   email: string;
@@ -33,9 +34,12 @@ export async function signInWithPassword(payload: LoginPayload) {
 
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
+
   if (error) {
     throw toAuthServiceError(error);
   }
+
+  clearCalendarCache();
 }
 
 /** Avisa quando a sessão termina: logout (nesta ou em outra aba) ou token que não pôde ser renovado. */
@@ -43,7 +47,10 @@ export function onSignOut(callback: () => void) {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange((event) => {
-    if (event === 'SIGNED_OUT') callback();
+    if (event === 'SIGNED_OUT') {
+      clearCalendarCache();
+      callback();
+    }
   });
 
   return () => subscription.unsubscribe();

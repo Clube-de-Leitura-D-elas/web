@@ -34,8 +34,13 @@ export const Subtitle = styled.p`
 
 export const KpiGrid = styled.section`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
+`;
+export const Icon = styled.span`
+  display: flex;
+  align-items: center;
+  transform: translateY(2px);
 `;
 
 export const ChartsGrid = styled.section`
