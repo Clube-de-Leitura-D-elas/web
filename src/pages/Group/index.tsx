@@ -411,8 +411,11 @@ export const GroupDetails = () => {
 
   const fetchParticipants = useCallback(
     async ({ page, pageSize }: TablePageRequest): Promise<TablePage> => {
-      const { items, total } = await loadMembers();
-      setMembersState({ key: groupId, list: { status: 'ready', items, total } });
+      const request = loadMembers();
+      const { items, total } = await request;
+      if (membersRequest.current?.promise === request) {
+        setMembersState({ key: groupId, list: { status: 'ready', items, total } });
+      }
       const table = text.table;
       const actions = text.participantActions;
       const sorted = [...items].sort((a, b) => Number(b.is_coordinator) - Number(a.is_coordinator));
