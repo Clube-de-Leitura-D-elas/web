@@ -286,6 +286,23 @@ describe('GroupDetails', () => {
     expect(within(carla).getByText(text.table.lowTag)).toBeInTheDocument();
   });
 
+  it('a nova tentativa da tabela recarrega a lista e os indicadores', async () => {
+    jest
+      .mocked(getAllGroupParticipants)
+      .mockRejectedValueOnce(new Error('rede'))
+      .mockRejectedValueOnce(new Error('rede'));
+    const { user } = renderPage();
+    await waitForPage();
+
+    await user.click(await screen.findByRole('button', { name: locale.table.retry }));
+
+    expect(await screen.findByRole('link', { name: /^Ana Souza/ })).toBeInTheDocument();
+    expect(getAllGroupParticipants).toHaveBeenCalledTimes(3);
+    expect(
+      within(screen.getByRole('region', { name: text.stats.label })).getByText('de 3'),
+    ).toBeInTheDocument();
+  });
+
   it('mostra o histórico de encontros na segunda aba', async () => {
     const { user } = renderPage();
     await waitForPage();

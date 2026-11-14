@@ -122,7 +122,10 @@ export const GroupStats = ({ activeCount, members, meetings }: GroupStatsProps) 
               (rating === null
                 ? stats.noRatings
                 : interpolate(stats.ratingSub, {
-                    meetings: pluralize(stats.meetings, meetings.total),
+                    meetings: pluralize(
+                      meetings.items.length < meetings.total ? stats.lastMeetings : stats.meetings,
+                      meetings.items.length,
+                    ),
                     votes: pluralize(stats.votes, votes),
                   }))}
         </Styled.StatSub>
