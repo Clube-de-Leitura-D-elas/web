@@ -50,4 +50,13 @@ describe('Dashboard', () => {
       await screen.findByRole('group', { name: text.registrations.chartLabel.month }),
     ).toBeInTheDocument();
   });
+
+  it('mostra o indicador de grupos na área dos indicadores', async () => {
+    renderWithProviders(<Dashboard />);
+
+    const kpis = screen.getByRole('region', { name: text.kpis.label });
+
+    expect(await screen.findByText(text.kpis.groups.title)).toBeInTheDocument();
+    expect(kpis).toContainElement(screen.getByText('5'));
+  });
 });
