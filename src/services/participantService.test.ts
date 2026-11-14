@@ -1,4 +1,5 @@
 import {
+  getAllParticipantGroups,
   getParticipantById,
   getParticipantGroups,
   getParticipantPresence,
@@ -74,6 +75,31 @@ describe('getParticipantGroups', () => {
     });
     expect(invoke).toHaveBeenCalledWith(
       'get-participant-groups?participant_id=p1&page=2&pageSize=5',
+      { method: 'GET' },
+    );
+  });
+});
+
+describe('getAllParticipantGroups', () => {
+  const item = (id: string) => ({
+    id,
+    number: 1,
+    city: null,
+    is_coordinator: false,
+    entry_date: null,
+  });
+
+  it('busca as páginas até chegar ao total', async () => {
+    invoke
+      .mockResolvedValueOnce({
+        data: { items: Array.from({ length: 100 }, (_, i) => item(`g${i}`)), total: 101 },
+        error: null,
+      })
+      .mockResolvedValueOnce({ data: { items: [item('g100')], total: 101 }, error: null });
+
+    await expect(getAllParticipantGroups('p1')).resolves.toHaveLength(101);
+    expect(invoke).toHaveBeenLastCalledWith(
+      'get-participant-groups?participant_id=p1&page=2&pageSize=100',
       { method: 'GET' },
     );
   });

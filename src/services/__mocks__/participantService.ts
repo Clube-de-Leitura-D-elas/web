@@ -7,6 +7,9 @@ export const getParticipantById =
 export const getParticipantGroups =
   fn<typeof actual.getParticipantGroups>().mockName('getParticipantGroups');
 
+export const getAllParticipantGroups =
+  fn<typeof actual.getAllParticipantGroups>().mockName('getAllParticipantGroups');
+
 export const getParticipantPresence =
   fn<typeof actual.getParticipantPresence>().mockName('getParticipantPresence');
 
