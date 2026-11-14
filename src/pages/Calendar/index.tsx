@@ -3,14 +3,16 @@ import type { CSSProperties } from 'react';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 import * as Styled from './styles';
 import { useLocale } from '../../hooks/useLocale';
-import { getCalendarMonth } from '../../services/calendarService';
-import type { CalendarMonthResponse } from '../../types/calendar';
+import { getCalendarMonth, getCities, getActiveGroups } from '../../services/calendarService';
+import type { CalendarMonthResponse, CalendarOption, CalendarGroup } from '../../types/calendar';
 import { getCalendarDays } from '../../utils/calendar';
 import { Input } from '../../components/Input';
+import { Dropdown } from '../../components/Dropdown';
 import { DayModal } from './DayModal';
 import { interpolate } from '../../locales';
 import { formatCalendarMonthName, formatEventTime } from '../../utils/date';
 import { useNavigate, useSearchParams } from 'react-router';
+import { Autocomplete } from '../../components/Autocomplete';
 
 const MAX_VISIBLE_EVENTS = 3;
 // mesmo intervalo aceito pela edge function calendar-month
@@ -95,8 +97,44 @@ export const Calendar = () => {
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isEditingYear, setIsEditingYear] = useState(false);
   const monthSelectorRef = useRef<HTMLDivElement>(null);
-
+  const [cities, setCities] = useState<CalendarOption[]>([]);
+  const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
+  const [selectedState, setSelectedState] = useState<string | null>(null);
   const [yearDraft, setYearDraft] = useState(String(selectedDate.getFullYear()));
+  const [groups, setGroups] = useState<CalendarGroup[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+
+  const cityOptions = cities
+    .filter((city) => selectedState === null || city.uf === selectedState)
+    .map((city) => ({
+      value: city.id,
+      label: city.name,
+    }));
+
+  const stateOptions = [
+    { value: '', label: 'Todos os estados' },
+    ...[...new Set(cities.map((city) => city.uf))]
+      .filter(Boolean)
+      .sort()
+      .map((uf) => ({
+        value: uf,
+        label: uf,
+      })),
+  ];
+
+  const groupOptions = [
+    { value: '', label: 'Todos os grupos' },
+    ...groups
+      .filter(
+        (group) =>
+          (selectedState === null || group.state === selectedState) &&
+          (selectedCityId === null || group.cityId === selectedCityId),
+      )
+      .map((group) => ({
+        value: group.id,
+        label: `Grupo ${String(group.number).padStart(2, '0')} — ${group.description}`,
+      })),
+  ];
 
   const updateCalendarDate = (date: Date) => {
     if (date.getFullYear() === year && date.getMonth() + 1 === month) {
@@ -147,6 +185,38 @@ export const Calendar = () => {
 
     updateCalendarDate(new Date(now.getFullYear(), now.getMonth(), 1));
   };
+
+  const handleStateChange = (value: string) => {
+    setSelectedState(value || null);
+    setSelectedCityId(null);
+    setSelectedGroupId(null);
+  };
+
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const data = await getCities();
+        setCities(data);
+      } catch (error) {
+        console.error('Erro ao buscar cidades:', error);
+      }
+    };
+
+    void loadCities();
+  }, []);
+
+  useEffect(() => {
+    const loadGroups = async () => {
+      try {
+        const data = await getActiveGroups();
+        setGroups(data);
+      } catch (error) {
+        console.error('Erro ao buscar grupos:', error);
+      }
+    };
+
+    void loadGroups();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -331,6 +401,37 @@ export const Calendar = () => {
             </Styled.YearButton>
           )}
         </Styled.MonthNavigationButtons>
+
+        <Styled.FiltersContainer>
+          <Dropdown
+            key={`${selectedState ?? 'all'}-${selectedCityId ?? 'all'}`}
+            label="Grupo"
+            placeholder="Todos os grupos"
+            options={groupOptions}
+            onSelect={(value) => setSelectedGroupId(value || null)}
+          />
+          <Styled.CityFilter>
+            <Autocomplete
+              label={locale.calendar.filters.city.title}
+              placeholder={locale.calendar.filters.city.placeholder}
+              options={cityOptions}
+              value={selectedCityId}
+              onChange={(value) => {
+                setSelectedCityId(value);
+                setSelectedGroupId(null);
+              }}
+            />
+          </Styled.CityFilter>
+
+          <Styled.CityFilter>
+            <Dropdown
+              label={locale.calendar.filters.state.title}
+              placeholder={locale.calendar.filters.state.placeholder}
+              options={stateOptions}
+              onSelect={handleStateChange}
+            />
+          </Styled.CityFilter>
+        </Styled.FiltersContainer>
       </Styled.MonthNavigation>
 
       {error && <Styled.Feedback role="alert">{locale.calendar.loadError}</Styled.Feedback>}
@@ -355,9 +456,14 @@ export const Calendar = () => {
             const inMonth = date.getMonth() + 1 === month;
             const currentDay = isToday(date);
 
-            const events = [...(eventsByDate.get(dateKey) ?? [])].sort(
-              (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
-            );
+            const events = [...(eventsByDate.get(dateKey) ?? [])]
+              .filter(
+                (event) =>
+                  (selectedState === null || event.state === selectedState) &&
+                  (selectedCityId === null || event.cityId === selectedCityId) &&
+                  (selectedGroupId === null || event.groupId === selectedGroupId),
+              )
+              .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
 
             const hiddenCount =
               events.length > MAX_VISIBLE_EVENTS ? events.length - (MAX_VISIBLE_EVENTS - 1) : 0;
@@ -427,7 +533,12 @@ export const Calendar = () => {
           onClose={() => setSelectedDay(null)}
           onSelectEvent={handleEventSelect}
           date={selectedDay}
-          events={eventsByDate.get(getDateKey(selectedDay)) ?? []}
+          events={(eventsByDate.get(getDateKey(selectedDay)) ?? []).filter(
+            (event) =>
+              (selectedState === null || event.state === selectedState) &&
+              (selectedCityId === null || event.cityId === selectedCityId) &&
+              (selectedGroupId === null || event.groupId === selectedGroupId),
+          )}
         />
       )}
     </Styled.Container>

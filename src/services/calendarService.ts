@@ -1,5 +1,6 @@
-import type { CalendarMonthResponse } from '../types/calendar';
 import { invokeGet } from './invokeGet';
+import type { CalendarMonthResponse, CalendarOption, CalendarGroup } from '../types/calendar';
+import { supabase } from './supabaseClient';
 
 const CACHE_DURATION_MS = 5 * 60 * 1000;
 
@@ -55,4 +56,25 @@ export function getCalendarMonth(year: number, month: number): Promise<CalendarM
   });
 
   return request;
+}
+
+export async function getCities(): Promise<CalendarOption[]> {
+  const { data, error } = await supabase.from('cities').select('id, name, uf').order('name');
+  if (error) throw error;
+
+  return (data ?? []) as CalendarOption[];
+}
+
+export async function getActiveGroups(): Promise<CalendarGroup[]> {
+  const { data, error } = await supabase.functions.invoke<{ groups: CalendarGroup[] }>(
+    'get-calendar-groups-web',
+    {
+      method: 'GET',
+    },
+  );
+
+  if (error) throw error;
+  if (!data) throw new Error('get-calendar-groups-web returned no data');
+
+  return data.groups;
 }

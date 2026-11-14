@@ -142,7 +142,10 @@ export const Autocomplete = ({
           placeholder={placeholder}
           disabled={disabled}
           onChange={handleInput}
-          onFocus={() => setOpen(true)}
+          onFocus={(event) => {
+            setOpen(true);
+            event.target.select();
+          }}
           onKeyDown={handleKeyDown}
         />
       </Styled.Field>

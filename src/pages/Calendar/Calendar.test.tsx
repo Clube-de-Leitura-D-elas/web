@@ -1,6 +1,6 @@
 import { act, screen, waitFor, within } from '@testing-library/react';
 import { locale } from '../../locales';
-import { getCalendarMonth } from '../../services/calendarService';
+import { getActiveGroups, getCalendarMonth, getCities } from '../../services/calendarService';
 import { pending, renderWithProviders } from '../../test/render';
 import type { CalendarMonthResponse } from '../../types/calendar';
 import { getCalendarDays } from '../../utils/calendar';
@@ -9,13 +9,19 @@ import { theme } from '../../theme/theme';
 
 jest.mock('../../services/calendarService', () => ({
   getCalendarMonth: jest.fn(),
+  getCities: jest.fn(),
+  getActiveGroups: jest.fn(),
 }));
 
 const text = locale.calendar;
 const nav = text.navigation;
 
 const renderPage = () => renderWithProviders(<Calendar />);
-const getMonthButton = () => screen.getByRole('button', { expanded: false });
+
+const getMonthButton = () =>
+  screen.getByRole('button', {
+    name: new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date()),
+  });
 
 const getCalendarDayLabel = (date: Date) =>
   `${locale.calendar.dayAriaLabel
@@ -42,6 +48,8 @@ const emptyCalendar = {
 
 beforeEach(() => {
   jest.mocked(getCalendarMonth).mockResolvedValue(emptyCalendar);
+  jest.mocked(getCities).mockResolvedValue([]);
+  jest.mocked(getActiveGroups).mockResolvedValue([]);
 });
 
 describe('Calendar', () => {
@@ -263,6 +271,26 @@ describe('Calendar', () => {
     renderPage();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(text.loadError);
+  });
+
+  it('seleciona todo o texto do autocomplete ao receber foco', async () => {
+    jest.mocked(getCities).mockResolvedValue([{ id: 'city-1', name: 'Porto Alegre', uf: 'RS' }]);
+
+    const { user } = renderPage();
+
+    const cityInput = screen.getByLabelText(locale.calendar.filters.city.title);
+
+    await user.type(cityInput, 'Porto');
+
+    await user.click(await screen.findByRole('option', { name: 'Porto Alegre' }));
+
+    expect(cityInput).toHaveValue('Porto Alegre');
+
+    cityInput.blur();
+    await user.click(cityInput);
+
+    expect(cityInput.selectionStart).toBe(0);
+    expect(cityInput.selectionEnd).toBe('Porto Alegre'.length);
   });
 
   it('busca os dados do mês e ano atuais', async () => {
