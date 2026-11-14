@@ -1,4 +1,5 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
+import { Link } from 'react-router';
 import { interpolate, locale } from '../../locales';
 import {
   getAllGroupParticipants,
@@ -301,6 +302,38 @@ describe('GroupDetails', () => {
     expect(
       within(screen.getByRole('region', { name: text.stats.label })).getByText('de 3'),
     ).toBeInTheDocument();
+  });
+
+  it('ignora a lista do grupo anterior quando ela chega depois da troca de grupo', async () => {
+    let resolveFirst: (value: {
+      items: GroupParticipantListItem[];
+      total: number;
+    }) => void = () => {};
+    jest
+      .mocked(getAllGroupParticipants)
+      .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)));
+    jest
+      .mocked(getGroupDetails)
+      .mockImplementation(async (id) =>
+        id === 'g2' ? { ...group, id: 'g2', number: 8, description: 'Sul' } : group,
+      );
+    const { user } = renderWithProviders(
+      <>
+        <GroupDetails />
+        <Link to="/grupos/g2">Ir para o grupo 08</Link>
+      </>,
+      { route: '/grupos/g1', path: '/grupos/:groupId' },
+    );
+    await waitForPage();
+
+    await user.click(screen.getByRole('link', { name: 'Ir para o grupo 08' }));
+    await screen.findByRole('heading', { name: 'Grupo 08 — Sul' });
+    const stats = screen.getByRole('region', { name: text.stats.label });
+    expect(await within(stats).findByText('de 3')).toBeInTheDocument();
+
+    await act(async () => resolveFirst({ items: members.slice(0, 1), total: 1 }));
+
+    expect(within(stats).getByText('de 3')).toBeInTheDocument();
   });
 
   it('mostra o histórico de encontros na segunda aba', async () => {
