@@ -439,6 +439,7 @@
     "loading": "Carregando calendário...",
     "subtitle": "Visualize os encontros de todos os grupos do clube.",
     "filters": {
+      "clear": "Limpar filtros",
       "group": {
         "title": "Grupo",
         "placeholder": "Todos os grupos"

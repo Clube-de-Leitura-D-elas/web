@@ -13,6 +13,7 @@ import { interpolate } from '../../locales';
 import { formatCalendarMonthName, formatEventTime } from '../../utils/date';
 import { useNavigate, useSearchParams } from 'react-router';
 import { Autocomplete } from '../../components/Autocomplete';
+import { Button } from '../../components/Button';
 
 const MAX_VISIBLE_EVENTS = 3;
 // mesmo intervalo aceito pela edge function calendar-month
@@ -103,6 +104,7 @@ export const Calendar = () => {
   const [yearDraft, setYearDraft] = useState(String(selectedDate.getFullYear()));
   const [groups, setGroups] = useState<CalendarGroup[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [filtersResetKey, setFiltersResetKey] = useState(0);
 
   const cityOptions = cities
     .filter((city) => selectedState === null || city.uf === selectedState)
@@ -190,6 +192,13 @@ export const Calendar = () => {
     setSelectedState(value || null);
     setSelectedCityId(null);
     setSelectedGroupId(null);
+  };
+
+  const handleClearFilters = () => {
+    setSelectedGroupId(null);
+    setSelectedCityId(null);
+    setSelectedState(null);
+    setFiltersResetKey((previous) => previous + 1);
   };
 
   useEffect(() => {
@@ -402,36 +411,44 @@ export const Calendar = () => {
           )}
         </Styled.MonthNavigationButtons>
 
-        <Styled.FiltersContainer>
-          <Dropdown
-            key={`${selectedState ?? 'all'}-${selectedCityId ?? 'all'}`}
-            label="Grupo"
-            placeholder="Todos os grupos"
-            options={groupOptions}
-            onSelect={(value) => setSelectedGroupId(value || null)}
-          />
-          <Styled.CityFilter>
-            <Autocomplete
-              label={locale.calendar.filters.city.title}
-              placeholder={locale.calendar.filters.city.placeholder}
-              options={cityOptions}
-              value={selectedCityId}
-              onChange={(value) => {
-                setSelectedCityId(value);
-                setSelectedGroupId(null);
-              }}
-            />
-          </Styled.CityFilter>
+        <Styled.FiltersSection>
+          <Button variant="primary" size="sm" onClick={handleClearFilters}>
+            {locale.calendar.filters.clear}
+          </Button>
 
-          <Styled.CityFilter>
+          <Styled.FiltersContainer>
             <Dropdown
-              label={locale.calendar.filters.state.title}
-              placeholder={locale.calendar.filters.state.placeholder}
-              options={stateOptions}
-              onSelect={handleStateChange}
+              key={`${filtersResetKey}-${selectedState ?? 'all'}-${selectedCityId ?? 'all'}`}
+              label={locale.calendar.filters.group.title}
+              placeholder={locale.calendar.filters.group.placeholder}
+              options={groupOptions}
+              onSelect={(value) => setSelectedGroupId(value || null)}
             />
-          </Styled.CityFilter>
-        </Styled.FiltersContainer>
+
+            <Styled.CityFilter>
+              <Autocomplete
+                label={locale.calendar.filters.city.title}
+                placeholder={locale.calendar.filters.city.placeholder}
+                options={cityOptions}
+                value={selectedCityId}
+                onChange={(value) => {
+                  setSelectedCityId(value);
+                  setSelectedGroupId(null);
+                }}
+              />
+            </Styled.CityFilter>
+
+            <Styled.CityFilter>
+              <Dropdown
+                key={`state-${filtersResetKey}`}
+                label={locale.calendar.filters.state.title}
+                placeholder={locale.calendar.filters.state.placeholder}
+                options={stateOptions}
+                onSelect={handleStateChange}
+              />
+            </Styled.CityFilter>
+          </Styled.FiltersContainer>
+        </Styled.FiltersSection>
       </Styled.MonthNavigation>
 
       {error && <Styled.Feedback role="alert">{locale.calendar.loadError}</Styled.Feedback>}
