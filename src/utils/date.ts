@@ -276,7 +276,10 @@ export const getElapsedTime = (
   now: Date = new Date(),
 ): { years: number; months: number } | null => {
   if (!iso) return null;
-  const start = new Date(iso);
+  const civil = parseCivilDate(iso);
+  const start = civil
+    ? new Date(civil.getUTCFullYear(), civil.getUTCMonth(), civil.getUTCDate())
+    : new Date(iso);
   if (!isValid(start) || start > now) return null;
 
   const totalMonths =

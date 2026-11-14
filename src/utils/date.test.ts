@@ -208,6 +208,11 @@ describe('getElapsedTime', () => {
     expect(getElapsedTime('2024-03-15', now)).toEqual({ years: 2, months: 7 });
   });
 
+  it('trata a data sem hora como o dia civil, sem antecipar o mês', () => {
+    expect(getElapsedTime('2026-10-13', now)).toEqual({ years: 0, months: 0 });
+    expect(getElapsedTime('2026-10-12', now)).toEqual({ years: 0, months: 1 });
+  });
+
   it('não conta o mês ainda incompleto', () => {
     expect(getElapsedTime('2026-10-20', now)).toEqual({ years: 0, months: 0 });
   });
