@@ -114,7 +114,7 @@ export const Calendar = () => {
     }));
 
   const stateOptions = [
-    { value: '', label: 'Todos os estados' },
+    { value: '', label: locale.calendar.filters.state.placeholder },
     ...[...new Set(cities.map((city) => city.uf))]
       .filter(Boolean)
       .sort()
@@ -125,7 +125,7 @@ export const Calendar = () => {
   ];
 
   const groupOptions = [
-    { value: '', label: 'Todos os grupos' },
+    { value: '', label: locale.calendar.filters.group.placeholder },
     ...groups
       .filter(
         (group) =>
