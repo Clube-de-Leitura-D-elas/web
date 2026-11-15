@@ -3,15 +3,20 @@ import * as Styled from './styles';
 
 export type ChartCardProps = {
   title: string;
+  // à direita do título (ex.: abas de período e zoom)
+  action?: ReactNode;
   children: ReactNode;
 };
 
-export const ChartCard = ({ title, children }: ChartCardProps) => {
+export const ChartCard = ({ title, action, children }: ChartCardProps) => {
   const titleId = useId();
 
   return (
     <Styled.Card aria-labelledby={titleId}>
-      <Styled.Title id={titleId}>{title}</Styled.Title>
+      <Styled.Header>
+        <Styled.Title id={titleId}>{title}</Styled.Title>
+        {action && <Styled.Action>{action}</Styled.Action>}
+      </Styled.Header>
       {children}
     </Styled.Card>
   );

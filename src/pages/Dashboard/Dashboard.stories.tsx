@@ -3,9 +3,9 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { expect, mocked } from 'storybook/test';
 import { DefaultLayout } from '../../layouts/DefaultLayout';
 import { locale } from '../../locales';
-import { getRegistrations } from '../../services/dashboardService';
+import { getActiveParticipants, getRegistrations } from '../../services/dashboardService';
 import { Dashboard } from '.';
-import { buildRegistrations } from './storyData';
+import { buildActiveParticipants, buildRegistrations } from './storyData';
 
 const meta = {
   title: 'Pages/Dashboard',
@@ -24,10 +24,13 @@ const meta = {
       </MemoryRouter>
     ),
   ],
-  // os estados do gráfico estão nas stories de NewRegistrationsChart
+  // os estados dos gráficos estão nas stories de NewRegistrationsChart e ActiveParticipantsChart
   beforeEach: () => {
     mocked(getRegistrations).mockImplementation(async (granularity, from) =>
       buildRegistrations(granularity, from),
+    );
+    mocked(getActiveParticipants).mockImplementation(async (from, to) =>
+      buildActiveParticipants(from, to),
     );
   },
 } satisfies Meta<typeof Dashboard>;

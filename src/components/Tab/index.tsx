@@ -1,12 +1,13 @@
 import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import * as Styled from './styles';
 
-export type TabSize = 'md' | 'lg';
+export type TabSize = 'sm' | 'md' | 'lg';
 
 export type Tab = {
   value: string;
   label: string;
-  children: ReactNode;
+  // conteúdo do painel; sem `showPanels`, as abas não têm painel e ele não é usado
+  children?: ReactNode;
   disabled?: boolean;
 };
 
@@ -16,9 +17,24 @@ export type TabsProps = {
   defaultActive?: string;
   onChange?: (value: string) => void;
   size?: TabSize;
+  // `false`: só a lista de abas, sem painel (o conteúdo fica fora, ex.: gráfico abaixo do título)
+  showPanels?: boolean;
+  // com `showPanels` falso: id do painel externo (`role="tabpanel"`) que as abas controlam
+  panelId?: string;
+  // `true`: a lista ocupa só o tamanho das abas, em vez de 100% da largura (ex.: ao lado de outros itens)
+  fit?: boolean;
 };
 
-export const Tabs = ({ tabs, active, defaultActive, onChange, size = 'md' }: TabsProps) => {
+export const Tabs = ({
+  tabs,
+  active,
+  defaultActive,
+  onChange,
+  size = 'md',
+  showPanels = true,
+  panelId,
+  fit = false,
+}: TabsProps) => {
   const isControlled = active !== undefined;
 
   const [internalActive, setInternalActive] = useState<string | undefined>(
@@ -68,7 +84,7 @@ export const Tabs = ({ tabs, active, defaultActive, onChange, size = 'md' }: Tab
   };
 
   return (
-    <Styled.Wrapper>
+    <Styled.Wrapper $fit={fit}>
       <Styled.TabList role="tablist" $size={size} onKeyDown={handleKeyDown}>
         {tabs.map((tab) => {
           const isActive = tab.value === activeValue;
@@ -83,7 +99,7 @@ export const Tabs = ({ tabs, active, defaultActive, onChange, size = 'md' }: Tab
               role="tab"
               id={`tab-${tab.value}`}
               aria-selected={isActive}
-              aria-controls={`tabpanel-${tab.value}`}
+              aria-controls={showPanels ? `tabpanel-${tab.value}` : panelId}
               tabIndex={isActive ? 0 : -1}
               disabled={tab.disabled}
               $active={isActive}
@@ -96,7 +112,7 @@ export const Tabs = ({ tabs, active, defaultActive, onChange, size = 'md' }: Tab
         })}
       </Styled.TabList>
 
-      {activeTab && (
+      {showPanels && activeTab && (
         <Styled.Panel
           role="tabpanel"
           id={`tabpanel-${activeTab.value}`}

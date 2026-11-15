@@ -1,4 +1,6 @@
 import type {
+  ActiveParticipantsItem,
+  ActiveParticipantsResponse,
   DashboardKpisResponse,
   Granularity,
   RegistrationsItem,
@@ -20,6 +22,20 @@ export async function getRegistrations(
 
   return data.items;
 }
+
+// Um ponto por mês, já em ordem. O painel pede 60 meses e recorta o período no navegador.
+export async function getActiveParticipants(
+  from: string,
+  to: string,
+): Promise<ActiveParticipantsItem[]> {
+  const data = await invokeGet<ActiveParticipantsResponse>(
+    'get-dashboard-active-participants-web',
+    { from, to },
+  );
+
+  return data.items;
+}
+
 export async function getDashboardKpis(): Promise<DashboardKpisResponse> {
   return invokeGet<DashboardKpisResponse>('get-dashboard-kpis-web', {});
 }
