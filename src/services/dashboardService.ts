@@ -1,4 +1,6 @@
 import type {
+  AbsenceItem,
+  AbsencesResponse,
   ActiveParticipantsItem,
   ActiveParticipantsResponse,
   DashboardKpisResponse,
@@ -38,4 +40,12 @@ export async function getActiveParticipants(
 
 export async function getDashboardKpis(): Promise<DashboardKpisResponse> {
   return invokeGet<DashboardKpisResponse>('get-dashboard-kpis-web', {});
+}
+
+// A lista vem inteira e já ordenada (sem presença há mais tempo primeiro): a tabela pagina no
+// navegador.
+export async function getAbsences(): Promise<AbsenceItem[]> {
+  const data = await invokeGet<AbsencesResponse>('get-dashboard-absences-web', {});
+
+  return data.items;
 }

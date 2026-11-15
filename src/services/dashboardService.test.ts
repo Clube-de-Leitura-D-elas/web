@@ -1,4 +1,4 @@
-import { getActiveParticipants, getRegistrations } from './dashboardService';
+import { getAbsences, getActiveParticipants, getRegistrations } from './dashboardService';
 import { supabase } from './supabaseClient';
 
 const invoke = jest.mocked(supabase.functions.invoke);
@@ -48,5 +48,32 @@ describe('getActiveParticipants', () => {
     invoke.mockResolvedValue({ data: null, error } as never);
 
     await expect(getActiveParticipants('2021-12-01', '2026-11-11')).rejects.toBe(error);
+  });
+});
+
+describe('getAbsences', () => {
+  it('chama a function sem parâmetros e devolve os itens', async () => {
+    const items = [
+      {
+        participantId: 'p1',
+        name: 'Rayane Moura',
+        group: { id: 'g6', number: 6, description: 'Recife' },
+        lastPresenceAt: null,
+      },
+    ];
+    invoke.mockResolvedValue({ data: { items }, error: null });
+
+    await expect(getAbsences()).resolves.toEqual(items);
+
+    const [name, options] = invoke.mock.calls[0];
+    expect(name).toBe('get-dashboard-absences-web?');
+    expect(options).toEqual({ method: 'GET' });
+  });
+
+  it('repassa o erro da function', async () => {
+    const error = new Error('403');
+    invoke.mockResolvedValue({ data: null, error } as never);
+
+    await expect(getAbsences()).rejects.toBe(error);
   });
 });

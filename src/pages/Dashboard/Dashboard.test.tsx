@@ -1,17 +1,20 @@
 import { screen, within } from '@testing-library/react';
 import { locale } from '../../locales';
 import {
+  getAbsences,
   getActiveParticipants,
   getDashboardKpis,
   getRegistrations,
 } from '../../services/dashboardService';
 import { renderWithProviders } from '../../test/render';
 import { Dashboard } from '.';
+import { ABSENCES } from './storyData';
 
 jest.mock('../../services/dashboardService', () => ({
   getRegistrations: jest.fn(),
   getActiveParticipants: jest.fn(),
   getDashboardKpis: jest.fn(),
+  getAbsences: jest.fn(),
 }));
 
 const text = locale.dashboard;
@@ -35,12 +38,14 @@ beforeEach(() => {
       previousMonth: 2,
     },
   });
+  jest.mocked(getAbsences).mockResolvedValue(ABSENCES);
 });
 
-// espera os dois gráficos carregarem, para nenhuma atualização de estado sobrar depois do teste
+// espera os gráficos e a lista carregarem, para nenhuma atualização de estado sobrar depois do teste
 const waitForCharts = async () => {
   await screen.findByRole('group', { name: text.registrations.chartLabel.month });
   await screen.findByRole('group', { name: text.activeParticipants.chartLabel });
+  await screen.findByRole('table');
 };
 
 describe('Dashboard', () => {
@@ -75,6 +80,14 @@ describe('Dashboard', () => {
     expect(charts).toContainElement(
       screen.getByRole('region', { name: text.activeParticipants.title }),
     );
+    await waitForCharts();
+  });
+
+  it('mostra a lista de quem faltou aos 3 últimos encontros fora da área dos gráficos', async () => {
+    renderWithProviders(<Dashboard />);
+
+    const list = await screen.findByRole('region', { name: text.absences.title });
+    expect(screen.getByRole('region', { name: text.charts.label })).not.toContainElement(list);
     await waitForCharts();
   });
 

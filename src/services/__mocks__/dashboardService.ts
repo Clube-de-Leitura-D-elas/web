@@ -6,3 +6,4 @@ export const getRegistrations = fn<typeof actual.getRegistrations>().mockName('g
 export const getActiveParticipants =
   fn<typeof actual.getActiveParticipants>().mockName('getActiveParticipants');
 export const getDashboardKpis = fn<typeof actual.getDashboardKpis>().mockName('getDashboardKpis');
+export const getAbsences = fn<typeof actual.getAbsences>().mockName('getAbsences');

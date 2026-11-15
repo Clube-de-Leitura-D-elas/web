@@ -16,6 +16,19 @@ describe('ChartCard', () => {
   });
 });
 
+describe('ChartCard com badge', () => {
+  it('mostra o badge ao lado do título, sem mudar o nome da região', () => {
+    renderWithProviders(
+      <ChartCard title="Participantes que faltaram" badge={<span>8</span>}>
+        <p>conteúdo da lista</p>
+      </ChartCard>,
+    );
+
+    const region = screen.getByRole('region', { name: 'Participantes que faltaram' });
+    expect(within(region).getByText('8')).toBeInTheDocument();
+  });
+});
+
 describe('ChartCard com ação', () => {
   it('mostra a ação ao lado do título', () => {
     renderWithProviders(
