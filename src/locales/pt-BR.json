@@ -287,7 +287,11 @@
   },
   "participants": {
     "title": "Participantes",
-    "subtitle": "{{groups}} em {{cities}}",
+    "subtitle": "{{participants}} em {{cities}}",
+    "activeParticipantsCount": {
+      "one": "{{count}} participante ativa",
+      "other": "{{count}} participantes ativas"
+    },
     "activeGroupsCount": {
       "one": "{{count}} grupo ativo",
       "other": "{{count}} grupos ativos"

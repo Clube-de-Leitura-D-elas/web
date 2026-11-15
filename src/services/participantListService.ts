@@ -47,3 +47,14 @@ export async function rejectPendingParticipant(id: string): Promise<void> {
   });
   if (error) throw error;
 }
+
+export async function getActiveParticipantsCount(): Promise<number> {
+  const { count, error } = await supabase
+    .from('users')
+    .select('*', { count: 'exact', head: true })
+    .eq('is_active', true);
+
+  if (error) throw error;
+
+  return count ?? 0;
+}
