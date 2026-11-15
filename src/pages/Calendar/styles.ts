@@ -398,4 +398,5 @@ export const FiltersSection = styled.div`
   gap: 0.5rem;
   margin-left: auto;
   flex-shrink: 0;
+  flex-warp: wrap;
 `;
