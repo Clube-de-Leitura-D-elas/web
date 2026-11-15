@@ -174,3 +174,14 @@ export const AbsenceDate = styled.span`
 export const AbsenceNever = styled(AbsenceDate)`
   color: ${({ theme }) => theme.textMuted};
 `;
+
+export const ChartScroll = styled.div`
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+`;
+
+export const ChartContent = styled.div<{ $minWidth: number }>`
+  width: 100%;
+  min-width: ${({ $minWidth }) => `${$minWidth}px`};
+`;
