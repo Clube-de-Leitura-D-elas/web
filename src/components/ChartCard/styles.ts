@@ -20,6 +20,13 @@ export const Header = styled.div`
   gap: 0.5rem 0.75rem;
 `;
 
+export const TitleGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+`;
+
 export const Action = styled.div`
   display: flex;
   align-items: center;

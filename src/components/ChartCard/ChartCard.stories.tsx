@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DataState } from '../DataState';
 import { Tabs } from '../Tab';
+import { Tag } from '../Tag';
 import { ChartCard } from '.';
 
 const meta = {
@@ -11,6 +12,10 @@ const meta = {
     title: {
       control: 'text',
       description: 'Título do card.',
+    },
+    badge: {
+      control: false,
+      description: 'Elemento colado ao título, como o contador de itens de uma lista.',
     },
     action: {
       control: false,
@@ -57,6 +62,14 @@ export const Empty: Story = {
 export const Error: Story = {
   args: {
     children: <DataState variant="error" minHeight="16rem" onRetry={() => {}} />,
+  },
+};
+
+// Contador colado ao título, como na lista de participantes que faltaram.
+export const WithBadge: Story = {
+  args: {
+    title: 'Participantes que faltaram aos últimos 3 encontros',
+    badge: <Tag color="neutral">8</Tag>,
   },
 };
 

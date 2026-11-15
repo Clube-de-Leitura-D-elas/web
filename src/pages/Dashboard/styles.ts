@@ -125,3 +125,52 @@ export const ZoomButton = styled.button`
     background-color: ${({ theme }) => theme.disabledBg};
   }
 `;
+
+// Mesmo padrão da tabela de Participantes: a `Table` divide as colunas por igual
+// (`table-layout: fixed`), então em tela estreita ela rola na horizontal em vez de quebrar o
+// nome letra a letra.
+export const AbsencesTable = styled.div`
+  width: 100%;
+  overflow-x: auto;
+
+  table {
+    min-width: 650px;
+  }
+`;
+
+export const AbsenceParticipant = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+`;
+
+export const AbsenceAvatar = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.surfaceBrandSoft};
+  color: ${({ theme }) => theme.textBrand};
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+`;
+
+export const AbsenceName = styled.span`
+  font-weight: 600;
+  color: ${({ theme }) => theme.text};
+`;
+
+export const AbsenceDate = styled.span`
+  white-space: nowrap;
+`;
+
+export const AbsenceNever = styled(AbsenceDate)`
+  color: ${({ theme }) => theme.textMuted};
+`;

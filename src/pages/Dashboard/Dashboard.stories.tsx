@@ -3,9 +3,14 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { expect, mocked } from 'storybook/test';
 import { DefaultLayout } from '../../layouts/DefaultLayout';
 import { locale } from '../../locales';
-import { getActiveParticipants, getRegistrations } from '../../services/dashboardService';
+import {
+  getAbsences,
+  getActiveParticipants,
+  getDashboardKpis,
+  getRegistrations,
+} from '../../services/dashboardService';
 import { Dashboard } from '.';
-import { buildActiveParticipants, buildRegistrations } from './storyData';
+import { ABSENCES, buildActiveParticipants, buildRegistrations } from './storyData';
 
 const meta = {
   title: 'Pages/Dashboard',
@@ -24,8 +29,15 @@ const meta = {
       </MemoryRouter>
     ),
   ],
-  // os estados dos gráficos estão nas stories de NewRegistrationsChart e ActiveParticipantsChart
+  // os estados dos gráficos e da lista estão nas stories de NewRegistrationsChart,
+  // ActiveParticipantsChart e AbsencesList
   beforeEach: () => {
+    // sem esse mock os cards de KPI quebram a story inteira (o mock do Storybook devolve undefined)
+    mocked(getDashboardKpis).mockResolvedValue({
+      groups: { active: 4, total: 6 },
+      meetings: { currentMonth: 12, previousMonth: 10 },
+    });
+    mocked(getAbsences).mockResolvedValue(ABSENCES);
     mocked(getRegistrations).mockImplementation(async (granularity, from) =>
       buildRegistrations(granularity, from),
     );

@@ -1,4 +1,5 @@
 import { useLocale } from '../../hooks/useLocale';
+import { AbsencesList } from './AbsencesList';
 import { ActiveParticipantsChart } from './ActiveParticipantsChart';
 import { NewRegistrationsChart } from './NewRegistrationsChart';
 import { GroupsKpi } from './GroupsKpi';
@@ -24,6 +25,8 @@ export const Dashboard = () => {
         <NewRegistrationsChart />
         <ActiveParticipantsChart />
       </Styled.ChartsGrid>
+
+      <AbsencesList />
     </Styled.Container>
   );
 };

@@ -704,6 +704,18 @@
         "one": "{{count}} participante ativa",
         "other": "{{count}} participantes ativas"
       }
+    },
+    "absences": {
+      "title": "Participantes que faltaram aos últimos 3 encontros",
+      "columns": {
+        "participant": "Participante",
+        "group": "Grupo",
+        "lastPresence": "Última presença"
+      },
+      "groupLabel": "Grupo {{number}} - {{description}}",
+      "never": "Nunca",
+      "itemLabel": "participantes",
+      "empty": "Nenhuma participante faltou aos 3 últimos encontros do grupo."
     }
   }
 }
