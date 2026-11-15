@@ -427,6 +427,7 @@ export const Calendar = () => {
 
             <Styled.CityFilter>
               <Autocomplete
+                key={`city-${filtersResetKey}-${selectedState ?? 'all'}`}
                 label={locale.calendar.filters.city.title}
                 placeholder={locale.calendar.filters.city.placeholder}
                 options={cityOptions}
