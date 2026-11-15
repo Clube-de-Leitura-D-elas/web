@@ -694,6 +694,49 @@ describe('GroupDetails', () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
+    it('a remoção que termina depois da troca de grupo não fecha a remoção do novo grupo', async () => {
+      let finishFirst: () => void = () => {};
+      jest
+        .mocked(updateGroupParticipant)
+        .mockImplementationOnce(() => new Promise<void>((resolve) => (finishFirst = resolve)));
+      jest
+        .mocked(getGroupDetails)
+        .mockImplementation(async (id) =>
+          id === 'g2' ? { ...group, id: 'g2', number: 8, description: 'Sul' } : group,
+        );
+      const { user } = renderWithProviders(
+        <>
+          <GroupDetails />
+          <Link to="/grupos/g2">Ir para o grupo 08</Link>
+        </>,
+        { route: '/grupos/g1', path: '/grupos/:groupId' },
+      );
+
+      await openMenu(user, 'Bia Lima');
+      await user.click(screen.getByRole('menuitem', { name: actions.remove }));
+      await user.click(
+        within(await screen.findByRole('dialog')).getByRole('button', {
+          name: locale.removeFromGroup.confirm,
+        }),
+      );
+
+      await user.click(screen.getByRole('link', { name: 'Ir para o grupo 08' }));
+      await screen.findByRole('heading', { name: 'Grupo 08 — Sul' });
+      await openMenu(user, 'Carla Dias');
+      await user.click(screen.getByRole('menuitem', { name: actions.remove }));
+      const second = await screen.findByRole('dialog', {
+        name: interpolate(locale.removeFromGroup.title, { name: 'Carla Dias', group: 'Grupo 08' }),
+      });
+
+      await act(async () => finishFirst());
+
+      expect(second).toBeInTheDocument();
+      expect(within(second).queryByRole('alert')).not.toBeInTheDocument();
+      expect(
+        within(second).getByRole('button', { name: locale.removeFromGroup.confirm }),
+      ).toBeEnabled();
+    });
+
     it('mantém o modal aberto com o erro quando a remoção falha', async () => {
       jest.mocked(updateGroupParticipant).mockRejectedValue(new Error(actions.error));
       const { user } = renderPage();
