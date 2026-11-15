@@ -18,6 +18,21 @@ const nav = text.navigation;
 
 const renderPage = () => renderWithProviders(<Calendar />);
 
+const selectDropdownOption = async (
+  user: ReturnType<typeof renderWithProviders>['user'],
+  label: string,
+  option: string,
+) => {
+  await user.click(screen.getByRole('button', { name: new RegExp(label) }));
+  await user.click(await screen.findByRole('option', { name: option }));
+};
+
+const mockCalendarFilters = () => {
+  jest.mocked(getCalendarMonth).mockResolvedValue(filterCalendar);
+  jest.mocked(getCities).mockResolvedValue(filterCities);
+  jest.mocked(getActiveGroups).mockResolvedValue(filterGroups);
+};
+
 const getMonthButton = () =>
   screen.getByRole('button', {
     name: new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date()),
@@ -45,6 +60,70 @@ const getThemeColor = (color: string) => {
 const emptyCalendar = {
   days: [],
 } as unknown as CalendarMonthResponse;
+
+const filterDate = new Date(new Date().getFullYear(), new Date().getMonth(), 15);
+
+const formatDateKey = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+const filterEvents = [
+  {
+    id: 'event-1',
+    groupId: 'group-1',
+    groupName: 'Clube do Livro',
+    cityId: 'city-1',
+    state: 'RS',
+    city: 'Porto Alegre',
+    startsAt: `${formatDateKey(filterDate)}T19:00:00`,
+    status: 'confirmed',
+  },
+  {
+    id: 'event-2',
+    groupId: 'group-2',
+    groupName: 'Grupo de Tecnologia',
+    cityId: 'city-2',
+    state: 'RS',
+    city: 'Gravataí',
+    startsAt: `${formatDateKey(filterDate)}T20:00:00`,
+    status: 'confirmed',
+  },
+  {
+    id: 'event-3',
+    groupId: 'group-3',
+    groupName: 'Grupo de Leitura',
+    cityId: 'city-3',
+    state: 'SC',
+    city: 'Florianópolis',
+    startsAt: `${formatDateKey(filterDate)}T21:00:00`,
+    status: 'confirmed',
+  },
+];
+
+const filterCalendar: CalendarMonthResponse = {
+  year: filterDate.getFullYear(),
+  month: filterDate.getMonth() + 1,
+  rangeStart: formatDateKey(filterDate),
+  rangeEnd: formatDateKey(filterDate),
+  days: [
+    {
+      date: formatDateKey(filterDate),
+      inMonth: true,
+      events: filterEvents,
+    },
+  ],
+};
+
+const filterCities = [
+  { id: 'city-1', name: 'Porto Alegre', uf: 'RS' },
+  { id: 'city-2', name: 'Gravataí', uf: 'RS' },
+  { id: 'city-3', name: 'Florianópolis', uf: 'SC' },
+];
+
+const filterGroups = [
+  { id: 'group-1', number: 1, description: 'Clube do Livro', cityId: 'city-1', state: 'RS' },
+  { id: 'group-2', number: 2, description: 'Grupo de Tecnologia', cityId: 'city-2', state: 'RS' },
+  { id: 'group-3', number: 3, description: 'Grupo de Leitura', cityId: 'city-3', state: 'SC' },
+];
 
 beforeEach(() => {
   jest.mocked(getCalendarMonth).mockResolvedValue(emptyCalendar);
@@ -111,6 +190,32 @@ describe('Calendar', () => {
     outsideMonth.forEach(({ cell }) => {
       expect(getComputedStyle(cell).backgroundColor).toBe(surfaceSunken);
     });
+  });
+
+  it('filtra os eventos do calendário pelo estado selecionado', async () => {
+    mockCalendarFilters();
+
+    const { user } = renderPage();
+
+    const dayLabel = `${getCalendarDayLabel(filterDate).replace(/, 0 eventos$/, '')}, 3 eventos`;
+
+    const dayCell = await screen.findByRole('button', {
+      name: dayLabel,
+    });
+
+    expect(within(dayCell).getByTitle('19:00 - Clube do Livro')).toBeInTheDocument();
+    expect(within(dayCell).getByTitle('20:00 - Grupo de Tecnologia')).toBeInTheDocument();
+    expect(within(dayCell).getByTitle('21:00 - Grupo de Leitura')).toBeInTheDocument();
+
+    await selectDropdownOption(user, locale.calendar.filters.state.title, 'RS');
+
+    expect(within(dayCell).getByTitle('19:00 - Clube do Livro')).toBeInTheDocument();
+    expect(within(dayCell).getByTitle('20:00 - Grupo de Tecnologia')).toBeInTheDocument();
+    expect(within(dayCell).queryByTitle('21:00 - Grupo de Leitura')).not.toBeInTheDocument();
+
+    expect(dayCell).toHaveAccessibleName(
+      `${getCalendarDayLabel(filterDate).replace(/, 0 eventos$/, '')}, 2 eventos`,
+    );
   });
 
   it('restaura o mês e o ano informados na URL', async () => {
