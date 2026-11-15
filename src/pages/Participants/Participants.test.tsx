@@ -6,6 +6,7 @@ import {
   getParticipantsPage,
   getPendingParticipantsPage,
   rejectPendingParticipant,
+  getActiveParticipantsCount,
 } from '../../services/participantListService';
 import { renderWithProviders } from '../../test/render';
 import { Participants } from '.';
@@ -15,6 +16,7 @@ jest.mock('../../services/participantListService', () => ({
   getPendingParticipantsPage: jest.fn(),
   approvePendingParticipant: jest.fn(),
   rejectPendingParticipant: jest.fn(),
+  getActiveParticipantsCount: jest.fn().mockResolvedValue(10),
 }));
 jest.mock('../../services/filterOptionsService', () => ({
   getParticipantFilterOptions: jest.fn(),
@@ -24,6 +26,8 @@ const text = locale.participants;
 const firstPage = { page: 1, pageSize: 6 };
 
 beforeEach(() => {
+  jest.mocked(getActiveParticipantsCount).mockResolvedValue(10);
+
   jest.mocked(getParticipantFilterOptions).mockResolvedValue({
     cityOptions: [
       { value: '', label: text.filters.cityAll },
@@ -63,10 +67,20 @@ const openRequestsTab = async (user: ReturnType<typeof renderWithProviders>['use
 };
 
 describe('Participants', () => {
-  it('mostra o resumo de grupos e cidades no subtítulo', async () => {
+  it('mostra a quantidade de participantes ativas e cidades no subtítulo', async () => {
     renderWithProviders(<Participants />);
 
-    expect(await screen.findByText('4 grupos ativos em 1 cidade')).toBeInTheDocument();
+    expect(await screen.findByText('10 participantes ativas em 1 cidade')).toBeInTheDocument();
+
+    expect(getActiveParticipantsCount).toHaveBeenCalledTimes(1);
+  });
+
+  it('mostra participante no singular quando existe apenas um ativo', async () => {
+    jest.mocked(getActiveParticipantsCount).mockResolvedValueOnce(1);
+
+    renderWithProviders(<Participants />);
+
+    expect(await screen.findByText('1 participante ativa em 1 cidade')).toBeInTheDocument();
   });
 
   it('lista as participantes com link para o perfil, grupos e status', async () => {
