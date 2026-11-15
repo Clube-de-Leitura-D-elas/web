@@ -438,6 +438,21 @@
     },
     "loading": "Carregando calendário...",
     "subtitle": "Visualize os encontros de todos os grupos do clube.",
+    "filters": {
+      "clear": "Limpar filtros",
+      "group": {
+        "title": "Grupo",
+        "placeholder": "Todos os grupos"
+      },
+      "city": {
+        "title": "Cidade",
+        "placeholder": "Digite o nome da cidade"
+      },
+      "state": {
+        "title": "Estado",
+        "placeholder": "Todos os estados"
+      }
+    },
     "weekdays": {
       "sunday": "DOM.",
       "monday": "SEG.",
