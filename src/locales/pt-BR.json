@@ -292,10 +292,6 @@
       "one": "{{count}} participante ativa",
       "other": "{{count}} participantes ativas"
     },
-    "activeGroupsCount": {
-      "one": "{{count}} grupo ativo",
-      "other": "{{count}} grupos ativos"
-    },
     "citiesCount": {
       "one": "{{count}} cidade",
       "other": "{{count}} cidades"
