@@ -10,7 +10,7 @@ describe('getParticipantFilterOptions', () => {
       data: {
         cities: [{ id: 'c1', name: 'Canoas' }],
         groups: [{ id: 'g1', number: 3, description: 'Centro' }],
-        summary: { groups: 4, cities: 2 },
+        summary: { groups: 4, cities: 2, activeParticipants: 10 },
       },
       error: null,
     });
