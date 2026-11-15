@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { locale } from '../../locales';
 import {
   getActiveParticipants,
@@ -29,6 +29,10 @@ beforeEach(() => {
     groups: {
       active: 2,
       total: 5,
+    },
+    meetings: {
+      currentMonth: 1,
+      previousMonth: 2,
     },
   });
 });
@@ -74,12 +78,23 @@ describe('Dashboard', () => {
     await waitForCharts();
   });
 
-  it('mostra o indicador de grupos na área dos indicadores', async () => {
+  it('mostra o indicador de grupos e encontros na área dos indicadores', async () => {
     renderWithProviders(<Dashboard />);
 
     const kpis = screen.getByRole('region', { name: text.kpis.label });
 
-    expect(await screen.findByText(text.kpis.groups.title)).toBeInTheDocument();
-    expect(kpis).toContainElement(screen.getByText('5'));
+    const groupsKpi = await screen.findByRole('region', {
+      name: text.kpis.groups.title,
+    });
+
+    const meetingsKpi = await screen.findByRole('region', {
+      name: text.kpis.meetings.title,
+    });
+
+    expect(kpis).toContainElement(groupsKpi);
+    expect(kpis).toContainElement(meetingsKpi);
+
+    expect(groupsKpi).toHaveTextContent('5');
+    expect(within(meetingsKpi).getByText('1', { exact: true })).toBeInTheDocument();
   });
 });

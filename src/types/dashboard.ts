@@ -26,4 +26,8 @@ export type DashboardKpisResponse = {
     active: number;
     total: number;
   };
+  meetings: {
+    currentMonth: number;
+    previousMonth: number;
+  };
 };

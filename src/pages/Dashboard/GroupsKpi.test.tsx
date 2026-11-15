@@ -16,6 +16,10 @@ beforeEach(() => {
       active: 2,
       total: 5,
     },
+    meetings: {
+      currentMonth: 2,
+      previousMonth: 2,
+    },
   });
 });
 
@@ -42,6 +46,10 @@ describe('GroupsKpi', () => {
       groups: {
         active: 0,
         total: 0,
+      },
+      meetings: {
+        currentMonth: 0,
+        previousMonth: 0,
       },
     });
 

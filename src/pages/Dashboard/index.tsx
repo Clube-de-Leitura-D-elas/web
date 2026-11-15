@@ -3,6 +3,7 @@ import { ActiveParticipantsChart } from './ActiveParticipantsChart';
 import { NewRegistrationsChart } from './NewRegistrationsChart';
 import { GroupsKpi } from './GroupsKpi';
 import * as Styled from './styles';
+import { MeetingsKpi } from './MeetingsKpi';
 
 export const Dashboard = () => {
   const { dashboard: text } = useLocale();
@@ -16,6 +17,7 @@ export const Dashboard = () => {
 
       <Styled.KpiGrid aria-label={text.kpis.label}>
         <GroupsKpi />
+        <MeetingsKpi />
       </Styled.KpiGrid>
 
       <Styled.ChartsGrid aria-label={text.charts.label}>

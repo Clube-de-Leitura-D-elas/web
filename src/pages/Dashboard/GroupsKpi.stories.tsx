@@ -37,6 +37,10 @@ const meta = {
           active: 2,
           total: 5,
         },
+        meetings: {
+          currentMonth: 0,
+          previousMonth: 0,
+        },
       };
     });
   },
@@ -54,6 +58,10 @@ export const ZeroGroups: Story = {
       groups: {
         active: 0,
         total: 0,
+      },
+      meetings: {
+        currentMonth: 0,
+        previousMonth: 0,
       },
     });
   },
