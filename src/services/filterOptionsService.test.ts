@@ -24,7 +24,7 @@ describe('getParticipantFilterOptions', () => {
         { value: '', label: locale.participants.filters.groupAll },
         { value: 'g1', label: 'Grupo 3 - Centro' },
       ],
-      summary: { groups: 4, cities: 2 },
+      summary: { groups: 4, cities: 2, activeParticipants: 10 },
     });
     expect(invoke).toHaveBeenCalledWith('get-participant-filters', { method: 'GET' });
   });

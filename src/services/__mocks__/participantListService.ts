@@ -15,7 +15,3 @@ export const approvePendingParticipant = fn<typeof actual.approvePendingParticip
 export const rejectPendingParticipant = fn<typeof actual.rejectPendingParticipant>().mockName(
   'rejectPendingParticipant',
 );
-
-export const getActiveParticipantsCount = fn<typeof actual.getActiveParticipantsCount>().mockName(
-  'getActiveParticipantsCount',
-);

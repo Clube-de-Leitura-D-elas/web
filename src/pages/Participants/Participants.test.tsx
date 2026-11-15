@@ -6,7 +6,6 @@ import {
   getParticipantsPage,
   getPendingParticipantsPage,
   rejectPendingParticipant,
-  getActiveParticipantsCount,
 } from '../../services/participantListService';
 import { renderWithProviders } from '../../test/render';
 import { Participants } from '.';
@@ -16,7 +15,6 @@ jest.mock('../../services/participantListService', () => ({
   getPendingParticipantsPage: jest.fn(),
   approvePendingParticipant: jest.fn(),
   rejectPendingParticipant: jest.fn(),
-  getActiveParticipantsCount: jest.fn().mockResolvedValue(10),
 }));
 jest.mock('../../services/filterOptionsService', () => ({
   getParticipantFilterOptions: jest.fn(),
@@ -26,8 +24,6 @@ const text = locale.participants;
 const firstPage = { page: 1, pageSize: 6 };
 
 beforeEach(() => {
-  jest.mocked(getActiveParticipantsCount).mockResolvedValue(10);
-
   jest.mocked(getParticipantFilterOptions).mockResolvedValue({
     cityOptions: [
       { value: '', label: text.filters.cityAll },
@@ -37,7 +33,11 @@ beforeEach(() => {
       { value: '', label: text.filters.groupAll },
       { value: 'g1', label: 'Grupo 3 - Centro' },
     ],
-    summary: { groups: 4, cities: 1 },
+    summary: {
+      groups: 4,
+      cities: 1,
+      activeParticipants: 10,
+    },
   });
   jest.mocked(getParticipantsPage).mockResolvedValue({
     items: [
@@ -72,11 +72,39 @@ describe('Participants', () => {
 
     expect(await screen.findByText('10 participantes ativas em 1 cidade')).toBeInTheDocument();
 
-    expect(getActiveParticipantsCount).toHaveBeenCalledTimes(1);
+    jest.mocked(getParticipantFilterOptions).mockResolvedValueOnce({
+      cityOptions: [
+        { value: '', label: text.filters.cityAll },
+        { value: 'c1', label: 'Canoas' },
+      ],
+      groupOptions: [
+        { value: '', label: text.filters.groupAll },
+        { value: 'g1', label: 'Grupo 3 - Centro' },
+      ],
+      summary: {
+        groups: 4,
+        cities: 1,
+        activeParticipants: 1,
+      },
+    });
   });
 
   it('mostra participante no singular quando existe apenas um ativo', async () => {
-    jest.mocked(getActiveParticipantsCount).mockResolvedValueOnce(1);
+    jest.mocked(getParticipantFilterOptions).mockResolvedValueOnce({
+      cityOptions: [
+        { value: '', label: text.filters.cityAll },
+        { value: 'c1', label: 'Canoas' },
+      ],
+      groupOptions: [
+        { value: '', label: text.filters.groupAll },
+        { value: 'g1', label: 'Grupo 3 - Centro' },
+      ],
+      summary: {
+        groups: 4,
+        cities: 1,
+        activeParticipants: 1,
+      },
+    });
 
     renderWithProviders(<Participants />);
 

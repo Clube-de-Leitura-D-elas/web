@@ -17,6 +17,7 @@ export type Page<T> = {
 export type ActiveGroupsSummary = {
   groups: number;
   cities: number;
+  activeParticipants: number;
 };
 
 export type ParticipantFiltersResponse = {

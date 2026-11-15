@@ -20,7 +20,6 @@ import {
   getPendingParticipantsPage,
   approvePendingParticipant,
   rejectPendingParticipant,
-  getActiveParticipantsCount,
 } from '../../services/participantListService';
 import { getParticipantFilterOptions } from '../../services/filterOptionsService';
 import type {
@@ -46,7 +45,6 @@ export const Participants = () => {
 
   // Debounce para evitar excesso de requisições ao digitar
   const debouncedSearch = useDebounce(search, 400);
-  const [activeParticipantsCount, setActiveParticipantsCount] = useState(0);
 
   // Chaves de recarregamento para invalidar cache da tabela após mutações
   const [participantsReloadKey, setParticipantsReloadKey] = useState(0);
@@ -65,10 +63,6 @@ export const Participants = () => {
         setGroupsSummary(summary);
       })
       .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    getActiveParticipantsCount().then(setActiveParticipantsCount).catch(console.error);
   }, []);
 
   // Objeto de filtros memoizado
@@ -276,7 +270,7 @@ export const Participants = () => {
             {interpolate(locale.participants.subtitle, {
               participants: pluralize(
                 locale.participants.activeParticipantsCount,
-                activeParticipantsCount,
+                groupsSummary.activeParticipants,
               ),
               cities: pluralize(locale.participants.citiesCount, groupsSummary.cities),
             })}
