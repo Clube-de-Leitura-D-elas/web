@@ -15,6 +15,7 @@ export type AutocompleteProps = {
   noResultsText?: string;
   helperText?: string;
   error?: string;
+  selectOnFocus?: boolean;
   disabled?: boolean;
   required?: boolean;
   maxSuggestions?: number;
@@ -38,6 +39,7 @@ export const Autocomplete = ({
   noResultsText = locale.autocomplete.noResults,
   helperText,
   error,
+  selectOnFocus = false,
   disabled = false,
   required = false,
   maxSuggestions = 10,
@@ -144,7 +146,10 @@ export const Autocomplete = ({
           onChange={handleInput}
           onFocus={(event) => {
             setOpen(true);
-            event.target.select();
+
+            if (selectOnFocus) {
+              event.target.select();
+            }
           }}
           onKeyDown={handleKeyDown}
         />

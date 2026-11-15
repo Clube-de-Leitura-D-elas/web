@@ -431,6 +431,7 @@ export const Calendar = () => {
                 placeholder={locale.calendar.filters.city.placeholder}
                 options={cityOptions}
                 value={selectedCityId}
+                selectOnFocus
                 onChange={(value) => {
                   setSelectedCityId(value);
                   setSelectedGroupId(null);
