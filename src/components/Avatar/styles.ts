@@ -6,7 +6,7 @@ const SIZES: Record<AvatarSize, { box: string; font: string }> = {
   sm: { box: '2rem', font: '0.75rem' },
   md: { box: '2.5rem', font: '0.875rem' },
   lg: { box: '3.5rem', font: '1.125rem' },
-  xl: { box: '6rem', font: '2rem' },
+  xl: { box: '4.5rem', font: '1.625rem' },
 };
 
 export const Container = styled.span<{ $size: AvatarSize }>`

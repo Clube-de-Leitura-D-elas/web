@@ -35,6 +35,15 @@ export type ParticipantPresence = {
   present: boolean;
 };
 
+export type ParticipantMeetingRecord = {
+  meetingId: string;
+  date: string;
+  bookTitle: string;
+  groupId: string;
+  groupNumber: number;
+  present: boolean | null;
+};
+
 /** Item de cidade/zona usado nos autocompletes do modal. */
 export type ParticipantOption = {
   id: string;
