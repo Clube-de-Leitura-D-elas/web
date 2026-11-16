@@ -56,6 +56,7 @@ export const ChartsGrid = styled.section`
 // O wrapper do tooltip começa no ponto e se estende para a direita (o translate só move a caixa
 // visível): nos pontos finais ele passaria do card e abriria rolagem lateral na página.
 export const ChartFrame = styled.div`
+  width: 100%;
   overflow: hidden;
 `;
 
@@ -184,4 +185,22 @@ export const ChartScroll = styled.div`
 export const ChartContent = styled.div<{ $minWidth: number }>`
   width: 100%;
   min-width: ${({ $minWidth }) => `${$minWidth}px`};
+`;
+
+export const ChartViewport = styled.div`
+  position: relative;
+  width: 100%;
+  min-width: 0;
+`;
+
+export const ChartAxisOverlay = styled.div<{ $width: number }>`
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: ${({ $width }) => `${$width}px`};
+  height: 256px;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: ${({ theme }) => theme.surface};
 `;

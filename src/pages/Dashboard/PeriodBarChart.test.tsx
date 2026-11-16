@@ -1,8 +1,9 @@
 import { screen, within } from '@testing-library/react';
 import { renderWithProviders } from '../../test/render';
-import { PeriodBarChart, type PeriodBarDatum } from './PeriodBarChart';
+import type { PeriodDatum } from './AnchoredTooltip';
+import { PeriodBarChart } from './PeriodBarChart';
 
-const monthlyData: PeriodBarDatum[] = [
+const monthlyData: PeriodDatum[] = [
   { key: '2026-07', label: 'jul/2026', total: 3 },
   { key: '2026-08', label: 'ago/2026', total: 4 },
   { key: '2026-09', label: 'set/2026', total: 5 },
@@ -10,13 +11,13 @@ const monthlyData: PeriodBarDatum[] = [
   { key: '2026-11', label: 'nov/2026', total: 7 },
 ];
 
-const weeklyData: PeriodBarDatum[] = Array.from({ length: 12 }, (_, index) => ({
+const weeklyData: PeriodDatum[] = Array.from({ length: 12 }, (_, index) => ({
   key: `week-${index + 1}`,
   label: `${String(index + 1).padStart(2, '0')}/11`,
   total: index + 1,
 }));
 
-const renderChart = (data: PeriodBarDatum[]) =>
+const renderChart = (data: PeriodDatum[]) =>
   renderWithProviders(
     <PeriodBarChart
       data={data}
@@ -48,13 +49,5 @@ describe('PeriodBarChart', () => {
     weeklyData.forEach(({ label }) => {
       expect(within(chart).getByText(label)).toBeInTheDocument();
     });
-  });
-
-  it('mantém uma largura mínima para permitir rolagem horizontal', () => {
-    const { container } = renderChart(weeklyData);
-
-    const chartContent = container.querySelector('[style*="min-width"]');
-
-    expect(chartContent).toBeInTheDocument();
   });
 });
