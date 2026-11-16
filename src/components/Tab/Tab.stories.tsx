@@ -83,6 +83,25 @@ export const Controlado: Story = {
   },
 };
 
+export const ComContador: Story = {
+  render: () => (
+    <div style={{ maxWidth: 560 }}>
+      <Tabs
+        size="lg"
+        tabs={[
+          { value: 'participantes', label: 'Participantes', count: 10, children: <p>Lista.</p> },
+          {
+            value: 'historico',
+            label: 'Histórico de encontros',
+            count: 14,
+            children: <p>Encontros.</p>,
+          },
+        ]}
+      />
+    </div>
+  ),
+};
+
 // Só a lista de abas, sem painel: o conteúdo fica fora do componente (ex.: ao lado do título de um card).
 export const SemPainel: Story = {
   render: () => {

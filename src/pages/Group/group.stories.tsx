@@ -6,7 +6,8 @@ import { DefaultLayout } from '../../layouts/DefaultLayout';
 import {
   getGroupDetails,
   getGroupMeetingsPage,
-  getGroupParticipantsPage,
+  getAllGroupParticipants,
+  updateGroupParticipant,
   updateGroupStatus,
 } from '../../services/groupService';
 import type {
@@ -24,7 +25,7 @@ const group: GroupDetailsData = {
   number: 3,
   description: 'Quinta à noite',
   city: 'Porto Alegre',
-  zone: '',
+  zone: 'Zona Sul',
   is_active: true,
   active_participants_count: 8,
   coordinators: [
@@ -246,10 +247,12 @@ const meta = {
     mocked(getGroupDetails).mockResolvedValue(group);
     mocked(updateGroupStatus).mockResolvedValue(false);
 
-    mocked(getGroupParticipantsPage).mockImplementation(async (_groupId, { page, pageSize }) => {
+    mocked(getAllGroupParticipants).mockImplementation(async () => {
       await wait(REQUEST_DELAY);
-      const start = (page - 1) * pageSize;
-      return { items: participants.slice(start, start + pageSize), total: participants.length };
+      return { items: participants, total: participants.length };
+    });
+    mocked(updateGroupParticipant).mockImplementation(async () => {
+      await wait(REQUEST_DELAY);
     });
 
     mocked(getGroupMeetingsPage).mockImplementation(async (_groupId, { page, pageSize }) => {
@@ -287,7 +290,7 @@ export const MultipleCoordinators: Story = {
         { id: 'p-02', name: 'Carla Mendes', email: 'carla@email.com', photo: null },
       ],
     });
-    mocked(getGroupParticipantsPage).mockResolvedValue({
+    mocked(getAllGroupParticipants).mockResolvedValue({
       items: participants.map((p) => (p.id === 'p-02' ? { ...p, is_coordinator: true } : p)),
       total: participants.length,
     });
@@ -297,16 +300,32 @@ export const MultipleCoordinators: Story = {
 export const NoCoordinator: Story = {
   beforeEach: () => {
     mocked(getGroupDetails).mockResolvedValue({ ...group, coordinators: [] });
-    mocked(getGroupParticipantsPage).mockResolvedValue({
+    mocked(getAllGroupParticipants).mockResolvedValue({
       items: participants.map((p) => ({ ...p, is_coordinator: false })),
       total: participants.length,
     });
   },
 };
 
+export const PendingMeeting: Story = {
+  beforeEach: () => {
+    mocked(getGroupDetails).mockResolvedValue({
+      ...group,
+      zone: 'Zona Sul',
+      next_meeting: { ...group.next_meeting!, confirmed: false },
+    });
+  },
+};
+
+export const NoNextMeeting: Story = {
+  beforeEach: () => {
+    mocked(getGroupDetails).mockResolvedValue({ ...group, next_meeting: null });
+  },
+};
+
 export const EmptyParticipants: Story = {
   beforeEach: () => {
-    mocked(getGroupParticipantsPage).mockResolvedValue({ items: [], total: 0 });
+    mocked(getAllGroupParticipants).mockResolvedValue({ items: [], total: 0 });
   },
 };
 

@@ -9,6 +9,7 @@ export type Tab = {
   // conteúdo do painel; sem `showPanels`, as abas não têm painel e ele não é usado
   children?: ReactNode;
   disabled?: boolean;
+  count?: number;
 };
 
 export type TabsProps = {
@@ -107,6 +108,9 @@ export const Tabs = ({
               onClick={() => selectTab(tab.value)}
             >
               {tab.label}
+              {tab.count !== undefined && (
+                <Styled.Count $active={isActive}>{tab.count}</Styled.Count>
+              )}
             </Styled.TabButton>
           );
         })}

@@ -3,6 +3,7 @@ import { GroupServiceError } from './groupErrors';
 import {
   createGroup,
   type CreateGroupPayload,
+  getAllGroupParticipants,
   getGroupDetails,
   getGroupMeetingsPage,
   getGroupParticipantsPage,
@@ -42,6 +43,33 @@ describe('consultas do grupo', () => {
     expect(invoke).toHaveBeenCalledWith('get-group-participants-web?groupId=g1&page=2&pageSize=6', {
       method: 'GET',
     });
+  });
+
+  it('getAllGroupParticipants junta todas as páginas', async () => {
+    const person = (id: string) => ({ id, name: id });
+    invoke
+      .mockResolvedValueOnce({
+        data: { items: Array.from({ length: 100 }, (_, i) => person(`p${i}`)), total: 101 },
+        error: null,
+      })
+      .mockResolvedValueOnce({ data: { items: [person('p100')], total: 101 }, error: null });
+
+    const result = await getAllGroupParticipants('g1');
+
+    expect(result.items).toHaveLength(101);
+    expect(result.total).toBe(101);
+    expect(invoke).toHaveBeenNthCalledWith(
+      2,
+      'get-group-participants-web?groupId=g1&page=2&pageSize=100',
+      { method: 'GET' },
+    );
+  });
+
+  it('getAllGroupParticipants para quando a página vem vazia', async () => {
+    respond({ items: [], total: 5 });
+
+    await expect(getAllGroupParticipants('g1')).resolves.toEqual({ items: [], total: 5 });
+    expect(invoke).toHaveBeenCalledTimes(1);
   });
 
   it('getGroupMeetingsPage pagina pelo groupId', async () => {
