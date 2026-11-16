@@ -251,6 +251,7 @@ export const GroupDetails = () => {
   const refreshCount = useRef(0);
 
   const refreshGroup = useCallback(async () => {
+    if (groupId !== activeGroup.current) return;
     refreshCount.current += 1;
     const refresh = refreshCount.current;
     try {

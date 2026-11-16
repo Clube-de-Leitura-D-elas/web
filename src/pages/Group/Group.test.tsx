@@ -572,6 +572,52 @@ describe('GroupDetails', () => {
       expect(within(summary).getByText(/Carla Dias/)).toBeInTheDocument();
     });
 
+    it('uma ação do grupo anterior que termina depois não descarta a atualização do grupo atual', async () => {
+      let finishFirstGroup: () => void = () => {};
+      let finishSecondRefresh: (value: GroupDetailsData) => void = () => {};
+      jest
+        .mocked(updateGroupParticipant)
+        .mockImplementationOnce(() => new Promise<void>((resolve) => (finishFirstGroup = resolve)))
+        .mockResolvedValue();
+      const secondGroup = { ...group, id: 'g2', number: 8, description: 'Sul' };
+      let secondGroupCalls = 0;
+      jest.mocked(getGroupDetails).mockImplementation(async (id) => {
+        if (id !== 'g2') return group;
+        secondGroupCalls += 1;
+        if (secondGroupCalls === 1) return secondGroup;
+        return new Promise((resolve) => (finishSecondRefresh = resolve));
+      });
+      const { user } = renderWithProviders(
+        <>
+          <GroupDetails />
+          <Link to="/grupos/g2">Ir para o grupo 08</Link>
+        </>,
+        { route: '/grupos/g1', path: '/grupos/:groupId' },
+      );
+
+      await openMenu(user, 'Bia Lima');
+      await user.click(screen.getByRole('menuitem', { name: actions.promote }));
+      await user.click(screen.getByRole('link', { name: 'Ir para o grupo 08' }));
+      await screen.findByRole('heading', { name: 'Grupo 08 — Sul' });
+      await openMenu(user, 'Carla Dias');
+      await user.click(screen.getByRole('menuitem', { name: actions.promote }));
+      await waitFor(() => expect(secondGroupCalls).toBe(2));
+
+      await act(async () => finishFirstGroup());
+      await act(async () =>
+        finishSecondRefresh({
+          ...secondGroup,
+          coordinators: [
+            ...group.coordinators,
+            { id: 'p3', name: 'Carla Dias', email: null, photo: null },
+          ],
+        }),
+      );
+
+      const summary = screen.getByRole('region', { name: text.summary.label });
+      expect(within(summary).getByText(/Carla Dias/)).toBeInTheDocument();
+    });
+
     it('o aviso de uma ação do grupo anterior não aparece no novo grupo', async () => {
       let finishPromote: () => void = () => {};
       jest
