@@ -1,0 +1,5 @@
+# pr-assets
+
+Screenshots referenced from pull request descriptions. Not part of the application.
+
+Each PR adds one folder.
