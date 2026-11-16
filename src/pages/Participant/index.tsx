@@ -153,7 +153,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
     };
   }, []);
 
-  const openingRemove = useRef(false);
+  const removeOpening = useRef(0);
   const groupsRequest = useRef<{ version: number; promise: Promise<ParticipantGroup[]> }>(null);
 
   const loadGroups = useCallback(() => {
@@ -206,6 +206,8 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
 
   const openRemove = useCallback(
     async (group: ParticipantGroup) => {
+      removeOpening.current += 1;
+      const opening = removeOpening.current;
       setRemoveError(null);
 
       if (!group.isCoordinator) {
@@ -213,13 +215,12 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
         return;
       }
 
-      if (openingRemove.current) return;
-      openingRemove.current = true;
       try {
         const [details, { items }] = await Promise.all([
           getGroupDetails(group.id),
           getAllGroupParticipants(group.id),
         ]);
+        if (removeOpening.current !== opening) return;
         setRemoveState({
           group,
           needsSuccessor:
@@ -231,9 +232,7 @@ const ParticipantProfile = ({ participantId }: { participantId?: string }) => {
         });
       } catch (error) {
         console.error(error);
-        showToast(text.groups.removeError, 'error');
-      } finally {
-        openingRemove.current = false;
+        if (removeOpening.current === opening) showToast(text.groups.removeError, 'error');
       }
     },
     [participantId, showToast],

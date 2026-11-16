@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import { interpolate, locale } from '../../locales';
 import {
   getAllGroupParticipants,
@@ -14,6 +14,7 @@ import {
   updateParticipantStatus,
 } from '../../services/participantService';
 import { pending, renderWithProviders } from '../../test/render';
+import type { GroupDetails as GroupDetailsData } from '../../types/group';
 import type { Participant } from '../../types/participant';
 import { ParticipantDetails } from '.';
 
@@ -528,6 +529,56 @@ describe('ParticipantDetails', () => {
       );
 
       expect(await within(dialog).findByRole('alert')).toHaveTextContent(text.groups.removeError);
+    });
+
+    it('a busca de uma remoção anterior não troca o grupo do modal aberto depois', async () => {
+      let finishDetails: (details: GroupDetailsData) => void = () => {};
+      jest
+        .mocked(getGroupDetails)
+        .mockReturnValue(new Promise((resolve) => (finishDetails = resolve)));
+      jest.mocked(getAllGroupParticipants).mockResolvedValue({
+        items: [
+          {
+            id: 'p9',
+            name: 'Carla Mendes',
+            entry_date: null,
+            attendance: [],
+            email: null,
+            is_coordinator: false,
+          },
+        ],
+        total: 1,
+      });
+      const { user } = renderPage();
+      const titleFor = (group: string) =>
+        interpolate(locale.removeFromGroup.title, { name: 'Joseane Alves', group });
+
+      await openRemove(user, '03');
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      await openRemove(user, '12');
+      expect(await screen.findByRole('dialog', { name: titleFor('Grupo 12') })).toBeInTheDocument();
+
+      await act(async () =>
+        finishDetails({
+          id: 'g3',
+          number: 3,
+          description: 'Quinta à noite',
+          city: 'São Paulo',
+          zone: null,
+          is_active: true,
+          active_participants_count: 2,
+          coordinators: [{ id: 'p1', name: 'Joseane Alves', email: null, photo: null }],
+          next_meeting: null,
+        }),
+      );
+
+      const dialog = screen.getByRole('dialog', { name: titleFor('Grupo 12') });
+      expect(
+        within(dialog).queryByRole('button', {
+          name: new RegExp(locale.removeFromGroup.newCoordinator),
+        }),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
   });
 });
