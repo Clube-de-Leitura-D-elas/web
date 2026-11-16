@@ -544,6 +544,94 @@ describe('GroupDetails', () => {
       expect(await screen.findByRole('status')).toHaveTextContent(actions.undone);
     });
 
+    it('a resposta atrasada de uma atualização não sobrescreve a mais recente', async () => {
+      jest.mocked(updateGroupParticipant).mockResolvedValue();
+      let finishFirst: (value: GroupDetailsData) => void = () => {};
+      let finishSecond: (value: GroupDetailsData) => void = () => {};
+      jest
+        .mocked(getGroupDetails)
+        .mockResolvedValueOnce(group)
+        .mockImplementationOnce(() => new Promise((resolve) => (finishFirst = resolve)))
+        .mockImplementationOnce(() => new Promise((resolve) => (finishSecond = resolve)));
+      const { user } = renderPage();
+
+      await openMenu(user, 'Bia Lima');
+      await user.click(screen.getByRole('menuitem', { name: actions.promote }));
+      await openMenu(user, 'Carla Dias');
+      await user.click(screen.getByRole('menuitem', { name: actions.promote }));
+      await waitFor(() => expect(getGroupDetails).toHaveBeenCalledTimes(3));
+
+      const bia = { id: 'p2', name: 'Bia Lima', email: null, photo: null };
+      const carla = { id: 'p3', name: 'Carla Dias', email: null, photo: null };
+      await act(async () =>
+        finishSecond({ ...group, coordinators: [...group.coordinators, bia, carla] }),
+      );
+      await act(async () => finishFirst({ ...group, coordinators: [...group.coordinators, bia] }));
+
+      const summary = screen.getByRole('region', { name: text.summary.label });
+      expect(within(summary).getByText(/Carla Dias/)).toBeInTheDocument();
+    });
+
+    it('o aviso de uma ação do grupo anterior não aparece no novo grupo', async () => {
+      let finishPromote: () => void = () => {};
+      jest
+        .mocked(updateGroupParticipant)
+        .mockImplementationOnce(() => new Promise<void>((resolve) => (finishPromote = resolve)));
+      jest
+        .mocked(getGroupDetails)
+        .mockImplementation(async (id) =>
+          id === 'g2' ? { ...group, id: 'g2', number: 8, description: 'Sul' } : group,
+        );
+      const { user } = renderWithProviders(
+        <>
+          <GroupDetails />
+          <Link to="/grupos/g2">Ir para o grupo 08</Link>
+        </>,
+        { route: '/grupos/g1', path: '/grupos/:groupId' },
+      );
+
+      await openMenu(user, 'Bia Lima');
+      await user.click(screen.getByRole('menuitem', { name: actions.promote }));
+      await user.click(screen.getByRole('link', { name: 'Ir para o grupo 08' }));
+      await screen.findByRole('heading', { name: 'Grupo 08 — Sul' });
+
+      await act(async () => finishPromote());
+
+      expect(
+        screen.queryByText(interpolate(actions.promoted, { name: 'Bia' })),
+      ).not.toBeInTheDocument();
+    });
+
+    it('fecha o aviso ao trocar de grupo', async () => {
+      jest.mocked(updateGroupParticipant).mockResolvedValue();
+      jest
+        .mocked(getGroupDetails)
+        .mockImplementation(async (id) =>
+          id === 'g2' ? { ...group, id: 'g2', number: 8, description: 'Sul' } : group,
+        );
+      const { user } = renderWithProviders(
+        <>
+          <GroupDetails />
+          <Link to="/grupos/g2">Ir para o grupo 08</Link>
+        </>,
+        { route: '/grupos/g1', path: '/grupos/:groupId' },
+      );
+
+      await openMenu(user, 'Bia Lima');
+      await user.click(screen.getByRole('menuitem', { name: actions.promote }));
+      expect(
+        await screen.findByText(interpolate(actions.promoted, { name: 'Bia' })),
+      ).toBeInTheDocument();
+
+      await user.click(screen.getByRole('link', { name: 'Ir para o grupo 08' }));
+      await screen.findByRole('heading', { name: 'Grupo 08 — Sul' });
+
+      expect(
+        screen.queryByText(interpolate(actions.promoted, { name: 'Bia' })),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: actions.undo })).not.toBeInTheDocument();
+    });
+
     it('mostra o erro no toast quando a coordenação não muda', async () => {
       jest.mocked(updateGroupParticipant).mockRejectedValue(new Error(actions.conflictError));
       const { user } = renderPage();
@@ -731,6 +819,9 @@ describe('GroupDetails', () => {
       await act(async () => finishFirst());
 
       expect(second).toBeInTheDocument();
+      expect(
+        screen.queryByText(interpolate(actions.removed, { name: 'Bia' })),
+      ).not.toBeInTheDocument();
       expect(within(second).queryByRole('alert')).not.toBeInTheDocument();
       expect(
         within(second).getByRole('button', { name: locale.removeFromGroup.confirm }),
