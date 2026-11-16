@@ -56,6 +56,7 @@ type GroupDetailsTab = 'participants' | 'history';
 
 type ToastState = {
   id: number;
+  groupId: string;
   message: string;
   variant: ToastVariant;
   undo?: () => void;
@@ -224,9 +225,21 @@ export const GroupDetails = () => {
   const members = membersState?.key === groupId ? membersState.list : LOADING_LIST;
   const meetings = meetingsState?.key === groupId ? meetingsState.list : LOADING_LIST;
 
+  const activeGroup = useRef(groupId);
+  useEffect(() => {
+    activeGroup.current = groupId;
+  }, [groupId]);
+
+  if (toast && toast.groupId !== groupId) setToast(null);
+
   const showToast = useCallback(
-    (next: Omit<ToastState, 'id' | 'variant'> & { variant?: ToastVariant }) =>
-      setToast({ variant: 'success', ...next, id: Date.now() }),
+    (
+      origin: string,
+      next: Omit<ToastState, 'id' | 'groupId' | 'variant'> & { variant?: ToastVariant },
+    ) => {
+      if (origin !== activeGroup.current) return;
+      setToast({ variant: 'success', ...next, groupId: origin, id: Date.now() });
+    },
     [],
   );
 
@@ -235,9 +248,14 @@ export const GroupDetails = () => {
     setLoadAttempt((attempt) => attempt + 1);
   };
 
+  const refreshCount = useRef(0);
+
   const refreshGroup = useCallback(async () => {
+    refreshCount.current += 1;
+    const refresh = refreshCount.current;
     try {
       const updatedGroup = await getGroupDetails(groupId);
+      if (refreshCount.current !== refresh) return;
       setResult((prev) => (prev?.id === groupId ? { id: groupId, group: updatedGroup } : prev));
     } catch (err) {
       console.error(err);
@@ -265,12 +283,12 @@ export const GroupDetails = () => {
     async (participant: GroupParticipantListItem, action: 'promote' | 'demote') => {
       const failure = await applyCoordinatorChange(participant.id, action);
       if (failure) {
-        showToast({ variant: 'error', message: failure });
+        showToast(groupId, { variant: 'error', message: failure });
         return;
       }
 
       const inverse = action === 'promote' ? 'demote' : 'promote';
-      showToast({
+      showToast(groupId, {
         message: interpolate(
           action === 'promote' ? text.participantActions.promoted : text.participantActions.demoted,
           { name: getFirstName(participant.name) },
@@ -278,6 +296,7 @@ export const GroupDetails = () => {
         undo: async () => {
           const undoFailure = await applyCoordinatorChange(participant.id, inverse);
           showToast(
+            groupId,
             undoFailure
               ? { variant: 'error', message: undoFailure }
               : { message: text.participantActions.undone },
@@ -285,7 +304,7 @@ export const GroupDetails = () => {
         },
       });
     },
-    [applyCoordinatorChange, showToast, text],
+    [applyCoordinatorChange, groupId, showToast, text],
   );
 
   const openRemove = useCallback(
@@ -305,7 +324,7 @@ export const GroupDetails = () => {
         });
       } catch (err) {
         console.error(err);
-        showToast({ variant: 'error', message: text.participantActions.error });
+        showToast(groupId, { variant: 'error', message: text.participantActions.error });
       }
     },
     [groupId, loadMembers, showToast, text],
@@ -363,7 +382,7 @@ export const GroupDetails = () => {
     }
 
     await refreshGroup();
-    showToast({
+    showToast(operationGroupId, {
       message: successor
         ? interpolate(text.participantActions.removedWithCoordinator, {
             name: getFirstName(target.name),
