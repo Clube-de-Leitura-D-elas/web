@@ -378,3 +378,25 @@ export const LoadingStatus = styled.span`
   white-space: nowrap;
   border: 0;
 `;
+
+export const CityFilter = styled.div`
+  width: 18rem;
+  flex-shrink: 0;
+`;
+
+export const FiltersContainer = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 1rem;
+`;
+
+export const FiltersSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-shrink: 0;
+  flex-warp: wrap;
+`;
