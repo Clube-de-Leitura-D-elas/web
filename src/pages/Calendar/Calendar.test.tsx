@@ -1,6 +1,6 @@
 import { act, screen, waitFor, within } from '@testing-library/react';
 import { locale } from '../../locales';
-import { getCalendarMonth } from '../../services/calendarService';
+import { getActiveGroups, getCalendarMonth, getCities } from '../../services/calendarService';
 import { pending, renderWithProviders } from '../../test/render';
 import type { CalendarMonthResponse } from '../../types/calendar';
 import { getCalendarDays } from '../../utils/calendar';
@@ -9,13 +9,34 @@ import { theme } from '../../theme/theme';
 
 jest.mock('../../services/calendarService', () => ({
   getCalendarMonth: jest.fn(),
+  getCities: jest.fn(),
+  getActiveGroups: jest.fn(),
 }));
 
 const text = locale.calendar;
 const nav = text.navigation;
 
 const renderPage = () => renderWithProviders(<Calendar />);
-const getMonthButton = () => screen.getByRole('button', { expanded: false });
+
+const selectDropdownOption = async (
+  user: ReturnType<typeof renderWithProviders>['user'],
+  label: string,
+  option: string,
+) => {
+  await user.click(screen.getByRole('button', { name: new RegExp(label) }));
+  await user.click(await screen.findByRole('option', { name: option }));
+};
+
+const mockCalendarFilters = () => {
+  jest.mocked(getCalendarMonth).mockResolvedValue(filterCalendar);
+  jest.mocked(getCities).mockResolvedValue(filterCities);
+  jest.mocked(getActiveGroups).mockResolvedValue(filterGroups);
+};
+
+const getMonthButton = () =>
+  screen.getByRole('button', {
+    name: new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date()),
+  });
 
 const getCalendarDayLabel = (date: Date) =>
   `${locale.calendar.dayAriaLabel
@@ -40,8 +61,74 @@ const emptyCalendar = {
   days: [],
 } as unknown as CalendarMonthResponse;
 
+const filterDate = new Date(new Date().getFullYear(), new Date().getMonth(), 15);
+
+const formatDateKey = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+const filterEvents = [
+  {
+    id: 'event-1',
+    groupId: 'group-1',
+    groupName: 'Clube do Livro',
+    cityId: 'city-1',
+    state: 'RS',
+    city: 'Porto Alegre',
+    startsAt: `${formatDateKey(filterDate)}T19:00:00`,
+    status: 'confirmed',
+  },
+  {
+    id: 'event-2',
+    groupId: 'group-2',
+    groupName: 'Grupo de Tecnologia',
+    cityId: 'city-2',
+    state: 'RS',
+    city: 'Gravataí',
+    startsAt: `${formatDateKey(filterDate)}T20:00:00`,
+    status: 'confirmed',
+  },
+  {
+    id: 'event-3',
+    groupId: 'group-3',
+    groupName: 'Grupo de Leitura',
+    cityId: 'city-3',
+    state: 'SC',
+    city: 'Florianópolis',
+    startsAt: `${formatDateKey(filterDate)}T21:00:00`,
+    status: 'confirmed',
+  },
+];
+
+const filterCalendar: CalendarMonthResponse = {
+  year: filterDate.getFullYear(),
+  month: filterDate.getMonth() + 1,
+  rangeStart: formatDateKey(filterDate),
+  rangeEnd: formatDateKey(filterDate),
+  days: [
+    {
+      date: formatDateKey(filterDate),
+      inMonth: true,
+      events: filterEvents,
+    },
+  ],
+};
+
+const filterCities = [
+  { id: 'city-1', name: 'Porto Alegre', uf: 'RS' },
+  { id: 'city-2', name: 'Gravataí', uf: 'RS' },
+  { id: 'city-3', name: 'Florianópolis', uf: 'SC' },
+];
+
+const filterGroups = [
+  { id: 'group-1', number: 1, description: 'Clube do Livro', cityId: 'city-1', state: 'RS' },
+  { id: 'group-2', number: 2, description: 'Grupo de Tecnologia', cityId: 'city-2', state: 'RS' },
+  { id: 'group-3', number: 3, description: 'Grupo de Leitura', cityId: 'city-3', state: 'SC' },
+];
+
 beforeEach(() => {
   jest.mocked(getCalendarMonth).mockResolvedValue(emptyCalendar);
+  jest.mocked(getCities).mockResolvedValue([]);
+  jest.mocked(getActiveGroups).mockResolvedValue([]);
 });
 
 describe('Calendar', () => {
@@ -103,6 +190,32 @@ describe('Calendar', () => {
     outsideMonth.forEach(({ cell }) => {
       expect(getComputedStyle(cell).backgroundColor).toBe(surfaceSunken);
     });
+  });
+
+  it('filtra os eventos do calendário pelo estado selecionado', async () => {
+    mockCalendarFilters();
+
+    const { user } = renderPage();
+
+    const dayLabel = `${getCalendarDayLabel(filterDate).replace(/, 0 eventos$/, '')}, 3 eventos`;
+
+    const dayCell = await screen.findByRole('button', {
+      name: dayLabel,
+    });
+
+    expect(within(dayCell).getByTitle('19:00 - Clube do Livro')).toBeInTheDocument();
+    expect(within(dayCell).getByTitle('20:00 - Grupo de Tecnologia')).toBeInTheDocument();
+    expect(within(dayCell).getByTitle('21:00 - Grupo de Leitura')).toBeInTheDocument();
+
+    await selectDropdownOption(user, locale.calendar.filters.state.title, 'RS');
+
+    expect(within(dayCell).getByTitle('19:00 - Clube do Livro')).toBeInTheDocument();
+    expect(within(dayCell).getByTitle('20:00 - Grupo de Tecnologia')).toBeInTheDocument();
+    expect(within(dayCell).queryByTitle('21:00 - Grupo de Leitura')).not.toBeInTheDocument();
+
+    expect(dayCell).toHaveAccessibleName(
+      `${getCalendarDayLabel(filterDate).replace(/, 0 eventos$/, '')}, 2 eventos`,
+    );
   });
 
   it('restaura o mês e o ano informados na URL', async () => {
@@ -263,6 +376,26 @@ describe('Calendar', () => {
     renderPage();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(text.loadError);
+  });
+
+  it('seleciona todo o texto do autocomplete ao receber foco', async () => {
+    jest.mocked(getCities).mockResolvedValue([{ id: 'city-1', name: 'Porto Alegre', uf: 'RS' }]);
+
+    const { user } = renderPage();
+
+    const cityInput = screen.getByLabelText(locale.calendar.filters.city.title) as HTMLInputElement;
+
+    await user.type(cityInput, 'Porto');
+
+    await user.click(await screen.findByRole('option', { name: 'Porto Alegre' }));
+
+    expect(cityInput).toHaveValue('Porto Alegre');
+
+    cityInput.blur();
+    await user.click(cityInput);
+
+    expect(cityInput.selectionStart).toBe(0);
+    expect(cityInput.selectionEnd).toBe('Porto Alegre'.length);
   });
 
   it('busca os dados do mês e ano atuais', async () => {
@@ -446,6 +579,8 @@ describe('Calendar', () => {
       id: 'e1',
       groupId: 'g1',
       groupName: 'Clube do Livro',
+      cityId: 'city-1',
+      state: 'RS',
       city: 'Porto Alegre',
       startsAt: `${formatDateKey(date)}T19:00:00`,
       status: 'confirmed',
@@ -455,6 +590,8 @@ describe('Calendar', () => {
       id: 'e2',
       groupId: 'g2',
       groupName: 'Grupo de Tecnologia',
+      cityId: 'city-1',
+      state: 'RS',
       city: 'São Paulo',
       startsAt: `${formatDateKey(nextDate)}T19:00:00`,
       status: 'confirmed',
@@ -521,6 +658,8 @@ describe('Calendar', () => {
       id: 'evento-123',
       groupId: 'grupo-456',
       groupName: 'Clube do Livro',
+      cityId: 'city-1',
+      state: 'RS',
       city: 'Porto Alegre',
       startsAt: '2026-10-15T19:00:00-03:00',
       status: 'confirmed',

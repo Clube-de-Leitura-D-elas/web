@@ -563,6 +563,21 @@
     },
     "loading": "Carregando calendário...",
     "subtitle": "Visualize os encontros de todos os grupos do clube.",
+    "filters": {
+      "clear": "Limpar filtros",
+      "group": {
+        "title": "Grupo",
+        "placeholder": "Todos os grupos"
+      },
+      "city": {
+        "title": "Cidade",
+        "placeholder": "Digite o nome da cidade"
+      },
+      "state": {
+        "title": "Estado",
+        "placeholder": "Todos os estados"
+      }
+    },
     "weekdays": {
       "sunday": "DOM.",
       "monday": "SEG.",
@@ -781,7 +796,19 @@
     "title": "Dashboard",
     "subtitle": "Acompanhe os principais indicadores do clube.",
     "kpis": {
-      "label": "Indicadores"
+      "label": "Indicadores",
+      "groups": {
+        "title": "Grupos",
+        "description": "Total de grupos cadastrados"
+      },
+      "meetings": {
+        "title": "Encontros no mês",
+        "description": "Encontros realizados no mês atual",
+        "increase": "{{percentage}}% a mais que no mês anterior",
+        "decrease": "{{percentage}}% a menos que no mês anterior",
+        "same": "Mesmo número de encontros do mês anterior",
+        "noPrevious": "Sem encontros no mês anterior"
+      }
     },
     "charts": {
       "label": "Gráficos"
@@ -800,6 +827,35 @@
         "one": "{{count}} inscrição",
         "other": "{{count}} inscrições"
       }
+    },
+    "activeParticipants": {
+      "title": "Total de Participantes",
+      "ranges": {
+        "6m": "6 meses",
+        "1y": "1 ano",
+        "2y": "2 anos",
+        "5y": "5 anos"
+      },
+      "zoomIn": "Aproximar (período menor)",
+      "zoomOut": "Afastar (período maior)",
+      "chartLabel": "Gráfico do total de participantes ativas por mês",
+      "empty": "Ainda não há participantes ativas para mostrar.",
+      "count": {
+        "one": "{{count}} participante ativa",
+        "other": "{{count}} participantes ativas"
+      }
+    },
+    "absences": {
+      "title": "Participantes que faltaram aos últimos 3 encontros",
+      "columns": {
+        "participant": "Participante",
+        "group": "Grupo",
+        "lastPresence": "Última presença"
+      },
+      "groupLabel": "Grupo {{number}} - {{description}}",
+      "never": "Nunca",
+      "itemLabel": "participantes",
+      "empty": "Nenhuma participante faltou aos 3 últimos encontros do grupo."
     }
   },
   "removeFromGroup": {
