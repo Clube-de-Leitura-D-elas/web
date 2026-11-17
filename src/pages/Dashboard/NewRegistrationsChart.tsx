@@ -8,6 +8,7 @@ import { getRegistrations } from '../../services/dashboardService';
 import type { Granularity, RegistrationsItem } from '../../types/dashboard';
 import { formatDayMonth, formatMonthLabel, getRegistrationsRange } from '../../utils/date';
 import { PeriodBarChart } from './PeriodBarChart';
+import { formatRegistrationTick } from './registrationTickLabels';
 
 const CHART_MIN_HEIGHT = '16rem';
 
@@ -79,9 +80,14 @@ export const NewRegistrationsChart = () => {
   const content =
     status === 'ready' && items ? (
       <PeriodBarChart
-        data={items.map(({ period, total }) => ({ key: period, label: labelOf(period), total }))}
+        data={items.map(({ period, total }) => ({
+          key: period,
+          label: labelOf(period),
+          total,
+        }))}
         formatValue={(total) => pluralize(text.count, total)}
         ariaLabel={text.chartLabel[granularity]}
+        formatTick={(label) => formatRegistrationTick(label, granularity)}
       />
     ) : (
       <DataState
