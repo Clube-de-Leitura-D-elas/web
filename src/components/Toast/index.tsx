@@ -49,6 +49,7 @@ export const Toast = ({
 
   return (
     <Styled.Container
+      $variant={variant}
       role={variant === 'error' ? 'alert' : 'status'}
       onFocus={() => setPaused(true)}
       onBlur={handleBlur}
@@ -58,7 +59,7 @@ export const Toast = ({
       </Styled.Icon>
       <Styled.Message>{children}</Styled.Message>
       {actionLabel && onAction && (
-        <Styled.Action type="button" onClick={onAction}>
+        <Styled.Action $variant={variant} type="button" onClick={onAction}>
           {actionLabel}
         </Styled.Action>
       )}
