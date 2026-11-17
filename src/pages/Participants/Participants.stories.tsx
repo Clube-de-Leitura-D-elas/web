@@ -18,24 +18,25 @@ const REQUEST_DELAY = 300;
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const participants: ParticipantListItem[] = [
-  { id: 'p-01', name: 'Ana Beatriz Souza', is_active: true, group_users: [{ id: 'gu-01' }] },
+  { id: 'p-01', name: 'Ana Beatriz Souza', status: 'active', group_users: [{ id: 'gu-01' }] },
   {
     id: 'p-02',
     name: 'Carla Mendes',
-    is_active: true,
+    status: 'active',
     group_users: [{ id: 'gu-02' }, { id: 'gu-03' }],
   },
-  { id: 'p-03', name: 'Daniela Rocha', is_active: false, group_users: [] },
-  { id: 'p-04', name: 'Fernanda Lima', is_active: true, group_users: [{ id: 'gu-04' }] },
-  { id: 'p-05', name: 'Joseane Alves', is_active: true, group_users: [{ id: 'gu-05' }] },
-  { id: 'p-06', name: 'Luana Castro', is_active: false, group_users: [] },
+  { id: 'p-03', name: 'Daniela Rocha', status: 'inactive', group_users: [] },
+  { id: 'p-04', name: 'Fernanda Lima', status: 'active', group_users: [{ id: 'gu-04' }] },
+  { id: 'p-05', name: 'Joseane Alves', status: 'active', group_users: [{ id: 'gu-05' }] },
+  { id: 'p-06', name: 'Luana Castro', status: 'inactive', group_users: [] },
   {
     id: 'p-07',
     name: 'Mariana Duarte',
-    is_active: true,
+    status: 'active',
     group_users: [{ id: 'gu-06' }, { id: 'gu-07' }, { id: 'gu-08' }],
   },
-  { id: 'p-08', name: 'Patrícia Nunes', is_active: true, group_users: [{ id: 'gu-09' }] },
+  { id: 'p-08', name: 'Patrícia Nunes', status: 'active', group_users: [{ id: 'gu-09' }] },
+  { id: 'p-09', name: 'Giovana Prado', status: 'awaiting_account', group_users: [] },
 ];
 
 const pendingParticipants: PendingParticipantListItem[] = [

@@ -314,6 +314,7 @@
       "groupCountSingle": "1 grupo",
       "statusActive": "Ativa",
       "statusInactive": "Inativa",
+      "statusAwaitingAccount": "Aguardando criação de conta",
       "empty": "Nenhum participante encontrado.",
       "emptyValue": "—",
       "itemLabel": "participantes cadastradas",
