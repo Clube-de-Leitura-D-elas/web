@@ -1,6 +1,7 @@
-import { AuthApiError } from '@supabase/supabase-js';
+import { AuthApiError, AuthWeakPasswordError } from '@supabase/supabase-js';
 import { AuthServiceError } from './authErrors';
 import {
+  changePassword,
   getCurrentUserRole,
   hasAdminRole,
   onSignOut,
@@ -162,5 +163,72 @@ describe('hasAdminRole', () => {
     [undefined, false],
   ] as const)('%s → %s', (role, expected) => {
     expect(hasAdminRole(role)).toBe(expected);
+  });
+});
+
+describe('changePassword', () => {
+  const payload = { currentPassword: 'atual-123', newPassword: 'nova-senha-456' };
+
+  beforeEach(() => {
+    auth.getClaims.mockResolvedValue({
+      data: { claims: { email: 'gestora@clube.com' } },
+      error: null,
+    } as never);
+    auth.signInWithPassword.mockResolvedValue({ data: { user: {} }, error: null } as never);
+    auth.updateUser.mockResolvedValue({ data: { user: {} }, error: null } as never);
+  });
+
+  it('confere a senha atual com o e-mail da sessão e grava a nova', async () => {
+    await expect(changePassword(payload)).resolves.toBeUndefined();
+
+    expect(auth.signInWithPassword).toHaveBeenCalledWith({
+      email: 'gestora@clube.com',
+      password: 'atual-123',
+    });
+    expect(auth.updateUser).toHaveBeenCalledWith({ password: 'nova-senha-456' });
+  });
+
+  it('traduz senha atual errada para wrong_password e não troca', async () => {
+    auth.signInWithPassword.mockResolvedValue({
+      data: { user: null },
+      error: new AuthApiError('Invalid login credentials', 400, 'invalid_credentials'),
+    } as never);
+
+    await expectAuthError(changePassword(payload), 'wrong_password');
+    expect(auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it('traduz senha igual à atual para same_password', async () => {
+    auth.updateUser.mockResolvedValue({
+      data: { user: null },
+      error: new AuthApiError('same', 422, 'same_password'),
+    } as never);
+
+    await expectAuthError(changePassword(payload), 'same_password');
+  });
+
+  it('traduz senha fraca para weak_password', async () => {
+    auth.updateUser.mockResolvedValue({
+      data: { user: null },
+      error: new AuthWeakPasswordError('weak', 422, ['length']),
+    } as never);
+
+    await expectAuthError(changePassword(payload), 'weak_password');
+  });
+
+  it('falha como unauthenticated quando a sessão não tem e-mail', async () => {
+    auth.getClaims.mockResolvedValue({ data: null, error: null } as never);
+
+    await expectAuthError(changePassword(payload), 'unauthenticated');
+    expect(auth.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it('trata outros erros como unknown', async () => {
+    auth.updateUser.mockResolvedValue({
+      data: { user: null },
+      error: new AuthApiError('boom', 500, 'unexpected_failure'),
+    } as never);
+
+    await expectAuthError(changePassword(payload), 'unknown');
   });
 });

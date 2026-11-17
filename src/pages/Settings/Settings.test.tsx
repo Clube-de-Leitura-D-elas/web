@@ -6,6 +6,7 @@ import { renderWithProviders } from '../../test/render';
 import type { CityGridResponse } from '../../types/city';
 import { Settings } from '.';
 
+jest.mock('../../services/authService', () => ({ changePassword: jest.fn() }));
 jest.mock('../../services/cityService', () => ({
   getCityGrid: jest.fn(),
   saveCity: jest.fn(),
@@ -78,6 +79,37 @@ describe('Settings', () => {
     );
     expect(await screen.findByText('2 cidades ativas e 4 regiões')).toBeInTheDocument();
     expect(getCityGrid).toHaveBeenCalledWith(firstPage, { search: '', uf: '', status: 'all' });
+  });
+
+  it('troca para a aba de senha e guarda a aba na URL', async () => {
+    const { user } = renderWithProviders(<Settings />, {
+      route: '/configuracoes',
+      path: '/configuracoes',
+      showLocationSearch: true,
+    });
+    await screen.findByText('Porto Alegre');
+
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.password }));
+
+    expect(screen.getByRole('tab', { name: locale.settings.tabs.password })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(screen.getByLabelText(locale.settings.password.current.label)).toBeInTheDocument();
+    expect(screen.getByTestId('location-search')).toHaveTextContent('?aba=senha');
+  });
+
+  it('abre direto na aba de senha pelo endereço', () => {
+    renderWithProviders(<Settings />, {
+      route: '/configuracoes?aba=senha',
+      path: '/configuracoes',
+    });
+
+    expect(screen.getByRole('tab', { name: locale.settings.tabs.password })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(getCityGrid).not.toHaveBeenCalled();
   });
 
   it('lista estado, regiões ativas, grupos e status de cada cidade', async () => {

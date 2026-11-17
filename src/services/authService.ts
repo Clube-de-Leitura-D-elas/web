@@ -1,4 +1,4 @@
-import { isAuthApiError } from '@supabase/supabase-js';
+import { isAuthApiError, isAuthWeakPasswordError } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient';
 import { AuthServiceError } from './authErrors';
 import { ADMIN_ROLES, APP_ROLES, type AppRole } from '../types/auth';
@@ -7,6 +7,11 @@ import { clearCalendarCache } from './calendarService';
 export type LoginPayload = {
   email: string;
   password: string;
+};
+
+export type ChangePasswordPayload = {
+  currentPassword: string;
+  newPassword: string;
 };
 
 /** Troca o erro original por um erro de domínio, registrando o original só no console. */
@@ -30,6 +35,38 @@ export async function signInWithPassword(payload: LoginPayload) {
   }
 
   return data.user;
+}
+
+export async function changePassword({ currentPassword, newPassword }: ChangePasswordPayload) {
+  const { data, error: claimsError } = await supabase.auth.getClaims();
+  if (claimsError) throw toAuthServiceError(claimsError);
+
+  const email: unknown = data?.claims.email;
+  if (typeof email !== 'string' || !email) throw new AuthServiceError('unauthenticated');
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password: currentPassword,
+  });
+
+  if (signInError) {
+    if (isAuthApiError(signInError) && signInError.code === 'invalid_credentials') {
+      throw new AuthServiceError('wrong_password', signInError);
+    }
+    throw toAuthServiceError(signInError);
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+  if (error) {
+    if (isAuthApiError(error) && error.code === 'same_password') {
+      throw new AuthServiceError('same_password', error);
+    }
+    if (isAuthWeakPasswordError(error)) {
+      throw new AuthServiceError('weak_password', error);
+    }
+    throw toAuthServiceError(error);
+  }
 }
 
 export async function signOut() {

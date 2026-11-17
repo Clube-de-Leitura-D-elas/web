@@ -875,9 +875,10 @@
   },
   "settings": {
     "title": "Configurações",
-    "subtitle": "Cadastros usados em todo o painel.",
+    "subtitle": "Cadastros do painel e dados da sua conta.",
     "tabs": {
-      "cities": "Cidades e regiões"
+      "cities": "Cidades e regiões",
+      "password": "Senha"
     },
     "cities": {
       "summary": "{{cities}} e {{zones}}",
@@ -1016,6 +1017,31 @@
         "SE": "Sergipe",
         "SP": "São Paulo",
         "TO": "Tocantins"
+      }
+    },
+    "password": {
+      "description": "Para trocar, confirme a senha atual. A nova senha vale para o painel e para o app.",
+      "current": {
+        "label": "Senha atual *"
+      },
+      "new": {
+        "label": "Nova senha *",
+        "helperText": "Use pelo menos 8 caracteres."
+      },
+      "confirm": {
+        "label": "Confirmar nova senha *"
+      },
+      "submit": "Alterar senha",
+      "submitting": "Alterando...",
+      "success": "Senha alterada.",
+      "errors": {
+        "currentRequired": "Informe a senha atual.",
+        "tooShort": "A nova senha precisa ter pelo menos 8 caracteres.",
+        "sameAsCurrent": "A nova senha precisa ser diferente da atual.",
+        "mismatch": "As senhas não conferem.",
+        "wrongPassword": "Senha atual incorreta.",
+        "weakPassword": "Essa senha é fraca. Misture letras, números e símbolos.",
+        "generic": "Não foi possível alterar a senha. Tente novamente."
       }
     }
   }

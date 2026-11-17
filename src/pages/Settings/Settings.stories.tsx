@@ -3,6 +3,8 @@ import { expect, mocked, waitFor } from 'storybook/test';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { DefaultLayout } from '../../layouts/DefaultLayout';
 import { locale } from '../../locales';
+import { AuthServiceError } from '../../services/authErrors';
+import { changePassword } from '../../services/authService';
 import { CityServiceError } from '../../services/cityErrors';
 import { getCityGrid, saveCity, updateCityStatus } from '../../services/cityService';
 import type { CityListItem } from '../../types/city';
@@ -138,6 +140,9 @@ const meta = {
       await wait(REQUEST_DELAY);
       return isActive;
     });
+    mocked(changePassword).mockImplementation(async () => {
+      await wait(REQUEST_DELAY);
+    });
   },
 } satisfies Meta<typeof Settings>;
 
@@ -248,5 +253,42 @@ export const DeactivateBlocked: Story = {
         canvas.getByRole('menuitem', { name: new RegExp(text.table.deactivate) }),
       ).toHaveAttribute('aria-disabled', 'true'),
     );
+  },
+};
+
+const password = locale.settings.password;
+
+export const PasswordTab: Story = {
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole('tab', { name: locale.settings.tabs.password }));
+
+    await expect(canvas.getByLabelText(password.current.label)).toBeInTheDocument();
+  },
+};
+
+export const PasswordChanged: Story = {
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole('tab', { name: locale.settings.tabs.password }));
+    await userEvent.type(canvas.getByLabelText(password.current.label), 'ClubeDelas@123');
+    await userEvent.type(canvas.getByLabelText(password.new.label), 'NovaSenha@2026');
+    await userEvent.type(canvas.getByLabelText(password.confirm.label), 'NovaSenha@2026');
+    await userEvent.click(canvas.getByRole('button', { name: password.submit }));
+
+    await expect(await canvas.findByText(password.success)).toBeInTheDocument();
+  },
+};
+
+export const PasswordWrongCurrent: Story = {
+  beforeEach: () => {
+    mocked(changePassword).mockRejectedValue(new AuthServiceError('wrong_password'));
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole('tab', { name: locale.settings.tabs.password }));
+    await userEvent.type(canvas.getByLabelText(password.current.label), 'senha-errada');
+    await userEvent.type(canvas.getByLabelText(password.new.label), 'NovaSenha@2026');
+    await userEvent.type(canvas.getByLabelText(password.confirm.label), 'NovaSenha@2026');
+    await userEvent.click(canvas.getByRole('button', { name: password.submit }));
+
+    await expect(await canvas.findByText(password.errors.wrongPassword)).toBeInTheDocument();
   },
 };
