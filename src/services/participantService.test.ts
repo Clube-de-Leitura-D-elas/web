@@ -26,6 +26,8 @@ describe('getParticipantById', () => {
       app_role: 'READER',
       city: 'Porto Alegre',
       zone: null,
+      city_id: 'poa',
+      zone_id: null,
       entry_date: '2025-03-15',
       photo: 'https://cdn.exemplo.com/jo.jpg',
     });
@@ -42,6 +44,8 @@ describe('getParticipantById', () => {
       active: true,
       city: 'Porto Alegre',
       zone: null,
+      cityId: 'poa',
+      zoneId: null,
       entryDate: '2025-03-15',
       photo: 'https://cdn.exemplo.com/jo.jpg',
     });

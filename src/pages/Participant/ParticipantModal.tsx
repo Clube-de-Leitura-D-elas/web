@@ -24,9 +24,6 @@ type ParticipantModalProps = {
   error?: string | null;
 };
 
-const findIdByName = (options: ParticipantOption[], name: string | null) =>
-  name ? (options.find((option) => option.name === name)?.id ?? null) : null;
-
 const toAutocompleteOptions = (options: ParticipantOption[]) =>
   options.map(({ id, name }) => ({ value: id, label: name }));
 
@@ -57,19 +54,12 @@ const ParticipantModalContent = ({
   const [cityChoice, setCityChoice] = useState<string | null | undefined>(undefined);
   const [zoneChoice, setZoneChoice] = useState<string | null | undefined>(undefined);
 
-  const initialCityId = findIdByName(cities, participant.city);
+  const initialCityId = participant.cityId;
   const cityId = cityChoice === undefined ? initialCityId : cityChoice;
 
   // só as zonas da cidade escolhida: "Zona Sul" existe em mais de uma cidade
   const cityZones = useMemo(() => zones.filter((zone) => zone.cityId === cityId), [zones, cityId]);
-  const initialZoneId = useMemo(
-    () =>
-      findIdByName(
-        zones.filter((zone) => zone.cityId === initialCityId),
-        participant.zone,
-      ),
-    [zones, initialCityId, participant.zone],
-  );
+  const initialZoneId = participant.zoneId;
   const zoneId =
     zoneChoice !== undefined ? zoneChoice : cityId === initialCityId ? initialZoneId : null;
 

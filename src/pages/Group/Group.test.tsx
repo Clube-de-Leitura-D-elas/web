@@ -35,6 +35,8 @@ const group: GroupDetailsData = {
   description: 'Centro',
   city: 'Canoas',
   zone: null,
+  city_id: 'c1',
+  zone_id: null,
   is_active: true,
   active_participants_count: 2,
   coordinators: [
@@ -167,7 +169,7 @@ describe('GroupDetails', () => {
   });
 
   it('mostra a zona junto da cidade', async () => {
-    jest.mocked(getGroupDetails).mockResolvedValue({ ...group, zone: 'Zona Sul' });
+    jest.mocked(getGroupDetails).mockResolvedValue({ ...group, zone: 'Zona Sul', zone_id: 'z1' });
 
     renderPage();
 
@@ -499,8 +501,44 @@ describe('GroupDetails', () => {
     expect(screen.getByText('Porto Alegre')).toBeInTheDocument();
   });
 
+  it('mantém a cidade do grupo pelo id quando outra cidade tem o mesmo nome', async () => {
+    jest.mocked(updateGroupLocation).mockResolvedValue();
+    jest.mocked(getGroupDetails).mockResolvedValue({
+      ...group,
+      city: 'Bom Jesus',
+      zone: 'Centro',
+      city_id: 'bj-sc',
+      zone_id: 'bj-sc-centro',
+    });
+    jest.mocked(getGroupCities).mockResolvedValue([
+      { id: 'bj-rs', name: 'Bom Jesus' },
+      { id: 'bj-sc', name: 'Bom Jesus', isActive: false },
+    ]);
+    jest.mocked(getGroupZones).mockResolvedValue([
+      { id: 'bj-rs-centro', name: 'Centro', cityId: 'bj-rs' },
+      { id: 'bj-sc-centro', name: 'Centro', cityId: 'bj-sc' },
+    ]);
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: text.header.editLocation }));
+    const dialog = screen.getByRole('dialog', { name: text.modal.title });
+    expect(within(dialog).getByRole('combobox', { name: new RegExp(text.modal.city) })).toHaveValue(
+      'Bom Jesus',
+    );
+    expect(within(dialog).getByRole('combobox', { name: new RegExp(text.modal.zone) })).toHaveValue(
+      'Centro',
+    );
+    await user.click(within(dialog).getByRole('button', { name: text.modal.save }));
+
+    expect(updateGroupLocation).toHaveBeenCalledWith('g1', {
+      description: 'Bom Jesus',
+      city_id: 'bj-sc',
+      zone_id: 'bj-sc-centro',
+    });
+  });
+
   it('esconde cidades e zonas desativadas, menos as que o grupo já usa', async () => {
-    jest.mocked(getGroupDetails).mockResolvedValue({ ...group, zone: 'Zona Sul' });
+    jest.mocked(getGroupDetails).mockResolvedValue({ ...group, zone: 'Zona Sul', zone_id: 'z1' });
     jest.mocked(getGroupCities).mockResolvedValue([
       { id: 'c1', name: 'Canoas', isActive: false },
       { id: 'c2', name: 'Porto Alegre', isActive: true },

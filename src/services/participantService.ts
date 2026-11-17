@@ -24,6 +24,8 @@ type ParticipantResponse = {
   app_role: string | null;
   city: string | null;
   zone: string | null;
+  city_id: string | null;
+  zone_id: string | null;
   entry_date?: string | null;
   photo: string | null;
 };
@@ -70,6 +72,8 @@ export async function getParticipantById(participantId: string): Promise<Partici
     active: data.is_active,
     city: data.city,
     zone: data.zone,
+    cityId: data.city_id ?? null,
+    zoneId: data.zone_id ?? null,
     appRole:
       data.app_role?.toUpperCase() === 'FOUNDER'
         ? 'FOUNDER'

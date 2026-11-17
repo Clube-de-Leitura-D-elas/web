@@ -104,11 +104,13 @@ const meta = {
     ),
   ],
   beforeEach: () => {
+    const rows = structuredClone(cities);
+
     mocked(getCityGrid).mockImplementation(async ({ page, pageSize }, { search, uf, status }) => {
       await wait(REQUEST_DELAY);
 
       const term = normalize(search);
-      const filtered = cities.filter(
+      const filtered = rows.filter(
         (city) =>
           (!uf || city.uf === uf) &&
           (status === 'all' || city.isActive === (status === 'active')) &&
@@ -120,22 +122,44 @@ const meta = {
       return {
         items: filtered.slice((page - 1) * pageSize, page * pageSize),
         total: filtered.length,
-        ufs: [...new Set(cities.map((city) => city.uf))].sort(),
+        ufs: [...new Set(rows.map((city) => city.uf))].sort(),
         summary: {
-          activeCities: cities.filter((city) => city.isActive).length,
-          activeZones: cities
+          activeCities: rows.filter((city) => city.isActive).length,
+          activeZones: rows
             .filter((city) => city.isActive)
             .flatMap((city) => city.zones)
             .filter((item) => item.isActive).length,
         },
       };
     });
-    mocked(saveCity).mockImplementation(async () => {
+    mocked(saveCity).mockImplementation(async ({ cityId, name, uf, zones }) => {
       await wait(REQUEST_DELAY);
-      return 'new-city';
+
+      const current = rows.find((city) => city.id === cityId);
+      const id = current?.id ?? `city-${rows.length + 1}`;
+      const savedZones = zones.map((item, index) => {
+        const previous = current?.zones.find((existing) => existing.id === item.id);
+        return zone(
+          item.id ?? `${id}-zone-${index + 1}`,
+          item.name,
+          previous?.activeGroups ?? 0,
+          item.isActive,
+        );
+      });
+
+      if (current) Object.assign(current, { name, uf, zones: savedZones });
+      else
+        rows.push({ id, name, uf, isActive: true, groups: 0, activeGroups: 0, zones: savedZones });
+      rows.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+      return id;
     });
-    mocked(updateCityStatus).mockImplementation(async (_cityId, isActive) => {
+    mocked(updateCityStatus).mockImplementation(async (cityId, isActive) => {
       await wait(REQUEST_DELAY);
+
+      const city = rows.find((item) => item.id === cityId);
+      if (city) city.isActive = isActive;
+
       return isActive;
     });
   },
