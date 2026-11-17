@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import { locale } from '../../locales';
 import { CityServiceError } from '../../services/cityErrors';
 import { getCityGrid, saveCity, updateCityStatus } from '../../services/cityService';
@@ -235,6 +235,53 @@ describe('Settings', () => {
 
     expect(updateCityStatus).toHaveBeenCalledWith('cwb', true);
     expect(await screen.findByText('Curitiba foi reativada.')).toBeInTheDocument();
+  });
+
+  it('mantém aberta a confirmação de outra cidade quando uma reativação termina', async () => {
+    let finishReactivation: (value: boolean) => void = () => {};
+    jest.mocked(updateCityStatus).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishReactivation = resolve;
+      }),
+    );
+    const { user } = renderWithProviders(<Settings />);
+    await screen.findByText('Curitiba');
+
+    await openActions(user, 'Curitiba');
+    await user.click(screen.getByRole('menuitem', { name: text.table.reactivate }));
+    await openActions(user, 'Canoas');
+    await user.click(screen.getByRole('menuitem', { name: text.table.deactivate }));
+    expect(screen.getByRole('dialog', { name: 'Desativar Canoas?' })).toBeInTheDocument();
+
+    await act(async () => finishReactivation(true));
+
+    expect(await screen.findByText('Curitiba foi reativada.')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Desativar Canoas?' })).toBeInTheDocument();
+  });
+
+  it('ignora o resumo de uma consulta antiga que termina depois da atual', async () => {
+    let finishFirst: (value: CityGridResponse) => void = () => {};
+    jest.mocked(getCityGrid).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishFirst = resolve;
+      }),
+    );
+    const { user } = renderWithProviders(<Settings />);
+
+    await user.click(screen.getByRole('button', { name: text.filters.statusAll }));
+    await user.click(screen.getByRole('option', { name: text.filters.statusInactive }));
+    expect(await screen.findByText('2 cidades ativas e 4 regiões')).toBeInTheDocument();
+
+    await act(async () =>
+      finishFirst({
+        ...response,
+        ufs: ['SC'],
+        summary: { activeCities: 9, activeZones: 9 },
+      }),
+    );
+
+    expect(screen.getByText('2 cidades ativas e 4 regiões')).toBeInTheDocument();
+    expect(screen.queryByText('9 cidades ativas e 9 regiões')).not.toBeInTheDocument();
   });
 
   it('cria uma cidade pelo modal e recarrega a tabela', async () => {

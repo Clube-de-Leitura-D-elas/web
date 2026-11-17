@@ -14,6 +14,8 @@ const participant: Participant = {
   phone: '51999999999',
   city: 'Porto Alegre',
   zone: 'Zona Sul',
+  cityId: 'poa',
+  zoneId: 'poa-sul',
   birthDate: '1990-10-24',
   job: null,
   active: true,

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { LuPlus } from 'react-icons/lu';
 
 import { ActionMenu } from '../../components/ActionMenu';
@@ -40,6 +40,7 @@ export const CitiesSettings = () => {
   const [ufs, setUfs] = useState<string[]>([]);
   const [summary, setSummary] = useState<CitiesSummary | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const latestRequest = useRef(0);
 
   const [editing, setEditing] = useState<CityListItem | null | undefined>(undefined);
   const [deactivating, setDeactivating] = useState<CityListItem | null>(null);
@@ -62,7 +63,7 @@ export const CitiesSettings = () => {
 
       try {
         await updateCityStatus(city.id, isActive);
-        setDeactivating(null);
+        setDeactivating((current) => (current?.id === city.id ? null : current));
         setToast({
           id: Date.now(),
           variant: 'success',
@@ -73,7 +74,7 @@ export const CitiesSettings = () => {
         setRefreshKey((key) => key + 1);
       } catch (error) {
         console.error('update-city-status error', error);
-        setDeactivating(null);
+        setDeactivating((current) => (current?.id === city.id ? null : current));
         setToast({
           id: Date.now(),
           variant: 'error',
@@ -110,10 +111,13 @@ export const CitiesSettings = () => {
 
   const fetchCities = useCallback(
     async (request: TablePageRequest): Promise<TablePage> => {
+      const requestId = ++latestRequest.current;
       const response = await getCityGrid(request, filters);
 
-      setUfs(response.ufs);
-      setSummary(response.summary);
+      if (requestId === latestRequest.current) {
+        setUfs(response.ufs);
+        setSummary(response.summary);
+      }
 
       const rows = response.items.map((city) => {
         const activeZones = city.zones.filter((zone) => zone.isActive);

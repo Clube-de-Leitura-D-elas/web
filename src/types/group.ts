@@ -23,6 +23,8 @@ export type GroupDetails = {
   description: string;
   city: string | null;
   zone: string | null;
+  city_id: string | null;
+  zone_id: string | null;
   is_active: boolean;
   active_participants_count: number;
   coordinators: GroupCoordinator[];

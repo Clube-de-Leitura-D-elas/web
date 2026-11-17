@@ -36,6 +36,8 @@ const participant: Participant = {
   phone: '(51) 91234-5678',
   city: 'Porto Alegre',
   zone: 'Zona Leste',
+  cityId: '41111111-1111-1111-1111-111111111111',
+  zoneId: '51111111-1111-1111-1111-111111111111',
   birthDate: '1990-10-24',
   job: 'Advogada',
   active: true,
@@ -148,6 +150,8 @@ const meta = {
       description: 'Quinta à noite',
       city: 'São Paulo',
       zone: null,
+      city_id: '42222222-2222-2222-2222-222222222222',
+      zone_id: null,
       is_active: true,
       active_participants_count: 8,
       coordinators: [

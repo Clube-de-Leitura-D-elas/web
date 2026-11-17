@@ -11,6 +11,8 @@ export type Participant = {
   active: boolean;
   city: string | null;
   zone: string | null;
+  cityId: string | null;
+  zoneId: string | null;
   appRole: ParticipantAppRole;
   entryDate: string | null;
   photo: string | null;
