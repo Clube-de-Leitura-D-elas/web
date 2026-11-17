@@ -6,12 +6,12 @@ import type { ToastVariant } from '.';
 const slideUp = keyframes`
   from {
     opacity: 0;
-    transform: translate(-50%, 1rem);
+    transform: translateY(1rem);
   }
 
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translateY(0);
   }
 `;
 
@@ -22,13 +22,13 @@ const palette = {
 
 export const Container = styled.div<{ $variant: ToastVariant }>`
   position: fixed;
-  left: 50%;
+  right: 2rem;
   bottom: 2rem;
   z-index: 1100;
   display: flex;
   align-items: center;
   gap: 1rem;
-  max-width: calc(100% - 2rem);
+  max-width: calc(100% - 4rem);
   padding: 0.625rem 0.625rem 0.625rem 1.125rem;
   border: 1px solid ${({ $variant }) => palette[$variant].border};
   border-radius: 0.75rem;
@@ -37,7 +37,6 @@ export const Container = styled.div<{ $variant: ToastVariant }>`
   box-shadow: 0 0.75rem 2rem -0.5rem ${theme.overlayScrim};
   font-size: 0.9375rem;
   font-weight: 700;
-  transform: translate(-50%, 0);
   animation: ${slideUp} 0.35s ${EASE_OUT} both;
   ${reducedMotion}
 `;
