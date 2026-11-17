@@ -13,6 +13,7 @@ import { saveCity } from '../../../services/cityService';
 import type { CityListItem } from '../../../types/city';
 
 import * as Styled from './styles';
+import { normalizeText } from '../../../utils/text';
 
 type ZoneRow = {
   key: string;
@@ -28,9 +29,6 @@ export type CityModalProps = {
   onSaved: (name: string) => void;
   saveRequest?: typeof saveCity;
 };
-
-const normalize = (value: string) =>
-  value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('pt-BR').replace(/\s+/g, ' ').trim();
 
 export const CityModal = ({ city, onClose, onSaved, saveRequest = saveCity }: CityModalProps) => {
   const {
@@ -65,7 +63,7 @@ export const CityModal = ({ city, onClose, onSaved, saveRequest = saveCity }: Ci
     const seen = new Set<string>();
 
     return zones.map((zone) => {
-      const normalized = normalize(zone.name);
+      const normalized = normalizeText(zone.name);
       if (!normalized) return text.errors.zoneRequired;
       if (seen.has(normalized)) return text.errors.zoneDuplicate;
       seen.add(normalized);

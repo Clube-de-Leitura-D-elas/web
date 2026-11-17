@@ -114,6 +114,8 @@
       "cityHint": "Selecione uma cidade da lista.",
       "requiredHint": "Preencha nome, e-mail, telefone, aniversário e cidade para salvar.",
       "saveError": "Não foi possível atualizar os dados do participante.",
+      "cityInactive": "A cidade escolhida foi desativada. Escolha outra.",
+      "zoneInactive": "A zona escolhida foi desativada. Escolha outra.",
       "optionsError": "Não foi possível carregar as cidades e zonas."
     },
     "profile": {
@@ -538,6 +540,8 @@
       "saving": "Salvando...",
       "requiredHint": "Selecione uma cidade da lista para salvar.",
       "modalError": "Não foi possível atualizar a localização do grupo. Tente novamente.",
+      "cityInactive": "A cidade escolhida foi desativada. Escolha outra.",
+      "zoneInactive": "A zona escolhida foi desativada. Escolha outra.",
       "optionsError": "Não foi possível carregar as cidades e zonas."
     },
     "participantActions": {
@@ -937,6 +941,7 @@
         "deactivated": "{{name}} foi desativada.",
         "reactivated": "{{name}} foi reativada.",
         "statusError": "Não foi possível alterar o status da cidade. Tente novamente.",
+        "activeGroupsErrorWithoutCount": "{{name}} tem grupos ativos. Encerre os grupos antes de desativar a cidade.",
         "activeGroupsError": {
           "one": "{{name}} tem {{count}} grupo ativo. Encerre o grupo antes de desativar a cidade.",
           "other": "{{name}} tem {{count}} grupos ativos. Encerre os grupos antes de desativar a cidade."

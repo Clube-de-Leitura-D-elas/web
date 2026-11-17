@@ -7,6 +7,7 @@ import {
   getGroupDetails,
   getGroupMeetingsPage,
   getGroupParticipantsPage,
+  updateGroupLocation,
   updateGroupParticipant,
   updateGroupStatus,
 } from './groupService';
@@ -80,6 +81,25 @@ describe('consultas do grupo', () => {
     expect(invoke).toHaveBeenCalledWith('get-group-meetings-web?groupId=g1&page=1&pageSize=6', {
       method: 'GET',
     });
+  });
+});
+
+describe('updateGroupLocation', () => {
+  const location = { description: 'Canoas', city_id: 'c1', zone_id: 'z1' };
+
+  it.each([
+    ['city_inactive', locale.group_details.modal.cityInactive],
+    ['zone_inactive', locale.group_details.modal.zoneInactive],
+  ])('mostra o texto do locale para %s', async (code, message) => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    fail(
+      new FunctionsHttpError({
+        status: 400,
+        json: async () => ({ error: 'city is inactive', code }),
+      }),
+    );
+
+    await expect(updateGroupLocation('g1', location)).rejects.toThrow(message);
   });
 });
 

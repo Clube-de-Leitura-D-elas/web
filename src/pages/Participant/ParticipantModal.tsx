@@ -11,6 +11,8 @@ import type {
   ParticipantZoneOption,
 } from '../../types/participant';
 
+import { toSelectableOptions } from '../../utils/locationOptions';
+
 import * as Styled from './styles';
 
 type ParticipantModalProps = {
@@ -23,9 +25,6 @@ type ParticipantModalProps = {
   saving?: boolean;
   error?: string | null;
 };
-
-const toAutocompleteOptions = (options: ParticipantOption[]) =>
-  options.map(({ id, name }) => ({ value: id, label: name }));
 
 export const ParticipantModal = (props: ParticipantModalProps) =>
   props.isOpen ? <ParticipantModalContent {...props} /> : null;
@@ -64,17 +63,11 @@ const ParticipantModalContent = ({
     zoneChoice !== undefined ? zoneChoice : cityId === initialCityId ? initialZoneId : null;
 
   const cityOptions = useMemo(
-    () =>
-      toAutocompleteOptions(
-        cities.filter((city) => city.isActive !== false || city.id === initialCityId),
-      ),
+    () => toSelectableOptions(cities, initialCityId),
     [cities, initialCityId],
   );
   const zoneOptions = useMemo(
-    () =>
-      toAutocompleteOptions(
-        cityZones.filter((zone) => zone.isActive !== false || zone.id === initialZoneId),
-      ),
+    () => toSelectableOptions(cityZones, initialZoneId),
     [cityZones, initialZoneId],
   );
 

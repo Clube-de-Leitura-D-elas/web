@@ -24,6 +24,7 @@ import { CityModal } from './CityModal';
 import * as Styled from './styles';
 
 const VISIBLE_ZONES = 3;
+const MAX_SEARCH_LENGTH = 100;
 
 type ToastState = { id: number; variant: ToastVariant; message: string };
 
@@ -41,6 +42,7 @@ export const CitiesSettings = () => {
   const [summary, setSummary] = useState<CitiesSummary | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const latestRequest = useRef(0);
+  const isChangingStatus = useRef(false);
 
   const [editing, setEditing] = useState<CityListItem | null | undefined>(undefined);
   const [deactivating, setDeactivating] = useState<CityListItem | null>(null);
@@ -59,6 +61,8 @@ export const CitiesSettings = () => {
 
   const changeStatus = useCallback(
     async (city: CityListItem, isActive: boolean) => {
+      if (isChangingStatus.current) return;
+      isChangingStatus.current = true;
       setIsUpdatingStatus(true);
 
       try {
@@ -80,12 +84,16 @@ export const CitiesSettings = () => {
           variant: 'error',
           message:
             error instanceof CityServiceError && error.code === 'city_has_active_groups'
-              ? interpolate(pluralize(text.toast.activeGroupsError, error.activeGroups), {
-                  name: city.name,
-                })
+              ? interpolate(
+                  error.activeGroups === null
+                    ? text.toast.activeGroupsErrorWithoutCount
+                    : pluralize(text.toast.activeGroupsError, error.activeGroups),
+                  { name: city.name },
+                )
               : text.toast.statusError,
         });
       } finally {
+        isChangingStatus.current = false;
         setIsUpdatingStatus(false);
       }
     },
@@ -236,6 +244,7 @@ export const CitiesSettings = () => {
           label={text.filters.searchPlaceholder}
           placeholder={text.filters.searchPlaceholder}
           value={search}
+          maxLength={MAX_SEARCH_LENGTH}
           onChange={(event) => setSearch(event.target.value)}
         />
 
@@ -250,7 +259,7 @@ export const CitiesSettings = () => {
 
       <Styled.TableContainer>
         <Table
-          key={refreshKey}
+          reloadKey={refreshKey}
           columns={columns}
           fetchPage={fetchCities}
           pageSize={8}

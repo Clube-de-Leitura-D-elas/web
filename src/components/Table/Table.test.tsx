@@ -136,6 +136,24 @@ describe('Table com fetchPage', () => {
     expect(second).toHaveBeenCalledWith({ page: 1, pageSize: 3 });
   });
 
+  it('recarrega a página atual quando o reloadKey muda', async () => {
+    const rows = makeRows(8);
+    const fetchPage = remoteSource(rows);
+    const { user, rerender } = renderWithProviders(
+      <Table columns={columns} fetchPage={fetchPage} pageSize={3} reloadKey={0} />,
+    );
+    await screen.findByText('Pessoa 1');
+    await user.click(pageButton(2));
+    await screen.findByText('Pessoa 4');
+
+    rows[3] = { name: 'Pessoa 4 editada', city: 'Canoas' };
+    rerender(<Table columns={columns} fetchPage={fetchPage} pageSize={3} reloadKey={1} />);
+
+    expect(await screen.findByText('Pessoa 4 editada')).toBeInTheDocument();
+    expect(pageButton(2)).toHaveAttribute('aria-current', 'page');
+    expect(fetchPage).toHaveBeenLastCalledWith({ page: 2, pageSize: 3 });
+  });
+
   it('ignora a resposta de um fetchPage antigo', async () => {
     let resolveOld: (value: { rows: TableRow[]; total: number }) => void = () => {};
     const old = jest.fn<ReturnType<TableFetchPage>, Parameters<TableFetchPage>>(

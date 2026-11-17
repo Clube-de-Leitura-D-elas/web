@@ -227,6 +227,51 @@ describe('Settings', () => {
     expect(screen.getByRole('dialog', { name: 'Desativar Canoas?' })).toBeInTheDocument();
   });
 
+  it('não manda a reativação duas vezes enquanto a primeira está em andamento', async () => {
+    jest.mocked(updateCityStatus).mockReturnValue(new Promise(() => {}));
+    const { user } = renderWithProviders(<Settings />);
+    await screen.findByText('Curitiba');
+
+    await openActions(user, 'Curitiba');
+    await user.click(screen.getByRole('menuitem', { name: text.table.reactivate }));
+    await openActions(user, 'Curitiba');
+    await user.click(screen.getByRole('menuitem', { name: text.table.reactivate }));
+
+    expect(updateCityStatus).toHaveBeenCalledTimes(1);
+  });
+
+  it('avisa sem número quando o servidor não informa quantos grupos estão ativos', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest
+      .mocked(updateCityStatus)
+      .mockRejectedValue(new CityServiceError('city_has_active_groups', { activeGroups: null }));
+    const { user } = renderWithProviders(<Settings />);
+    await screen.findByText('Canoas');
+
+    await openActions(user, 'Canoas');
+    await user.click(screen.getByRole('menuitem', { name: text.table.deactivate }));
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name: text.deactivateModal.confirm,
+      }),
+    );
+
+    expect(
+      await screen.findByText(
+        'Canoas tem grupos ativos. Encerre os grupos antes de desativar a cidade.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('limita a busca ao tamanho que o servidor aceita', () => {
+    renderWithProviders(<Settings />);
+
+    expect(screen.getByLabelText(text.filters.searchPlaceholder)).toHaveAttribute(
+      'maxLength',
+      '100',
+    );
+  });
+
   it('ignora o resumo de uma consulta antiga que termina depois da atual', async () => {
     let finishFirst: (value: CityGridResponse) => void = () => {};
     jest.mocked(getCityGrid).mockReturnValueOnce(
