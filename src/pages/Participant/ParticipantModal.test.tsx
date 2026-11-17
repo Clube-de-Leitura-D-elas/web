@@ -117,4 +117,40 @@ describe('ParticipantModal', () => {
       within(screen.getByRole('dialog')).getByRole('button', { name: text.save }),
     ).toBeDisabled();
   });
+
+  it('hides inactive cities and zones except the ones the participant already has', async () => {
+    const { user } = renderWithProviders(
+      <ParticipantModal
+        isOpen
+        participant={participant}
+        cities={[
+          { id: 'poa', name: 'Porto Alegre', isActive: false },
+          { id: 'sp', name: 'São Paulo', isActive: false },
+        ]}
+        zones={[
+          { id: 'poa-sul', name: 'Zona Sul', cityId: 'poa', isActive: false },
+          { id: 'poa-norte', name: 'Zona Norte', cityId: 'poa', isActive: false },
+          { id: 'poa-leste', name: 'Zona Leste', cityId: 'poa', isActive: true },
+        ]}
+        onClose={jest.fn()}
+        onConfirm={jest.fn()}
+      />,
+    );
+
+    const city = screen.getByRole('combobox', { name: new RegExp(text.city) });
+    const zone = screen.getByRole('combobox', { name: new RegExp(text.zone) });
+    expect(city).toHaveValue('Porto Alegre');
+    expect(zone).toHaveValue('Zona Sul');
+
+    await user.clear(zone);
+    await user.type(zone, 'Zona');
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      'Zona Sul',
+      'Zona Leste',
+    ]);
+
+    await user.clear(city);
+    await user.type(city, 'São');
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
+  });
 });

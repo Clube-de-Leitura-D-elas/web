@@ -96,6 +96,28 @@ describe('updateGroupStatus', () => {
     expect(clearCalendarCache).toHaveBeenCalledTimes(1);
   });
 
+  it('traduz a cidade inativa para city_inactive', async () => {
+    fail(
+      new FunctionsHttpError({
+        status: 409,
+        json: async () => ({ error: 'group city is inactive', code: 'city_inactive' }),
+      }),
+    );
+
+    const error = await updateGroupStatus('g1', true).catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(GroupServiceError);
+    expect(error).toMatchObject({ code: 'city_inactive' });
+    expect(clearCalendarCache).not.toHaveBeenCalled();
+  });
+
+  it('repassa outros erros sem traduzir', async () => {
+    const original = new FunctionsHttpError({ status: 500, json: async () => ({ error: 'x' }) });
+    fail(original);
+
+    await expect(updateGroupStatus('g1', true)).rejects.toBe(original);
+  });
+
   it('falha quando a resposta vem vazia', async () => {
     respond(null);
 

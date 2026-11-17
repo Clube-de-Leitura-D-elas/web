@@ -48,6 +48,7 @@ export type ParticipantMeetingRecord = {
 export type ParticipantOption = {
   id: string;
   name: string;
+  isActive?: boolean;
 };
 
 /** Zona com a cidade a que pertence: "Zona Sul" existe em mais de uma cidade. */

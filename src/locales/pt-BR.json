@@ -432,6 +432,7 @@
       "cancel": "Cancelar"
     },
     "updateStatusError": "Não foi possível atualizar o status do grupo. Tente novamente.",
+    "updateStatusCityInactive": "A cidade deste grupo está desativada. Reative a cidade em Configurações para reabrir o grupo.",
     "summary": {
       "label": "Resumo do grupo",
       "coordinator": {

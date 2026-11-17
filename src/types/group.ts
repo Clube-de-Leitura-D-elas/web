@@ -60,6 +60,7 @@ export type UpdateGroupLocationInput = {
 export type GroupOption = {
   id: string;
   name: string;
+  isActive?: boolean;
 };
 
 /** Zona com a cidade a que pertence: "Zona Sul" existe em mais de uma cidade. */

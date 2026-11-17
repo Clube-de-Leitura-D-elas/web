@@ -62,15 +62,31 @@ const ParticipantModalContent = ({
 
   // só as zonas da cidade escolhida: "Zona Sul" existe em mais de uma cidade
   const cityZones = useMemo(() => zones.filter((zone) => zone.cityId === cityId), [zones, cityId]);
+  const initialZoneId = useMemo(
+    () =>
+      findIdByName(
+        zones.filter((zone) => zone.cityId === initialCityId),
+        participant.zone,
+      ),
+    [zones, initialCityId, participant.zone],
+  );
   const zoneId =
-    zoneChoice !== undefined
-      ? zoneChoice
-      : cityId === initialCityId
-        ? findIdByName(cityZones, participant.zone)
-        : null;
+    zoneChoice !== undefined ? zoneChoice : cityId === initialCityId ? initialZoneId : null;
 
-  const cityOptions = useMemo(() => toAutocompleteOptions(cities), [cities]);
-  const zoneOptions = useMemo(() => toAutocompleteOptions(cityZones), [cityZones]);
+  const cityOptions = useMemo(
+    () =>
+      toAutocompleteOptions(
+        cities.filter((city) => city.isActive !== false || city.id === initialCityId),
+      ),
+    [cities, initialCityId],
+  );
+  const zoneOptions = useMemo(
+    () =>
+      toAutocompleteOptions(
+        cityZones.filter((zone) => zone.isActive !== false || zone.id === initialZoneId),
+      ),
+    [cityZones, initialZoneId],
+  );
 
   const handleCityChange = (value: string | null) => {
     setCityChoice(value);

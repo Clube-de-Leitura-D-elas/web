@@ -181,17 +181,25 @@ export async function updateParticipantStatus(
 }
 
 export async function getCities(): Promise<ParticipantOption[]> {
-  const { data, error } = await supabase.from('cities').select('id, name').order('name');
+  const { data, error } = await supabase.from('cities').select('id, name, is_active').order('name');
   if (error) throw error;
 
-  return (data ?? []) as ParticipantOption[];
+  return (data ?? []).map(({ id, name, is_active }) => ({ id, name, isActive: is_active }));
 }
 
 export async function getZones(): Promise<ParticipantZoneOption[]> {
-  const { data, error } = await supabase.from('zones').select('id, name, city_id').order('name');
+  const { data, error } = await supabase
+    .from('zones')
+    .select('id, name, city_id, is_active')
+    .order('name');
   if (error) throw error;
 
-  return (data ?? []).map(({ id, name, city_id }) => ({ id, name, cityId: city_id }));
+  return (data ?? []).map(({ id, name, city_id, is_active }) => ({
+    id,
+    name,
+    cityId: city_id,
+    isActive: is_active,
+  }));
 }
 
 export async function updateParticipant(
