@@ -4,11 +4,13 @@ import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Toast } from '../../components/Toast';
 import { useLocale } from '../../hooks/useLocale';
+import { interpolate } from '../../locales';
 import { AuthServiceError } from '../../services/authErrors';
 import { changePassword } from '../../services/authService';
 import * as Styled from './styles';
 
 const MIN_PASSWORD_LENGTH = 8;
+const lengthParams = { min: MIN_PASSWORD_LENGTH };
 
 type FieldErrors = {
   current?: string;
@@ -30,11 +32,14 @@ export const AuthenticationSettings = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [successId, setSuccessId] = useState<number | null>(null);
 
+  const clearError = (field: keyof FieldErrors) =>
+    setErrors((current) => (current[field] ? { ...current, [field]: undefined } : current));
+
   const validate = (): FieldErrors => ({
     current: current ? undefined : text.errors.currentRequired,
     next:
       next.length < MIN_PASSWORD_LENGTH
-        ? text.errors.tooShort
+        ? interpolate(text.errors.tooShort, lengthParams)
         : next === current
           ? text.errors.sameAsCurrent
           : undefined,
@@ -62,6 +67,7 @@ export const AuthenticationSettings = () => {
       const code = error instanceof AuthServiceError ? error.code : 'unknown';
 
       if (code === 'wrong_password') setErrors({ current: text.errors.wrongPassword });
+      else if (code === 'too_many_attempts') setErrors({ current: text.errors.tooManyAttempts });
       else if (code === 'same_password') setErrors({ next: text.errors.sameAsCurrent });
       else if (code === 'weak_password') setErrors({ next: text.errors.weakPassword });
       else setFormError(text.errors.generic);
@@ -81,7 +87,10 @@ export const AuthenticationSettings = () => {
           label={text.current.label}
           autoComplete="current-password"
           value={current}
-          onChange={(event) => setCurrent(event.target.value)}
+          onChange={(event) => {
+            setCurrent(event.target.value);
+            clearError('current');
+          }}
           error={errors.current}
           disabled={isSaving}
           required
@@ -94,8 +103,11 @@ export const AuthenticationSettings = () => {
           label={text.new.label}
           autoComplete="new-password"
           value={next}
-          onChange={(event) => setNext(event.target.value)}
-          helperText={text.new.helperText}
+          onChange={(event) => {
+            setNext(event.target.value);
+            clearError('next');
+          }}
+          helperText={interpolate(text.new.helperText, lengthParams)}
           error={errors.next}
           disabled={isSaving}
           required
@@ -108,7 +120,10 @@ export const AuthenticationSettings = () => {
           label={text.confirm.label}
           autoComplete="new-password"
           value={confirm}
-          onChange={(event) => setConfirm(event.target.value)}
+          onChange={(event) => {
+            setConfirm(event.target.value);
+            clearError('confirm');
+          }}
           error={errors.confirm}
           disabled={isSaving}
           required

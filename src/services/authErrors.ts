@@ -4,6 +4,7 @@ export type AuthErrorCode =
   | 'wrong_password'
   | 'same_password'
   | 'weak_password'
+  | 'too_many_attempts'
   | 'unknown';
 
 /**

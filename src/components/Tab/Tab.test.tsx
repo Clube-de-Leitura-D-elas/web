@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react';
+import { useState } from 'react';
 import { renderWithProviders } from '../../test/render';
 import { Tabs, type Tab } from '.';
 
@@ -87,6 +88,42 @@ describe('Tabs', () => {
 
     expect(screen.getByRole('tab', { name: 'Participantes 10' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Histórico' })).toBeInTheDocument();
+  });
+});
+
+describe('Tabs com keepMounted', () => {
+  const Counter = () => {
+    const [count, setCount] = useState(0);
+    return (
+      <button type="button" onClick={() => setCount((value) => value + 1)}>
+        contador {count}
+      </button>
+    );
+  };
+
+  const panels: Tab[] = [
+    { value: 'one', label: 'Primeira', children: <Counter /> },
+    { value: 'two', label: 'Segunda', children: <p>conteúdo 2</p> },
+  ];
+
+  it('só monta o painel quando a aba é aberta pela primeira vez', () => {
+    renderWithProviders(<Tabs tabs={panels} keepMounted />);
+
+    expect(screen.queryByText('conteúdo 2')).not.toBeInTheDocument();
+  });
+
+  it('mantém o estado do painel ao trocar de aba e voltar', async () => {
+    const { user } = renderWithProviders(<Tabs tabs={panels} keepMounted />);
+
+    await user.click(screen.getByRole('button', { name: 'contador 0' }));
+    await user.click(screen.getByRole('tab', { name: 'Segunda' }));
+
+    expect(screen.getByRole('tabpanel', { name: 'Segunda' })).toHaveTextContent('conteúdo 2');
+    expect(screen.queryByRole('tabpanel', { name: 'Primeira' })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: 'Primeira' }));
+
+    expect(screen.getByRole('button', { name: 'contador 1' })).toBeInTheDocument();
   });
 });
 

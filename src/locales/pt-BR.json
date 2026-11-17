@@ -1031,7 +1031,7 @@
       },
       "new": {
         "label": "Nova senha *",
-        "helperText": "Use pelo menos 8 caracteres."
+        "helperText": "Use pelo menos {{min}} caracteres."
       },
       "confirm": {
         "label": "Confirmar nova senha *"
@@ -1041,11 +1041,12 @@
       "success": "Senha alterada.",
       "errors": {
         "currentRequired": "Informe a senha atual.",
-        "tooShort": "A nova senha precisa ter pelo menos 8 caracteres.",
+        "tooShort": "A nova senha precisa ter pelo menos {{min}} caracteres.",
         "sameAsCurrent": "A nova senha precisa ser diferente da atual.",
         "mismatch": "As senhas não conferem.",
         "wrongPassword": "Senha atual incorreta.",
         "weakPassword": "Essa senha é fraca. Misture letras, números e símbolos.",
+        "tooManyAttempts": "Muitas tentativas com a senha errada. Espere alguns minutos e tente de novo.",
         "generic": "Não foi possível alterar a senha. Tente novamente."
       }
     }

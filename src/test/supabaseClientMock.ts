@@ -12,6 +12,5 @@ export const supabase = {
     signOut: jest.fn(),
     onAuthStateChange: jest.fn(),
     getClaims: jest.fn(),
-    updateUser: jest.fn(),
   },
 } as unknown as SupabaseClient;

@@ -99,6 +99,41 @@ describe('Settings', () => {
     expect(screen.getByTestId('location-search')).toHaveTextContent('?aba=autenticacao');
   });
 
+  it('volta para Cidades sem perder a busca nem buscar de novo', async () => {
+    const { user } = renderWithProviders(<Settings />);
+    await screen.findByText('Porto Alegre');
+    await user.type(screen.getByLabelText(text.filters.searchPlaceholder), 'zona');
+    await waitFor(() =>
+      expect(getCityGrid).toHaveBeenLastCalledWith(
+        firstPage,
+        expect.objectContaining({ search: 'zona' }),
+      ),
+    );
+    const calls = jest.mocked(getCityGrid).mock.calls.length;
+
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.authentication }));
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.cities }));
+
+    expect(screen.getByLabelText(text.filters.searchPlaceholder)).toHaveValue('zona');
+    expect(getCityGrid).toHaveBeenCalledTimes(calls);
+  });
+
+  it('troca de aba sem apagar os outros parâmetros da URL', async () => {
+    const { user } = renderWithProviders(<Settings />, {
+      route: '/configuracoes?origem=menu',
+      path: '/configuracoes',
+      showLocationSearch: true,
+    });
+
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.authentication }));
+    expect(screen.getByTestId('location-search')).toHaveTextContent(
+      '?origem=menu&aba=autenticacao',
+    );
+
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.cities }));
+    expect(screen.getByTestId('location-search')).toHaveTextContent('?origem=menu');
+  });
+
   it('abre direto na aba de autenticação pelo endereço', () => {
     renderWithProviders(<Settings />, {
       route: '/configuracoes?aba=autenticacao',

@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import { locale } from '../../locales';
+import { interpolate, locale } from '../../locales';
 import { AuthServiceError } from '../../services/authErrors';
 import { changePassword } from '../../services/authService';
 import { renderWithProviders } from '../../test/render';
@@ -30,7 +30,7 @@ describe('AuthenticationSettings', () => {
 
     await submit();
     expect(screen.getByText(text.errors.currentRequired)).toBeInTheDocument();
-    expect(screen.getByText(text.errors.tooShort)).toBeInTheDocument();
+    expect(screen.getByText(interpolate(text.errors.tooShort, { min: 8 }))).toBeInTheDocument();
 
     await fill('senha-atual', 'nova-senha-1', 'nova-senha-2');
     await submit();
@@ -84,6 +84,35 @@ describe('AuthenticationSettings', () => {
     await submit();
 
     expect(await screen.findByText(text.errors.weakPassword)).toBeInTheDocument();
+  });
+
+  it('tira o erro do campo assim que a usuária volta a digitar nele', async () => {
+    jest.mocked(changePassword).mockRejectedValue(new AuthServiceError('wrong_password'));
+    const { fill, submit, user } = renderTab();
+
+    await fill('errada', 'nova-senha-123');
+    await submit();
+    expect(await screen.findByText(text.errors.wrongPassword)).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(text.current.label), 'x');
+
+    expect(screen.queryByText(text.errors.wrongPassword)).not.toBeInTheDocument();
+  });
+
+  it('avisa quando houve tentativas demais com a senha errada', async () => {
+    jest.mocked(changePassword).mockRejectedValue(new AuthServiceError('too_many_attempts'));
+    const { fill, submit } = renderTab();
+
+    await fill('errada', 'nova-senha-123');
+    await submit();
+
+    expect(await screen.findByText(text.errors.tooManyAttempts)).toBeInTheDocument();
+  });
+
+  it('mostra o mínimo de caracteres no texto de ajuda', () => {
+    renderTab();
+
+    expect(screen.getByText(interpolate(text.new.helperText, { min: 8 }))).toBeInTheDocument();
   });
 
   it('mostra erro genérico nas outras falhas', async () => {

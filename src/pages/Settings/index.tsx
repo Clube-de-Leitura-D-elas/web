@@ -22,10 +22,17 @@ export const Settings = () => {
 
       <Tabs
         active={active}
+        keepMounted
         onChange={(value) =>
-          setSearchParams(value === 'authentication' ? { aba: AUTHENTICATION_TAB } : {}, {
-            replace: true,
-          })
+          setSearchParams(
+            (current) => {
+              const next = new URLSearchParams(current);
+              if (value === 'authentication') next.set('aba', AUTHENTICATION_TAB);
+              else next.delete('aba');
+              return next;
+            },
+            { replace: true },
+          )
         }
         tabs={[
           { value: 'cities', label: text.tabs.cities, children: <CitiesSettings /> },

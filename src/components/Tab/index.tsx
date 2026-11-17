@@ -24,6 +24,7 @@ export type TabsProps = {
   panelId?: string;
   // `true`: a lista ocupa só o tamanho das abas, em vez de 100% da largura (ex.: ao lado de outros itens)
   fit?: boolean;
+  keepMounted?: boolean;
 };
 
 export const Tabs = ({
@@ -35,6 +36,7 @@ export const Tabs = ({
   showPanels = true,
   panelId,
   fit = false,
+  keepMounted = false,
 }: TabsProps) => {
   const isControlled = active !== undefined;
 
@@ -44,6 +46,17 @@ export const Tabs = ({
 
   const activeValue = isControlled ? active : internalActive;
   const activeTab = tabs.find((tab) => tab.value === activeValue);
+
+  const [visited, setVisited] = useState<ReadonlySet<string>>(
+    () => new Set(activeValue === undefined ? [] : [activeValue]),
+  );
+  if (keepMounted && activeValue !== undefined && !visited.has(activeValue)) {
+    setVisited(new Set(visited).add(activeValue));
+  }
+
+  const mountedTabs = keepMounted
+    ? tabs.filter((tab) => tab.value === activeValue || visited.has(tab.value))
+    : tabs.filter((tab) => tab === activeTab);
 
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -116,15 +129,18 @@ export const Tabs = ({
         })}
       </Styled.TabList>
 
-      {showPanels && activeTab && (
-        <Styled.Panel
-          role="tabpanel"
-          id={`tabpanel-${activeTab.value}`}
-          aria-labelledby={`tab-${activeTab.value}`}
-        >
-          {activeTab.children}
-        </Styled.Panel>
-      )}
+      {showPanels &&
+        mountedTabs.map((tab) => (
+          <Styled.Panel
+            key={tab.value}
+            role="tabpanel"
+            id={`tabpanel-${tab.value}`}
+            aria-labelledby={`tab-${tab.value}`}
+            hidden={tab.value !== activeValue}
+          >
+            {tab.children}
+          </Styled.Panel>
+        ))}
     </Styled.Wrapper>
   );
 };

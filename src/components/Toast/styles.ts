@@ -71,6 +71,6 @@ export const Action = styled.button<{ $variant: ToastVariant }>`
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: ${theme.surface};
+    background-color: ${({ $variant }) => `color-mix(in srgb, ${palette[$variant].border} 14%, transparent)`};
   }
 `;
