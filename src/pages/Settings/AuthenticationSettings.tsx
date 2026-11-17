@@ -16,9 +16,9 @@ type FieldErrors = {
   confirm?: string;
 };
 
-export const PasswordSettings = () => {
+export const AuthenticationSettings = () => {
   const {
-    settings: { password: text },
+    settings: { authentication: text },
   } = useLocale();
   const baseId = useId();
 

@@ -2,16 +2,16 @@ import { useSearchParams } from 'react-router';
 import { Tabs } from '../../components/Tab';
 import { useLocale } from '../../hooks/useLocale';
 import { CitiesSettings } from './CitiesSettings';
-import { PasswordSettings } from './PasswordSettings';
+import { AuthenticationSettings } from './AuthenticationSettings';
 import * as Styled from './styles';
 
-const PASSWORD_TAB = 'senha';
+const AUTHENTICATION_TAB = 'autenticacao';
 
 export const Settings = () => {
   const { settings: text } = useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const active = searchParams.get('aba') === PASSWORD_TAB ? 'password' : 'cities';
+  const active = searchParams.get('aba') === AUTHENTICATION_TAB ? 'authentication' : 'cities';
 
   return (
     <Styled.Container>
@@ -23,11 +23,17 @@ export const Settings = () => {
       <Tabs
         active={active}
         onChange={(value) =>
-          setSearchParams(value === 'password' ? { aba: PASSWORD_TAB } : {}, { replace: true })
+          setSearchParams(value === 'authentication' ? { aba: AUTHENTICATION_TAB } : {}, {
+            replace: true,
+          })
         }
         tabs={[
           { value: 'cities', label: text.tabs.cities, children: <CitiesSettings /> },
-          { value: 'password', label: text.tabs.password, children: <PasswordSettings /> },
+          {
+            value: 'authentication',
+            label: text.tabs.authentication,
+            children: <AuthenticationSettings />,
+          },
         ]}
       />
     </Styled.Container>

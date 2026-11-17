@@ -3,14 +3,14 @@ import { locale } from '../../locales';
 import { AuthServiceError } from '../../services/authErrors';
 import { changePassword } from '../../services/authService';
 import { renderWithProviders } from '../../test/render';
-import { PasswordSettings } from './PasswordSettings';
+import { AuthenticationSettings } from './AuthenticationSettings';
 
 jest.mock('../../services/authService', () => ({ changePassword: jest.fn() }));
 
-const text = locale.settings.password;
+const text = locale.settings.authentication;
 
 const renderTab = () => {
-  const view = renderWithProviders(<PasswordSettings />);
+  const view = renderWithProviders(<AuthenticationSettings />);
   const fill = async (current: string, next: string, confirm = next) => {
     if (current) await view.user.type(screen.getByLabelText(text.current.label), current);
     if (next) await view.user.type(screen.getByLabelText(text.new.label), next);
@@ -24,7 +24,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('PasswordSettings', () => {
+describe('AuthenticationSettings', () => {
   it('valida os campos antes de chamar o servidor', async () => {
     const { fill, submit } = renderTab();
 

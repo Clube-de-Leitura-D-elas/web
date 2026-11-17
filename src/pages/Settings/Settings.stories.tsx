@@ -256,25 +256,25 @@ export const DeactivateBlocked: Story = {
   },
 };
 
-const password = locale.settings.password;
+const authentication = locale.settings.authentication;
 
-export const PasswordTab: Story = {
+export const AuthenticationTab: Story = {
   play: async ({ canvas, userEvent }) => {
-    await userEvent.click(canvas.getByRole('tab', { name: locale.settings.tabs.password }));
+    await userEvent.click(canvas.getByRole('tab', { name: locale.settings.tabs.authentication }));
 
-    await expect(canvas.getByLabelText(password.current.label)).toBeInTheDocument();
+    await expect(canvas.getByLabelText(authentication.current.label)).toBeInTheDocument();
   },
 };
 
 export const PasswordChanged: Story = {
   play: async ({ canvas, userEvent }) => {
-    await userEvent.click(canvas.getByRole('tab', { name: locale.settings.tabs.password }));
-    await userEvent.type(canvas.getByLabelText(password.current.label), 'ClubeDelas@123');
-    await userEvent.type(canvas.getByLabelText(password.new.label), 'NovaSenha@2026');
-    await userEvent.type(canvas.getByLabelText(password.confirm.label), 'NovaSenha@2026');
-    await userEvent.click(canvas.getByRole('button', { name: password.submit }));
+    await userEvent.click(canvas.getByRole('tab', { name: locale.settings.tabs.authentication }));
+    await userEvent.type(canvas.getByLabelText(authentication.current.label), 'ClubeDelas@123');
+    await userEvent.type(canvas.getByLabelText(authentication.new.label), 'NovaSenha@2026');
+    await userEvent.type(canvas.getByLabelText(authentication.confirm.label), 'NovaSenha@2026');
+    await userEvent.click(canvas.getByRole('button', { name: authentication.submit }));
 
-    await expect(await canvas.findByText(password.success)).toBeInTheDocument();
+    await expect(await canvas.findByText(authentication.success)).toBeInTheDocument();
   },
 };
 
@@ -283,12 +283,12 @@ export const PasswordWrongCurrent: Story = {
     mocked(changePassword).mockRejectedValue(new AuthServiceError('wrong_password'));
   },
   play: async ({ canvas, userEvent }) => {
-    await userEvent.click(canvas.getByRole('tab', { name: locale.settings.tabs.password }));
-    await userEvent.type(canvas.getByLabelText(password.current.label), 'senha-errada');
-    await userEvent.type(canvas.getByLabelText(password.new.label), 'NovaSenha@2026');
-    await userEvent.type(canvas.getByLabelText(password.confirm.label), 'NovaSenha@2026');
-    await userEvent.click(canvas.getByRole('button', { name: password.submit }));
+    await userEvent.click(canvas.getByRole('tab', { name: locale.settings.tabs.authentication }));
+    await userEvent.type(canvas.getByLabelText(authentication.current.label), 'senha-errada');
+    await userEvent.type(canvas.getByLabelText(authentication.new.label), 'NovaSenha@2026');
+    await userEvent.type(canvas.getByLabelText(authentication.confirm.label), 'NovaSenha@2026');
+    await userEvent.click(canvas.getByRole('button', { name: authentication.submit }));
 
-    await expect(await canvas.findByText(password.errors.wrongPassword)).toBeInTheDocument();
+    await expect(await canvas.findByText(authentication.errors.wrongPassword)).toBeInTheDocument();
   },
 };

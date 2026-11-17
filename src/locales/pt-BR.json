@@ -878,7 +878,7 @@
     "subtitle": "Cadastros do painel e dados da sua conta.",
     "tabs": {
       "cities": "Cidades e regiões",
-      "password": "Senha"
+      "authentication": "Autenticação"
     },
     "cities": {
       "summary": "{{cities}} e {{zones}}",
@@ -1019,8 +1019,8 @@
         "TO": "Tocantins"
       }
     },
-    "password": {
-      "description": "Para trocar, confirme a senha atual. A nova senha vale para o painel e para o app.",
+    "authentication": {
+      "description": "Para trocar a senha, confirme a atual. A nova senha vale para o painel e para o app.",
       "current": {
         "label": "Senha atual *"
       },

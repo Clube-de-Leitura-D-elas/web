@@ -81,7 +81,7 @@ describe('Settings', () => {
     expect(getCityGrid).toHaveBeenCalledWith(firstPage, { search: '', uf: '', status: 'all' });
   });
 
-  it('troca para a aba de senha e guarda a aba na URL', async () => {
+  it('troca para a aba de autenticação e guarda a aba na URL', async () => {
     const { user } = renderWithProviders(<Settings />, {
       route: '/configuracoes',
       path: '/configuracoes',
@@ -89,23 +89,23 @@ describe('Settings', () => {
     });
     await screen.findByText('Porto Alegre');
 
-    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.password }));
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.authentication }));
 
-    expect(screen.getByRole('tab', { name: locale.settings.tabs.password })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: locale.settings.tabs.authentication })).toHaveAttribute(
       'aria-selected',
       'true',
     );
-    expect(screen.getByLabelText(locale.settings.password.current.label)).toBeInTheDocument();
-    expect(screen.getByTestId('location-search')).toHaveTextContent('?aba=senha');
+    expect(screen.getByLabelText(locale.settings.authentication.current.label)).toBeInTheDocument();
+    expect(screen.getByTestId('location-search')).toHaveTextContent('?aba=autenticacao');
   });
 
-  it('abre direto na aba de senha pelo endereço', () => {
+  it('abre direto na aba de autenticação pelo endereço', () => {
     renderWithProviders(<Settings />, {
-      route: '/configuracoes?aba=senha',
+      route: '/configuracoes?aba=autenticacao',
       path: '/configuracoes',
     });
 
-    expect(screen.getByRole('tab', { name: locale.settings.tabs.password })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: locale.settings.tabs.authentication })).toHaveAttribute(
       'aria-selected',
       'true',
     );
