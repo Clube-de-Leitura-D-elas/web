@@ -21,6 +21,7 @@ sb.mock(import('../src/services/groupService.ts'));
 sb.mock(import('../src/services/eventService.ts'));
 sb.mock(import('../src/services/eventPhotoService.ts'));
 sb.mock(import('../src/services/dashboardService.ts'));
+sb.mock(import('../src/services/cityService.ts'));
 
 // Sessão falsa: toda story começa com uma gestora logada, para as rotas protegidas renderizarem.
 // `signOut` encerra a sessão e avisa quem assinou `onSignOut`, como o Supabase faz.

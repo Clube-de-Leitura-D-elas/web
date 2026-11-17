@@ -871,5 +871,151 @@
     "cancel": "Cancelar",
     "confirm": "Remover do grupo",
     "removing": "Removendo..."
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Cadastros usados em todo o painel.",
+    "tabs": {
+      "cities": "Cidades e regiões"
+    },
+    "cities": {
+      "summary": "{{cities}} e {{zones}}",
+      "activeCitiesCount": {
+        "one": "{{count}} cidade ativa",
+        "other": "{{count}} cidades ativas"
+      },
+      "activeZonesCount": {
+        "one": "{{count}} região",
+        "other": "{{count}} regiões"
+      },
+      "filters": {
+        "searchPlaceholder": "Buscar por cidade ou região",
+        "ufAll": "Estado: todos",
+        "ufOption": "Estado: {{uf}}",
+        "statusAll": "Status: todas",
+        "statusActive": "Status: ativas",
+        "statusInactive": "Status: inativas"
+      },
+      "newCity": "Nova cidade",
+      "table": {
+        "itemLabel": "cidades cadastradas",
+        "columns": {
+          "name": "CIDADE",
+          "uf": "ESTADO",
+          "zones": "REGIÕES",
+          "groups": "GRUPOS",
+          "status": "STATUS",
+          "actions": "Ações"
+        },
+        "noZones": "Sem regiões",
+        "moreZones": "+{{count}}",
+        "moreZonesLabel": {
+          "one": "mais {{count}} região",
+          "other": "mais {{count}} regiões"
+        },
+        "statusActive": "Ativa",
+        "statusInactive": "Inativa",
+        "actionsAriaLabel": "Ações de {{name}}",
+        "edit": "Editar",
+        "deactivate": "Desativar",
+        "reactivate": "Reativar",
+        "deactivateBlocked": {
+          "one": "Tem {{count}} grupo ativo",
+          "other": "Tem {{count}} grupos ativos"
+        }
+      },
+      "deactivateModal": {
+        "title": "Desativar {{name}}?",
+        "description": "{{name}} deixa de aparecer no cadastro de grupos, de participantes e no app. Quem já está nesta cidade continua com ela, e dá para reativar depois.",
+        "confirm": "Desativar cidade",
+        "confirming": "Desativando..."
+      },
+      "toast": {
+        "created": "{{name}} foi cadastrada.",
+        "updated": "{{name}} foi atualizada.",
+        "deactivated": "{{name}} foi desativada.",
+        "reactivated": "{{name}} foi reativada.",
+        "statusError": "Não foi possível alterar o status da cidade. Tente novamente.",
+        "activeGroupsError": {
+          "one": "{{name}} tem {{count}} grupo ativo. Encerre o grupo antes de desativar a cidade.",
+          "other": "{{name}} tem {{count}} grupos ativos. Encerre os grupos antes de desativar a cidade."
+        }
+      },
+      "modal": {
+        "createTitle": "Nova cidade",
+        "editTitle": "Editar {{name}}",
+        "description": "Cidades e regiões ativas aparecem no cadastro de grupos e de participantes.",
+        "name": {
+          "label": "Nome da cidade *",
+          "placeholder": "Ex: Porto Alegre"
+        },
+        "uf": {
+          "label": "Estado *",
+          "placeholder": "Digite a sigla ou o nome do estado",
+          "option": "{{uf}} — {{name}}",
+          "noResults": "Estado não encontrado"
+        },
+        "zones": {
+          "title": "Regiões",
+          "description": "Zonas ou bairros onde os grupos se encontram, como Zona Sul ou Centro Histórico.",
+          "empty": "Nenhuma região cadastrada.",
+          "label": "Região {{index}}",
+          "placeholder": "Ex: Zona Sul",
+          "add": "Adicionar região",
+          "remove": "Remover",
+          "removeLabel": "Remover {{name}}",
+          "deactivate": "Desativar",
+          "deactivateLabel": "Desativar {{name}}",
+          "reactivate": "Reativar",
+          "reactivateLabel": "Reativar {{name}}",
+          "inactiveTag": "Inativa",
+          "blockedHint": {
+            "one": "Tem {{count}} grupo ativo",
+            "other": "Tem {{count}} grupos ativos"
+          }
+        },
+        "save": "Salvar cidade",
+        "saving": "Salvando...",
+        "errors": {
+          "nameRequired": "Informe o nome da cidade.",
+          "ufRequired": "Escolha o estado.",
+          "zoneRequired": "Informe o nome da região ou remova a linha.",
+          "zoneDuplicate": "Esta região já está na lista.",
+          "duplicateCity": "Já existe uma cidade com esse nome em {{uf}}.",
+          "duplicateZone": "Há regiões com o mesmo nome nesta cidade.",
+          "zoneHasActiveGroups": "A região {{zone}} tem grupos ativos e não pode ser desativada.",
+          "generic": "Não foi possível salvar a cidade. Tente novamente."
+        }
+      },
+      "ufs": {
+        "AC": "Acre",
+        "AL": "Alagoas",
+        "AM": "Amazonas",
+        "AP": "Amapá",
+        "BA": "Bahia",
+        "CE": "Ceará",
+        "DF": "Distrito Federal",
+        "ES": "Espírito Santo",
+        "GO": "Goiás",
+        "MA": "Maranhão",
+        "MG": "Minas Gerais",
+        "MS": "Mato Grosso do Sul",
+        "MT": "Mato Grosso",
+        "PA": "Pará",
+        "PB": "Paraíba",
+        "PE": "Pernambuco",
+        "PI": "Piauí",
+        "PR": "Paraná",
+        "RJ": "Rio de Janeiro",
+        "RN": "Rio Grande do Norte",
+        "RO": "Rondônia",
+        "RR": "Roraima",
+        "RS": "Rio Grande do Sul",
+        "SC": "Santa Catarina",
+        "SE": "Sergipe",
+        "SP": "São Paulo",
+        "TO": "Tocantins"
+      }
+    }
   }
 }
