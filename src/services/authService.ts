@@ -46,6 +46,12 @@ const PASSWORD_ERROR_CODES: readonly AuthErrorCode[] = [
 ];
 
 export async function changePassword({ currentPassword, newPassword }: ChangePasswordPayload) {
+  const { data: claims, error: claimsError } = await supabase.auth.getClaims();
+  if (claimsError) throw toAuthServiceError(claimsError);
+
+  const email: unknown = claims?.claims.email;
+  if (typeof email !== 'string' || !email) throw new AuthServiceError('unauthenticated');
+
   const { data, error } = await supabase.functions.invoke<{ changed: boolean }>(
     'change-password-web',
     { body: { current_password: currentPassword, new_password: newPassword } },
@@ -59,6 +65,12 @@ export async function changePassword({ currentPassword, newPassword }: ChangePas
   }
 
   if (!data?.changed) throw toAuthServiceError(new Error('change-password-web returned no data'));
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password: newPassword,
+  });
+  if (signInError) console.error('[authService] sign in after password change', signInError);
 }
 
 export async function signOut() {

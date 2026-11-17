@@ -176,7 +176,15 @@ describe('changePassword', () => {
       error: new FunctionsHttpError({ status, json: async () => body }),
     } as never);
 
-  it('manda a senha atual e a nova para a function', async () => {
+  beforeEach(() => {
+    auth.getClaims.mockResolvedValue({
+      data: { claims: { email: 'gestora@clube.com' } },
+      error: null,
+    } as never);
+    auth.signInWithPassword.mockResolvedValue({ data: { user: {} }, error: null } as never);
+  });
+
+  it('troca pela function e entra de novo com a senha nova', async () => {
     invoke.mockResolvedValue({ data: { changed: true }, error: null });
 
     await expect(changePassword(payload)).resolves.toBeUndefined();
@@ -184,7 +192,35 @@ describe('changePassword', () => {
     expect(invoke).toHaveBeenCalledWith('change-password-web', {
       body: { current_password: 'atual-123', new_password: 'nova-senha-456' },
     });
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(1);
+    expect(auth.signInWithPassword).toHaveBeenCalledWith({
+      email: 'gestora@clube.com',
+      password: 'nova-senha-456',
+    });
+  });
+
+  it('não entra de novo quando a troca falha', async () => {
+    failWith(403, { error: 'x', code: 'wrong_password' });
+
+    await expectAuthError(changePassword(payload), 'wrong_password');
     expect(auth.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it('considera a senha trocada mesmo se o novo login falhar', async () => {
+    invoke.mockResolvedValue({ data: { changed: true }, error: null });
+    auth.signInWithPassword.mockResolvedValue({
+      data: { user: null },
+      error: new AuthApiError('boom', 500, 'unexpected_failure'),
+    } as never);
+
+    await expect(changePassword(payload)).resolves.toBeUndefined();
+  });
+
+  it('falha como unauthenticated quando a sessão não tem e-mail', async () => {
+    auth.getClaims.mockResolvedValue({ data: null, error: null } as never);
+
+    await expectAuthError(changePassword(payload), 'unauthenticated');
+    expect(invoke).not.toHaveBeenCalled();
   });
 
   it.each(['wrong_password', 'same_password', 'weak_password', 'too_many_attempts'] as const)(
