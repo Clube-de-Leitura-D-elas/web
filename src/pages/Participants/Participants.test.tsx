@@ -71,22 +71,6 @@ describe('Participants', () => {
     renderWithProviders(<Participants />);
 
     expect(await screen.findByText('10 participantes ativas em 1 cidade')).toBeInTheDocument();
-
-    jest.mocked(getParticipantFilterOptions).mockResolvedValueOnce({
-      cityOptions: [
-        { value: '', label: text.filters.cityAll },
-        { value: 'c1', label: 'Canoas' },
-      ],
-      groupOptions: [
-        { value: '', label: text.filters.groupAll },
-        { value: 'g1', label: 'Grupo 3 - Centro' },
-      ],
-      summary: {
-        groups: 4,
-        cities: 1,
-        activeParticipants: 1,
-      },
-    });
   });
 
   it('mostra participante no singular quando existe apenas um ativo', async () => {
