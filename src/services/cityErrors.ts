@@ -18,17 +18,17 @@ export const toCityErrorCode = (value: unknown): CityErrorCode =>
 export class CityServiceError extends Error {
   readonly code: CityErrorCode;
   readonly zone: string | null;
-  readonly activeGroups: number;
+  readonly activeGroups: number | null;
 
   constructor(
     code: CityErrorCode,
-    details: { zone?: string | null; activeGroups?: number } = {},
+    details: { zone?: string | null; activeGroups?: number | null } = {},
     cause?: unknown,
   ) {
     super(`cities/${code}`, { cause });
     this.name = 'CityServiceError';
     this.code = code;
     this.zone = details.zone ?? null;
-    this.activeGroups = details.activeGroups ?? 0;
+    this.activeGroups = details.activeGroups ?? null;
   }
 }

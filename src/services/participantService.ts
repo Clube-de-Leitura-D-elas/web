@@ -9,7 +9,7 @@ import type {
   ParticipantZoneOption,
   UpdateParticipantInput,
 } from '../types/participant';
-import { readFunctionErrorMessage } from './functionError';
+import { readFunctionErrorBody, readFunctionErrorMessage } from './functionError';
 import { supabase } from './supabaseClient';
 
 type ParticipantResponse = {
@@ -227,8 +227,10 @@ export async function updateParticipant(
 
   if (error) {
     console.error('update-participant-web error', error);
-    throw new Error(
-      (await readFunctionErrorMessage(error)) ?? locale.participant_details.modal.saveError,
-    );
+    const modalText = locale.participant_details.modal;
+    const body = await readFunctionErrorBody(error);
+    if (body?.code === 'city_inactive') throw new Error(modalText.cityInactive);
+    if (body?.code === 'zone_inactive') throw new Error(modalText.zoneInactive);
+    throw new Error((await readFunctionErrorMessage(error)) ?? modalText.saveError);
   }
 }

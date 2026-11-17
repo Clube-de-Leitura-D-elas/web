@@ -142,6 +142,15 @@ describe('updateCityStatus', () => {
     });
   });
 
+  it('deixa a contagem nula quando o servidor não manda um número', async () => {
+    failWith(409, { error: 'city has active groups', code: 'city_has_active_groups' });
+
+    await expect(updateCityStatus('c1', false)).rejects.toMatchObject({
+      code: 'city_has_active_groups',
+      activeGroups: null,
+    });
+  });
+
   it('falha quando a resposta vem vazia', async () => {
     respond(null);
 

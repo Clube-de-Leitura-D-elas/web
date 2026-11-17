@@ -147,9 +147,11 @@ export async function updateGroupLocation(
 
   if (error) {
     console.error('update-group-location-web error', error);
-    throw new Error(
-      (await readFunctionErrorMessage(error)) ?? locale.group_details.modal.modalError,
-    );
+    const modalText = locale.group_details.modal;
+    const body = await readFunctionErrorBody(error);
+    if (body?.code === 'city_inactive') throw new Error(modalText.cityInactive);
+    if (body?.code === 'zone_inactive') throw new Error(modalText.zoneInactive);
+    throw new Error((await readFunctionErrorMessage(error)) ?? modalText.modalError);
   }
 
   if (!data) {

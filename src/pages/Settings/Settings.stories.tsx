@@ -9,14 +9,12 @@ import { CityServiceError } from '../../services/cityErrors';
 import { getCityGrid, saveCity, updateCityStatus } from '../../services/cityService';
 import type { CityListItem } from '../../types/city';
 import { Settings } from '.';
+import { normalizeText } from '../../utils/text';
 
 const text = locale.settings.cities;
 const REQUEST_DELAY = 300;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const normalize = (value: string) =>
-  value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase('pt-BR').trim();
 
 const zone = (id: string, name: string, activeGroups = 0, isActive = true) => ({
   id,
@@ -111,14 +109,14 @@ const meta = {
     mocked(getCityGrid).mockImplementation(async ({ page, pageSize }, { search, uf, status }) => {
       await wait(REQUEST_DELAY);
 
-      const term = normalize(search);
+      const term = normalizeText(search);
       const filtered = rows.filter(
         (city) =>
           (!uf || city.uf === uf) &&
           (status === 'all' || city.isActive === (status === 'active')) &&
           (!term ||
-            normalize(city.name).includes(term) ||
-            city.zones.some((item) => normalize(item.name).includes(term))),
+            normalizeText(city.name).includes(term) ||
+            city.zones.some((item) => normalizeText(item.name).includes(term))),
       );
 
       return {

@@ -12,7 +12,8 @@ async function toCityServiceError(error: unknown): Promise<CityServiceError> {
     toCityErrorCode(body?.code),
     {
       zone: typeof body?.zone === 'string' ? body.zone : null,
-      activeGroups: typeof body?.activeGroups === 'number' ? body.activeGroups : 0,
+      activeGroups:
+        typeof body?.activeGroups === 'number' && body.activeGroups > 0 ? body.activeGroups : null,
     },
     error,
   );

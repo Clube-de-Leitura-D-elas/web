@@ -1,9 +1,12 @@
+import { FunctionsHttpError } from '@supabase/functions-js';
+import { locale } from '../locales';
 import {
   getAllParticipantGroups,
   getParticipantById,
   getParticipantGroups,
   getParticipantPresence,
   getParticipantPresenceHistory,
+  updateParticipant,
   updateParticipantStatus,
 } from './participantService';
 import { supabase } from './supabaseClient';
@@ -213,5 +216,35 @@ describe('updateParticipantStatus', () => {
     invoke.mockResolvedValue({ data: null, error } as never);
 
     await expect(updateParticipantStatus('p1', true)).rejects.toBe(error);
+  });
+});
+
+describe('updateParticipant', () => {
+  const input = {
+    name: 'Joseane',
+    email: 'jo@gmail.com',
+    phone: '51999999999',
+    instagram: null,
+    cityId: 'c1',
+    zoneId: 'z1',
+    birthDate: '1990-10-24',
+    job: null,
+    appRole: 'READER' as const,
+  };
+
+  it.each([
+    ['city_inactive', locale.participant_details.modal.cityInactive],
+    ['zone_inactive', locale.participant_details.modal.zoneInactive],
+  ])('mostra o texto do locale para %s', async (code, message) => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    invoke.mockResolvedValue({
+      data: null,
+      error: new FunctionsHttpError({
+        status: 400,
+        json: async () => ({ error: 'zone is inactive', code }),
+      }),
+    } as never);
+
+    await expect(updateParticipant('p1', input)).rejects.toThrow(message);
   });
 });

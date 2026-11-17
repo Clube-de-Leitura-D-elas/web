@@ -10,6 +10,7 @@ import type {
   GroupOption,
   GroupZoneOption,
 } from '../../types/group';
+import { toSelectableOptions } from '../../utils/locationOptions';
 
 import * as Styled from './styles';
 
@@ -24,9 +25,6 @@ type GroupModalProps = {
   saving?: boolean;
   error?: string | null;
 };
-
-const toAutocompleteOptions = (options: GroupOption[]) =>
-  options.map(({ id, name }) => ({ value: id, label: name }));
 
 export const GroupModal = (props: GroupModalProps) =>
   props.isOpen ? <GroupModalContent {...props} /> : null;
@@ -57,17 +55,11 @@ const GroupModalContent = ({
     zoneChoice !== undefined ? zoneChoice : cityId === initialCityId ? initialZoneId : null;
 
   const cityOptions = useMemo(
-    () =>
-      toAutocompleteOptions(
-        cities.filter((city) => city.isActive !== false || city.id === initialCityId),
-      ),
+    () => toSelectableOptions(cities, initialCityId),
     [cities, initialCityId],
   );
   const zoneOptions = useMemo(
-    () =>
-      toAutocompleteOptions(
-        cityZones.filter((zone) => zone.isActive !== false || zone.id === initialZoneId),
-      ),
+    () => toSelectableOptions(cityZones, initialZoneId),
     [cityZones, initialZoneId],
   );
 
