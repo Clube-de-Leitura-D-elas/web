@@ -1,12 +1,18 @@
 import { isAuthApiError } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient';
-import { AuthServiceError } from './authErrors';
+import { AuthServiceError, type AuthErrorCode } from './authErrors';
+import { readFunctionErrorBody } from './functionError';
 import { ADMIN_ROLES, APP_ROLES, type AppRole } from '../types/auth';
 import { clearCalendarCache } from './calendarService';
 
 export type LoginPayload = {
   email: string;
   password: string;
+};
+
+export type ChangePasswordPayload = {
+  currentPassword: string;
+  newPassword: string;
 };
 
 /** Troca o erro original por um erro de domínio, registrando o original só no console. */
@@ -30,6 +36,41 @@ export async function signInWithPassword(payload: LoginPayload) {
   }
 
   return data.user;
+}
+
+const PASSWORD_ERROR_CODES: readonly AuthErrorCode[] = [
+  'wrong_password',
+  'same_password',
+  'weak_password',
+  'too_many_attempts',
+];
+
+export async function changePassword({ currentPassword, newPassword }: ChangePasswordPayload) {
+  const { data: claims, error: claimsError } = await supabase.auth.getClaims();
+  if (claimsError) throw toAuthServiceError(claimsError);
+
+  const email: unknown = claims?.claims.email;
+  if (typeof email !== 'string' || !email) throw new AuthServiceError('unauthenticated');
+
+  const { data, error } = await supabase.functions.invoke<{ changed: boolean }>(
+    'change-password-web',
+    { body: { current_password: currentPassword, new_password: newPassword } },
+  );
+
+  if (error) {
+    const body = await readFunctionErrorBody(error);
+    const code = PASSWORD_ERROR_CODES.find((known) => known === body?.code);
+    if (code) throw new AuthServiceError(code, error);
+    throw toAuthServiceError(error);
+  }
+
+  if (!data?.changed) throw toAuthServiceError(new Error('change-password-web returned no data'));
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password: newPassword,
+  });
+  if (signInError) throw new AuthServiceError('relogin_required', signInError);
 }
 
 export async function signOut() {

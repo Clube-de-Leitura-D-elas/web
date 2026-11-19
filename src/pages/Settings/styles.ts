@@ -139,3 +139,21 @@ export const VisuallyHidden = styled.span`
   clip: rect(0 0 0 0);
   white-space: nowrap;
 `;
+
+export const PasswordForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 28rem;
+`;
+
+export const FormActions = styled.div`
+  display: flex;
+`;
+
+export const FormError = styled.p`
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${({ theme }) => theme.error};
+`;
