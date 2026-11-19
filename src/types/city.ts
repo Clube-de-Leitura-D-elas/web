@@ -1,3 +1,5 @@
+export const MAX_LOCATION_NAME_LENGTH = 100;
+
 export type CityStatusFilter = 'all' | 'active' | 'inactive';
 
 export type CityFilters = {

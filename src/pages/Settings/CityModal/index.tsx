@@ -10,7 +10,7 @@ import { useLocale } from '../../../hooks/useLocale';
 import { interpolate, pluralize } from '../../../locales';
 import { CityServiceError } from '../../../services/cityErrors';
 import { saveCity } from '../../../services/cityService';
-import type { CityListItem } from '../../../types/city';
+import { MAX_LOCATION_NAME_LENGTH, type CityListItem } from '../../../types/city';
 
 import * as Styled from './styles';
 import { normalizeText } from '../../../utils/text';
@@ -152,6 +152,7 @@ export const CityModal = ({ city, onClose, onSaved, saveRequest = saveCity }: Ci
           label={text.name.label}
           placeholder={text.name.placeholder}
           value={name}
+          maxLength={MAX_LOCATION_NAME_LENGTH}
           onChange={(event) => {
             setName(event.target.value);
             setDuplicateCityUf(null);
@@ -202,6 +203,7 @@ export const CityModal = ({ city, onClose, onSaved, saveRequest = saveCity }: Ci
                       label={label}
                       placeholder={text.zones.placeholder}
                       value={zone.name}
+                      maxLength={MAX_LOCATION_NAME_LENGTH}
                       onChange={(event) => updateZone(zone.key, { name: event.target.value })}
                       error={
                         checkedZoneKeys.has(zone.key) ? (zoneErrors[index] ?? undefined) : undefined
