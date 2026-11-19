@@ -17,13 +17,13 @@ export type Page<T> = {
 export type ActiveGroupsSummary = {
   groups: number;
   cities: number;
-  activeParticipants: number;
+  activeParticipants: number | null;
 };
 
 export type ParticipantFiltersResponse = {
   cities: { id: string; name: string }[];
   groups: { id: string; number: number; description: string }[];
-  summary: Omit<ActiveGroupsSummary, 'activeParticipants'> & { activeParticipants?: number };
+  summary: Omit<ActiveGroupsSummary, 'activeParticipants'> & { activeParticipants?: number | null };
 };
 
 export type ParticipantFilterOptions = {

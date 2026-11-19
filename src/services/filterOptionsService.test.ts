@@ -29,14 +29,29 @@ describe('getParticipantFilterOptions', () => {
     expect(invoke).toHaveBeenCalledWith('get-participant-filters', { method: 'GET' });
   });
 
-  it('usa zero participantes ativas quando a function ainda não manda o campo', async () => {
+  it.each([
+    ['sem o campo', {}],
+    ['com null', { activeParticipants: null }],
+    ['com NaN', { activeParticipants: NaN }],
+  ])('devolve activeParticipants nulo quando a function responde %s', async (_, extra) => {
     invoke.mockResolvedValue({
-      data: { cities: [], groups: [], summary: { groups: 4, cities: 2 } },
+      data: { cities: [], groups: [], summary: { groups: 4, cities: 2, ...extra } },
       error: null,
     });
 
     await expect(getParticipantFilterOptions()).resolves.toMatchObject({
-      summary: { groups: 4, cities: 2, activeParticipants: 0 },
+      summary: { groups: 4, cities: 2, activeParticipants: null },
+    });
+  });
+
+  it('mantém zero participantes ativas', async () => {
+    invoke.mockResolvedValue({
+      data: { cities: [], groups: [], summary: { groups: 4, cities: 2, activeParticipants: 0 } },
+      error: null,
+    });
+
+    await expect(getParticipantFilterOptions()).resolves.toMatchObject({
+      summary: { activeParticipants: 0 },
     });
   });
 

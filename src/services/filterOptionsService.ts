@@ -13,6 +13,8 @@ export async function getParticipantFilterOptions(): Promise<ParticipantFilterOp
   if (error) throw error;
   if (!data) throw new Error('get-participant-filters returned no data');
 
+  const { activeParticipants } = data.summary;
+
   return {
     cityOptions: [
       { value: '', label: locale.participants.filters.cityAll },
@@ -30,7 +32,10 @@ export async function getParticipantFilterOptions(): Promise<ParticipantFilterOp
     ],
     summary: {
       ...data.summary,
-      activeParticipants: data.summary.activeParticipants ?? 0,
+      activeParticipants:
+        typeof activeParticipants === 'number' && Number.isFinite(activeParticipants)
+          ? activeParticipants
+          : null,
     },
   };
 }

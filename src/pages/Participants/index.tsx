@@ -265,7 +265,7 @@ export const Participants = () => {
     <Styled.Container>
       <Styled.Header>
         <Styled.Title>{locale.participants.title}</Styled.Title>
-        {groupsSummary && (
+        {groupsSummary && groupsSummary.activeParticipants !== null && (
           <Styled.Subtitle>
             {groupsSummary.activeParticipants === 0
               ? locale.participants.noActiveParticipants

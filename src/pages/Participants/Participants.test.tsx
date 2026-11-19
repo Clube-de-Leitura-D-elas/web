@@ -107,6 +107,19 @@ describe('Participants', () => {
     expect(await screen.findByText('Nenhuma participante ativa')).toBeInTheDocument();
   });
 
+  it('esconde o subtítulo quando não há contagem de participantes ativas', async () => {
+    jest.mocked(getParticipantFilterOptions).mockResolvedValueOnce({
+      cityOptions: [],
+      groupOptions: [],
+      summary: { groups: 4, cities: 1, activeParticipants: null },
+    });
+
+    renderWithProviders(<Participants />);
+
+    expect(await screen.findByRole('link', { name: 'Ana Souza' })).toBeInTheDocument();
+    expect(screen.queryByText(/participantes? ativas?/i)).not.toBeInTheDocument();
+  });
+
   it('lista as participantes com link para o perfil, grupos e status', async () => {
     renderWithProviders(<Participants />);
 
