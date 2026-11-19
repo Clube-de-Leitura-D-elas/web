@@ -115,6 +115,19 @@ describe('AuthenticationSettings', () => {
     expect(screen.getByText(interpolate(text.new.helperText, { min: 8 }))).toBeInTheDocument();
   });
 
+  it('pede novo login quando a senha mudou mas a sessão não voltou', async () => {
+    jest.mocked(changePassword).mockRejectedValue(new AuthServiceError('relogin_required'));
+    const { fill, submit } = renderTab();
+
+    await fill('senha-atual', 'nova-senha-123');
+    await submit();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(text.errors.reloginRequired);
+    expect(screen.getByLabelText(text.current.label)).toHaveValue('');
+    expect(screen.getByLabelText(text.new.label)).toHaveValue('');
+    expect(screen.getByLabelText(text.confirm.label)).toHaveValue('');
+  });
+
   it('mostra erro genérico nas outras falhas', async () => {
     jest.mocked(changePassword).mockRejectedValue(new Error('network'));
     const { fill, submit } = renderTab();

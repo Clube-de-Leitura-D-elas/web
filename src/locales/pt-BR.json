@@ -1043,6 +1043,7 @@
         "wrongPassword": "Senha atual incorreta.",
         "weakPassword": "Essa senha é fraca. Misture letras, números e símbolos.",
         "tooManyAttempts": "Muitas tentativas com a senha errada. Espere alguns minutos e tente de novo.",
+        "reloginRequired": "Senha alterada, mas sua sessão foi encerrada. Entre de novo com a nova senha.",
         "generic": "Não foi possível alterar a senha. Tente novamente."
       }
     }

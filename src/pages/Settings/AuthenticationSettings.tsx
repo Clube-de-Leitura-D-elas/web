@@ -66,7 +66,12 @@ export const AuthenticationSettings = () => {
     } catch (error) {
       const code = error instanceof AuthServiceError ? error.code : 'unknown';
 
-      if (code === 'wrong_password') setErrors({ current: text.errors.wrongPassword });
+      if (code === 'relogin_required') {
+        setCurrent('');
+        setNext('');
+        setConfirm('');
+        setFormError(text.errors.reloginRequired);
+      } else if (code === 'wrong_password') setErrors({ current: text.errors.wrongPassword });
       else if (code === 'too_many_attempts') setErrors({ current: text.errors.tooManyAttempts });
       else if (code === 'same_password') setErrors({ next: text.errors.sameAsCurrent });
       else if (code === 'weak_password') setErrors({ next: text.errors.weakPassword });

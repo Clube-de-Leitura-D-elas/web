@@ -70,7 +70,7 @@ export async function changePassword({ currentPassword, newPassword }: ChangePas
     email,
     password: newPassword,
   });
-  if (signInError) console.error('[authService] sign in after password change', signInError);
+  if (signInError) throw new AuthServiceError('relogin_required', signInError);
 }
 
 export async function signOut() {

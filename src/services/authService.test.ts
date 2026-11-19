@@ -206,14 +206,14 @@ describe('changePassword', () => {
     expect(auth.signInWithPassword).not.toHaveBeenCalled();
   });
 
-  it('considera a senha trocada mesmo se o novo login falhar', async () => {
+  it('pede novo login quando a senha muda mas o login de volta falha', async () => {
     invoke.mockResolvedValue({ data: { changed: true }, error: null });
     auth.signInWithPassword.mockResolvedValue({
       data: { user: null },
       error: new AuthApiError('boom', 500, 'unexpected_failure'),
     } as never);
 
-    await expect(changePassword(payload)).resolves.toBeUndefined();
+    await expectAuthError(changePassword(payload), 'relogin_required');
   });
 
   it('falha como unauthenticated quando a sessão não tem e-mail', async () => {

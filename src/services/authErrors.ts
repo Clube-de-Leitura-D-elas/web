@@ -5,6 +5,7 @@ export type AuthErrorCode =
   | 'same_password'
   | 'weak_password'
   | 'too_many_attempts'
+  | 'relogin_required'
   | 'unknown';
 
 /**
