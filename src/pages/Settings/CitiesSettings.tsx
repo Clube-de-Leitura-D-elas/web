@@ -19,12 +19,17 @@ import { useLocale } from '../../hooks/useLocale';
 import { interpolate, pluralize } from '../../locales';
 import { CityServiceError } from '../../services/cityErrors';
 import { getCityGrid, updateCityStatus } from '../../services/cityService';
-import type { CitiesSummary, CityFilters, CityListItem, CityStatusFilter } from '../../types/city';
+import {
+  MAX_LOCATION_NAME_LENGTH,
+  type CitiesSummary,
+  type CityFilters,
+  type CityListItem,
+  type CityStatusFilter,
+} from '../../types/city';
 import { CityModal } from './CityModal';
 import * as Styled from './styles';
 
 const VISIBLE_ZONES = 3;
-const MAX_SEARCH_LENGTH = 100;
 
 type ToastState = { id: number; variant: ToastVariant; message: string };
 
@@ -244,7 +249,7 @@ export const CitiesSettings = () => {
           label={text.filters.searchPlaceholder}
           placeholder={text.filters.searchPlaceholder}
           value={search}
-          maxLength={MAX_SEARCH_LENGTH}
+          maxLength={MAX_LOCATION_NAME_LENGTH}
           onChange={(event) => setSearch(event.target.value)}
         />
 

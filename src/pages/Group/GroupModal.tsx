@@ -45,12 +45,12 @@ const GroupModalContent = ({
   const [cityChoice, setCityChoice] = useState<string | null | undefined>(undefined);
   const [zoneChoice, setZoneChoice] = useState<string | null | undefined>(undefined);
 
-  const initialCityId = group.city_id;
+  const initialCityId = group.city_id ?? null;
   const cityId = cityChoice === undefined ? initialCityId : cityChoice;
 
   // só as zonas da cidade escolhida: "Zona Sul" existe em mais de uma cidade
   const cityZones = useMemo(() => zones.filter((zone) => zone.cityId === cityId), [zones, cityId]);
-  const initialZoneId = group.zone_id;
+  const initialZoneId = group.zone_id ?? null;
   const zoneId =
     zoneChoice !== undefined ? zoneChoice : cityId === initialCityId ? initialZoneId : null;
 
