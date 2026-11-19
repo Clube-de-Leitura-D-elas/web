@@ -6,6 +6,7 @@ import {
   type FocusEvent,
   type ReactNode,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { LuCheck, LuTriangleAlert } from 'react-icons/lu';
 import * as Styled from './styles';
 
@@ -47,8 +48,9 @@ export const Toast = ({
     if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false);
   };
 
-  return (
+  return createPortal(
     <Styled.Container
+      $variant={variant}
       role={variant === 'error' ? 'alert' : 'status'}
       onFocus={() => setPaused(true)}
       onBlur={handleBlur}
@@ -58,10 +60,11 @@ export const Toast = ({
       </Styled.Icon>
       <Styled.Message>{children}</Styled.Message>
       {actionLabel && onAction && (
-        <Styled.Action type="button" onClick={onAction}>
+        <Styled.Action $variant={variant} type="button" onClick={onAction}>
           {actionLabel}
         </Styled.Action>
       )}
-    </Styled.Container>
+    </Styled.Container>,
+    document.body,
   );
 };

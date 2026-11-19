@@ -289,14 +289,10 @@
   },
   "participants": {
     "title": "Participantes",
-    "subtitle": "{{groups}} em {{cities}}",
-    "activeGroupsCount": {
-      "one": "{{count}} grupo ativo",
-      "other": "{{count}} grupos ativos"
-    },
-    "citiesCount": {
-      "one": "{{count}} cidade",
-      "other": "{{count}} cidades"
+    "noActiveParticipants": "Nenhuma participante ativa",
+    "activeParticipantsCount": {
+      "one": "{{count}} participante ativa",
+      "other": "{{count}} participantes ativas"
     },
     "tabs": {
       "participants": "Participantes",
@@ -879,9 +875,10 @@
   },
   "settings": {
     "title": "Configurações",
-    "subtitle": "Cadastros usados em todo o painel.",
+    "subtitle": "Cadastros do painel e dados da sua conta.",
     "tabs": {
-      "cities": "Cidades e regiões"
+      "cities": "Cidades e regiões",
+      "authentication": "Autenticação"
     },
     "cities": {
       "summary": "{{cities}} e {{zones}}",
@@ -1021,6 +1018,33 @@
         "SE": "Sergipe",
         "SP": "São Paulo",
         "TO": "Tocantins"
+      }
+    },
+    "authentication": {
+      "description": "Para trocar a senha, confirme a atual. A nova senha vale para o painel e para o app.",
+      "current": {
+        "label": "Senha atual *"
+      },
+      "new": {
+        "label": "Nova senha *",
+        "helperText": "Use pelo menos {{min}} caracteres."
+      },
+      "confirm": {
+        "label": "Confirmar nova senha *"
+      },
+      "submit": "Alterar senha",
+      "submitting": "Alterando...",
+      "success": "Senha alterada.",
+      "errors": {
+        "currentRequired": "Informe a senha atual.",
+        "tooShort": "A nova senha precisa ter pelo menos {{min}} caracteres.",
+        "sameAsCurrent": "A nova senha precisa ser diferente da atual.",
+        "mismatch": "As senhas não conferem.",
+        "wrongPassword": "Senha atual incorreta.",
+        "weakPassword": "Essa senha é fraca. Misture letras, números e símbolos.",
+        "tooManyAttempts": "Muitas tentativas com a senha errada. Espere alguns minutos e tente de novo.",
+        "reloginRequired": "Senha alterada, mas sua sessão foi encerrada. Entre de novo com a nova senha.",
+        "generic": "Não foi possível alterar a senha. Tente novamente."
       }
     }
   }

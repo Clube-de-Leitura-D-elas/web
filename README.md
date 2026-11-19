@@ -469,6 +469,70 @@ VITE_SUPABASE_PUBLISHABLE_KEY=<sua_publishable_key>
 
 > O `.env.local` **não vai para o Git**. Nunca commite credenciais.
 
+### Rodando com o Supabase local
+
+As contas de teste do seed (tabela abaixo) só existem no banco local. Com o `.env.local` apontando
+para o projeto remoto, o login com elas falha com **"E-mail ou senha incorretos."**. Para validar
+uma feature nova sem depender do remoto, rode o painel contra o Supabase do repositório
+[`backend`](https://github.com/Clube-de-Leitura-D-elas/backend).
+
+Você precisa do [Docker Desktop](https://www.docker.com/products/docker-desktop/) aberto e do
+repositório `backend` clonado, com `npm install` rodado nele uma vez.
+
+1. No terminal, **dentro da pasta do `backend`**, suba o Supabase local e recrie o banco com o
+   seed:
+
+   ```bash
+   npx supabase start      # na primeira vez baixa as imagens e demora alguns minutos
+   npx supabase db reset   # aplica as migrations e o seed, que cria as contas de teste
+   ```
+
+   O `db reset` apaga o que você criou no banco local e volta para o seed. Rode de novo sempre que
+   quiser recomeçar do zero.
+
+2. No `web`, deixe o `.env.local` assim (o `.env.example` traz o mesmo bloco, comentado):
+
+   ```
+   VITE_SUPABASE_URL=http://127.0.0.1:54321
+   VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
+   ```
+
+   Essa é a chave padrão do Supabase local, igual em toda máquina, e não é segredo. Se o
+   `npx supabase status` (rodado no `backend`) mostrar outro valor em **Publishable**, use o dele.
+
+3. **Reinicie o `yarn dev`** (`Ctrl + C` e `yarn dev` de novo) e recarregue a página. Assim o
+   painel com certeza lê os valores novos do `.env.local`.
+
+4. Abra **http://localhost:5173/login** e entre com `local.user.admin@gmail.com` e a senha
+   `ClubeDelas@123`. O painel abre no Dashboard.
+
+Logo depois do `db reset`, cada tela demora alguns segundos a mais na primeira vez que carrega: as
+Edge Functions sobem junto com o `supabase start` e compilam na primeira chamada. Elas rodam sem as
+chaves externas do `supabase/functions/.env.local`. Para testar algo que depende delas, como
+aprovar uma solicitação de cadastro (envia e-mail), suba também o
+`npx supabase functions serve --env-file supabase/functions/.env.local`, como explica o README do
+`backend`.
+
+#### Contas do seed
+
+Todas usam a senha `ClubeDelas@123`.
+
+| E-mail                         | Papel     | Entra no painel?                                                                                                        |
+| ------------------------------ | --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `local.user.admin@gmail.com`   | `FOUNDER` | Sim, com acesso a todas as telas.                                                                                       |
+| `local.user.manager@gmail.com` | `MANAGER` | Sim, mas a tela Participantes mostra "Não foi possível carregar os registros.": as functions dela só aceitam `FOUNDER`. |
+| `local.user.reader@gmail.com`  | `READER`  | Não. O login mostra "Seu perfil não tem acesso ao painel de gestão."                                                    |
+
+As outras participantes do seed entram com `<nome.sobrenome>@example.com` (ex.:
+`fernanda.vargas@example.com`) e a mesma senha. Quase todas são `READER`.
+
+Se o login com a conta admin der **"E-mail ou senha incorretos."**, o painel ainda está falando com
+o projeto remoto ou o `db reset` não rodou. Na aba **Network** do DevTools, as chamadas precisam ir
+para `127.0.0.1:54321`.
+
+Para voltar ao projeto remoto, coloque de novo os valores dele no `.env.local` e reinicie o
+`yarn dev`.
+
 ### Como usar nos services
 
 Sempre que precisar buscar ou enviar dados, importe o cliente no arquivo de service correspondente em `src/services/`:

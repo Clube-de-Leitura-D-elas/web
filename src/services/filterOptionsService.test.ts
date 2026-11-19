@@ -10,7 +10,7 @@ describe('getParticipantFilterOptions', () => {
       data: {
         cities: [{ id: 'c1', name: 'Canoas' }],
         groups: [{ id: 'g1', number: 3, description: 'Centro' }],
-        summary: { groups: 4, cities: 2 },
+        summary: { groups: 4, cities: 2, activeParticipants: 10 },
       },
       error: null,
     });
@@ -24,9 +24,35 @@ describe('getParticipantFilterOptions', () => {
         { value: '', label: locale.participants.filters.groupAll },
         { value: 'g1', label: 'Grupo 3 - Centro' },
       ],
-      summary: { groups: 4, cities: 2 },
+      summary: { groups: 4, cities: 2, activeParticipants: 10 },
     });
     expect(invoke).toHaveBeenCalledWith('get-participant-filters', { method: 'GET' });
+  });
+
+  it.each([
+    ['sem o campo', {}],
+    ['com null', { activeParticipants: null }],
+    ['com NaN', { activeParticipants: NaN }],
+  ])('devolve activeParticipants nulo quando a function responde %s', async (_, extra) => {
+    invoke.mockResolvedValue({
+      data: { cities: [], groups: [], summary: { groups: 4, cities: 2, ...extra } },
+      error: null,
+    });
+
+    await expect(getParticipantFilterOptions()).resolves.toMatchObject({
+      summary: { groups: 4, cities: 2, activeParticipants: null },
+    });
+  });
+
+  it('mantém zero participantes ativas', async () => {
+    invoke.mockResolvedValue({
+      data: { cities: [], groups: [], summary: { groups: 4, cities: 2, activeParticipants: 0 } },
+      error: null,
+    });
+
+    await expect(getParticipantFilterOptions()).resolves.toMatchObject({
+      summary: { activeParticipants: 0 },
+    });
   });
 
   it('repassa o erro da function', async () => {

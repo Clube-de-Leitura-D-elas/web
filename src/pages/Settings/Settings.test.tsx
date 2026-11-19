@@ -6,6 +6,7 @@ import { renderWithProviders } from '../../test/render';
 import type { CityGridResponse } from '../../types/city';
 import { Settings } from '.';
 
+jest.mock('../../services/authService', () => ({ changePassword: jest.fn() }));
 jest.mock('../../services/cityService', () => ({
   getCityGrid: jest.fn(),
   saveCity: jest.fn(),
@@ -78,6 +79,72 @@ describe('Settings', () => {
     );
     expect(await screen.findByText('2 cidades ativas e 4 regiões')).toBeInTheDocument();
     expect(getCityGrid).toHaveBeenCalledWith(firstPage, { search: '', uf: '', status: 'all' });
+  });
+
+  it('troca para a aba de autenticação e guarda a aba na URL', async () => {
+    const { user } = renderWithProviders(<Settings />, {
+      route: '/configuracoes',
+      path: '/configuracoes',
+      showLocationSearch: true,
+    });
+    await screen.findByText('Porto Alegre');
+
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.authentication }));
+
+    expect(screen.getByRole('tab', { name: locale.settings.tabs.authentication })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(screen.getByLabelText(locale.settings.authentication.current.label)).toBeInTheDocument();
+    expect(screen.getByTestId('location-search')).toHaveTextContent('?aba=autenticacao');
+  });
+
+  it('volta para Cidades sem perder a busca nem buscar de novo', async () => {
+    const { user } = renderWithProviders(<Settings />);
+    await screen.findByText('Porto Alegre');
+    await user.type(screen.getByLabelText(text.filters.searchPlaceholder), 'zona');
+    await waitFor(() =>
+      expect(getCityGrid).toHaveBeenLastCalledWith(
+        firstPage,
+        expect.objectContaining({ search: 'zona' }),
+      ),
+    );
+    const calls = jest.mocked(getCityGrid).mock.calls.length;
+
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.authentication }));
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.cities }));
+
+    expect(screen.getByLabelText(text.filters.searchPlaceholder)).toHaveValue('zona');
+    expect(getCityGrid).toHaveBeenCalledTimes(calls);
+  });
+
+  it('troca de aba sem apagar os outros parâmetros da URL', async () => {
+    const { user } = renderWithProviders(<Settings />, {
+      route: '/configuracoes?origem=menu',
+      path: '/configuracoes',
+      showLocationSearch: true,
+    });
+
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.authentication }));
+    expect(screen.getByTestId('location-search')).toHaveTextContent(
+      '?origem=menu&aba=autenticacao',
+    );
+
+    await user.click(screen.getByRole('tab', { name: locale.settings.tabs.cities }));
+    expect(screen.getByTestId('location-search')).toHaveTextContent('?origem=menu');
+  });
+
+  it('abre direto na aba de autenticação pelo endereço', () => {
+    renderWithProviders(<Settings />, {
+      route: '/configuracoes?aba=autenticacao',
+      path: '/configuracoes',
+    });
+
+    expect(screen.getByRole('tab', { name: locale.settings.tabs.authentication })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(getCityGrid).not.toHaveBeenCalled();
   });
 
   it('lista estado, regiões ativas, grupos e status de cada cidade', async () => {

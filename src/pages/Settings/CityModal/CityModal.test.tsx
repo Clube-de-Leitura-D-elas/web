@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { locale } from '../../../locales';
 import { CityServiceError } from '../../../services/cityErrors';
 import { renderWithProviders } from '../../../test/render';
-import type { CityListItem } from '../../../types/city';
+import { MAX_LOCATION_NAME_LENGTH, type CityListItem } from '../../../types/city';
 import { CityModal } from '.';
 
 jest.mock('../../../services/cityService', () => ({ saveCity: jest.fn() }));
@@ -43,6 +43,19 @@ describe('CityModal', () => {
     expect(within(dialog).getByText(text.errors.nameRequired)).toBeInTheDocument();
     expect(within(dialog).getByText(text.errors.ufRequired)).toBeInTheDocument();
     expect(saveRequest).not.toHaveBeenCalled();
+  });
+
+  it('limita o nome da cidade e das regiões ao tamanho aceito pelo backend', async () => {
+    const { dialog } = renderModal();
+
+    expect(within(dialog).getByLabelText(text.name.label)).toHaveAttribute(
+      'maxLength',
+      String(MAX_LOCATION_NAME_LENGTH),
+    );
+    expect(within(dialog).getByLabelText('Região 1')).toHaveAttribute(
+      'maxLength',
+      String(MAX_LOCATION_NAME_LENGTH),
+    );
   });
 
   it('cria a cidade com as regiões novas, sem espaços sobrando', async () => {

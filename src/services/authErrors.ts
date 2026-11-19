@@ -1,4 +1,12 @@
-export type AuthErrorCode = 'invalid_credentials' | 'unauthenticated' | 'unknown';
+export type AuthErrorCode =
+  | 'invalid_credentials'
+  | 'unauthenticated'
+  | 'wrong_password'
+  | 'same_password'
+  | 'weak_password'
+  | 'too_many_attempts'
+  | 'relogin_required'
+  | 'unknown';
 
 /**
  * Erro de domínio da autenticação. A mensagem é genérica de propósito: o erro original
