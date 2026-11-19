@@ -67,12 +67,10 @@ const openRequestsTab = async (user: ReturnType<typeof renderWithProviders>['use
 };
 
 describe('Participants', () => {
-  it('mostra a quantidade de participantes ativas e cidades no subtítulo', async () => {
+  it('mostra a quantidade de participantes ativas no subtítulo', async () => {
     renderWithProviders(<Participants />);
 
-    expect(
-      await screen.findByText('10 participantes ativas • 1 cidade com grupos ativos'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('10 participantes ativas')).toBeInTheDocument();
   });
 
   it('mostra participante no singular quando existe apenas um ativo', async () => {
@@ -94,12 +92,10 @@ describe('Participants', () => {
 
     renderWithProviders(<Participants />);
 
-    expect(
-      await screen.findByText('1 participante ativa • 1 cidade com grupos ativos'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('1 participante ativa')).toBeInTheDocument();
   });
 
-  it('mostra "nenhuma participante ativa" quando a contagem é zero', async () => {
+  it('mostra "Nenhuma participante ativa" quando a contagem é zero', async () => {
     jest.mocked(getParticipantFilterOptions).mockResolvedValueOnce({
       cityOptions: [],
       groupOptions: [],
@@ -108,9 +104,7 @@ describe('Participants', () => {
 
     renderWithProviders(<Participants />);
 
-    expect(
-      await screen.findByText('nenhuma participante ativa • 1 cidade com grupos ativos'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Nenhuma participante ativa')).toBeInTheDocument();
   });
 
   it('lista as participantes com link para o perfil, grupos e status', async () => {
