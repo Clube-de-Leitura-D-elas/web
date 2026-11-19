@@ -103,7 +103,7 @@ const meta = {
         { value: 'group-3', label: 'Grupo 3 - Quinta à noite' },
         { value: 'group-7', label: 'Grupo 7 - Sábado de manhã' },
       ],
-      summary: { groups: 4, cities: 2 },
+      summary: { groups: 4, cities: 2, activeParticipants: 10 },
     });
 
     mocked(getParticipantsPage).mockImplementation(async (request, filters) => {

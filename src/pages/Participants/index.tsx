@@ -265,12 +265,14 @@ export const Participants = () => {
     <Styled.Container>
       <Styled.Header>
         <Styled.Title>{locale.participants.title}</Styled.Title>
-        {groupsSummary && (
+        {groupsSummary && groupsSummary.activeParticipants !== null && (
           <Styled.Subtitle>
-            {interpolate(locale.participants.subtitle, {
-              groups: pluralize(locale.participants.activeGroupsCount, groupsSummary.groups),
-              cities: pluralize(locale.participants.citiesCount, groupsSummary.cities),
-            })}
+            {groupsSummary.activeParticipants === 0
+              ? locale.participants.noActiveParticipants
+              : pluralize(
+                  locale.participants.activeParticipantsCount,
+                  groupsSummary.activeParticipants,
+                )}
           </Styled.Subtitle>
         )}
       </Styled.Header>

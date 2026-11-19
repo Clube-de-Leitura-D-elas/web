@@ -33,7 +33,11 @@ beforeEach(() => {
       { value: '', label: text.filters.groupAll },
       { value: 'g1', label: 'Grupo 3 - Centro' },
     ],
-    summary: { groups: 4, cities: 1 },
+    summary: {
+      groups: 4,
+      cities: 1,
+      activeParticipants: 10,
+    },
   });
   jest.mocked(getParticipantsPage).mockResolvedValue({
     items: [
@@ -63,10 +67,57 @@ const openRequestsTab = async (user: ReturnType<typeof renderWithProviders>['use
 };
 
 describe('Participants', () => {
-  it('mostra o resumo de grupos e cidades no subtítulo', async () => {
+  it('mostra a quantidade de participantes ativas no subtítulo', async () => {
     renderWithProviders(<Participants />);
 
-    expect(await screen.findByText('4 grupos ativos em 1 cidade')).toBeInTheDocument();
+    expect(await screen.findByText('10 participantes ativas')).toBeInTheDocument();
+  });
+
+  it('mostra participante no singular quando existe apenas um ativo', async () => {
+    jest.mocked(getParticipantFilterOptions).mockResolvedValueOnce({
+      cityOptions: [
+        { value: '', label: text.filters.cityAll },
+        { value: 'c1', label: 'Canoas' },
+      ],
+      groupOptions: [
+        { value: '', label: text.filters.groupAll },
+        { value: 'g1', label: 'Grupo 3 - Centro' },
+      ],
+      summary: {
+        groups: 4,
+        cities: 1,
+        activeParticipants: 1,
+      },
+    });
+
+    renderWithProviders(<Participants />);
+
+    expect(await screen.findByText('1 participante ativa')).toBeInTheDocument();
+  });
+
+  it('mostra "Nenhuma participante ativa" quando a contagem é zero', async () => {
+    jest.mocked(getParticipantFilterOptions).mockResolvedValueOnce({
+      cityOptions: [],
+      groupOptions: [],
+      summary: { groups: 4, cities: 1, activeParticipants: 0 },
+    });
+
+    renderWithProviders(<Participants />);
+
+    expect(await screen.findByText('Nenhuma participante ativa')).toBeInTheDocument();
+  });
+
+  it('esconde o subtítulo quando não há contagem de participantes ativas', async () => {
+    jest.mocked(getParticipantFilterOptions).mockResolvedValueOnce({
+      cityOptions: [],
+      groupOptions: [],
+      summary: { groups: 4, cities: 1, activeParticipants: null },
+    });
+
+    renderWithProviders(<Participants />);
+
+    expect(await screen.findByRole('link', { name: 'Ana Souza' })).toBeInTheDocument();
+    expect(screen.queryByText(/participantes? ativas?/i)).not.toBeInTheDocument();
   });
 
   it('lista as participantes com link para o perfil, grupos e status', async () => {

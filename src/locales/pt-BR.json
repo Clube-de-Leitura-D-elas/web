@@ -287,14 +287,10 @@
   },
   "participants": {
     "title": "Participantes",
-    "subtitle": "{{groups}} em {{cities}}",
-    "activeGroupsCount": {
-      "one": "{{count}} grupo ativo",
-      "other": "{{count}} grupos ativos"
-    },
-    "citiesCount": {
-      "one": "{{count}} cidade",
-      "other": "{{count}} cidades"
+    "noActiveParticipants": "Nenhuma participante ativa",
+    "activeParticipantsCount": {
+      "one": "{{count}} participante ativa",
+      "other": "{{count}} participantes ativas"
     },
     "tabs": {
       "participants": "Participantes",
