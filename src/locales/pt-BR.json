@@ -287,7 +287,8 @@
   },
   "participants": {
     "title": "Participantes",
-    "subtitle": "{{participants}} em {{cities}}",
+    "subtitle": "{{participants}} • {{cities}} com grupos ativos",
+    "noActiveParticipants": "nenhuma participante ativa",
     "activeParticipantsCount": {
       "one": "{{count}} participante ativa",
       "other": "{{count}} participantes ativas"

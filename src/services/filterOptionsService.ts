@@ -28,6 +28,9 @@ export async function getParticipantFilterOptions(): Promise<ParticipantFilterOp
         }),
       })),
     ],
-    summary: data.summary,
+    summary: {
+      ...data.summary,
+      activeParticipants: data.summary.activeParticipants ?? 0,
+    },
   };
 }

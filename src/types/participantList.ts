@@ -23,7 +23,7 @@ export type ActiveGroupsSummary = {
 export type ParticipantFiltersResponse = {
   cities: { id: string; name: string }[];
   groups: { id: string; number: number; description: string }[];
-  summary: ActiveGroupsSummary;
+  summary: Omit<ActiveGroupsSummary, 'activeParticipants'> & { activeParticipants?: number };
 };
 
 export type ParticipantFilterOptions = {

@@ -29,6 +29,17 @@ describe('getParticipantFilterOptions', () => {
     expect(invoke).toHaveBeenCalledWith('get-participant-filters', { method: 'GET' });
   });
 
+  it('usa zero participantes ativas quando a function ainda não manda o campo', async () => {
+    invoke.mockResolvedValue({
+      data: { cities: [], groups: [], summary: { groups: 4, cities: 2 } },
+      error: null,
+    });
+
+    await expect(getParticipantFilterOptions()).resolves.toMatchObject({
+      summary: { groups: 4, cities: 2, activeParticipants: 0 },
+    });
+  });
+
   it('repassa o erro da function', async () => {
     const error = new Error('500');
     invoke.mockResolvedValue({ data: null, error } as never);
