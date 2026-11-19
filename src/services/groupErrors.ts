@@ -1,4 +1,4 @@
-export type GroupErrorCode = 'duplicate_number' | 'unknown';
+export type GroupErrorCode = 'duplicate_number' | 'city_inactive' | 'unknown';
 
 /**
  * Erro de domínio dos grupos. A mensagem é genérica de propósito: o erro original

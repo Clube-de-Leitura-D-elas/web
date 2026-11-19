@@ -33,6 +33,7 @@ import {
   updateGroupParticipant,
   updateGroupStatus,
 } from '../../services/groupService';
+import { GroupServiceError } from '../../services/groupErrors';
 import type {
   GroupDetails as GroupDetailsData,
   GroupFormValues,
@@ -462,7 +463,11 @@ export const GroupDetails = () => {
       setIsCloseModalOpen(false);
     } catch (err) {
       console.error(err);
-      setStatusError(text.updateStatusError);
+      setStatusError(
+        err instanceof GroupServiceError && err.code === 'city_inactive'
+          ? text.updateStatusCityInactive
+          : text.updateStatusError,
+      );
     } finally {
       setIsSubmitting(false);
     }

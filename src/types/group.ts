@@ -23,6 +23,8 @@ export type GroupDetails = {
   description: string;
   city: string | null;
   zone: string | null;
+  city_id: string | null;
+  zone_id: string | null;
   is_active: boolean;
   active_participants_count: number;
   coordinators: GroupCoordinator[];
@@ -60,6 +62,7 @@ export type UpdateGroupLocationInput = {
 export type GroupOption = {
   id: string;
   name: string;
+  isActive?: boolean;
 };
 
 /** Zona com a cidade a que pertence: "Zona Sul" existe em mais de uma cidade. */

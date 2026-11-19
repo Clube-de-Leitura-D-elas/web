@@ -9,7 +9,7 @@ import type {
   ParticipantZoneOption,
   UpdateParticipantInput,
 } from '../types/participant';
-import { readFunctionErrorMessage } from './functionError';
+import { readFunctionErrorBody, readFunctionErrorMessage } from './functionError';
 import { supabase } from './supabaseClient';
 
 type ParticipantResponse = {
@@ -24,6 +24,8 @@ type ParticipantResponse = {
   app_role: string | null;
   city: string | null;
   zone: string | null;
+  city_id: string | null;
+  zone_id: string | null;
   entry_date?: string | null;
   photo: string | null;
 };
@@ -70,6 +72,8 @@ export async function getParticipantById(participantId: string): Promise<Partici
     active: data.is_active,
     city: data.city,
     zone: data.zone,
+    cityId: data.city_id ?? null,
+    zoneId: data.zone_id ?? null,
     appRole:
       data.app_role?.toUpperCase() === 'FOUNDER'
         ? 'FOUNDER'
@@ -181,17 +185,25 @@ export async function updateParticipantStatus(
 }
 
 export async function getCities(): Promise<ParticipantOption[]> {
-  const { data, error } = await supabase.from('cities').select('id, name').order('name');
+  const { data, error } = await supabase.from('cities').select('id, name, is_active').order('name');
   if (error) throw error;
 
-  return (data ?? []) as ParticipantOption[];
+  return (data ?? []).map(({ id, name, is_active }) => ({ id, name, isActive: is_active }));
 }
 
 export async function getZones(): Promise<ParticipantZoneOption[]> {
-  const { data, error } = await supabase.from('zones').select('id, name, city_id').order('name');
+  const { data, error } = await supabase
+    .from('zones')
+    .select('id, name, city_id, is_active')
+    .order('name');
   if (error) throw error;
 
-  return (data ?? []).map(({ id, name, city_id }) => ({ id, name, cityId: city_id }));
+  return (data ?? []).map(({ id, name, city_id, is_active }) => ({
+    id,
+    name,
+    cityId: city_id,
+    isActive: is_active,
+  }));
 }
 
 export async function updateParticipant(
@@ -215,8 +227,10 @@ export async function updateParticipant(
 
   if (error) {
     console.error('update-participant-web error', error);
-    throw new Error(
-      (await readFunctionErrorMessage(error)) ?? locale.participant_details.modal.saveError,
-    );
+    const modalText = locale.participant_details.modal;
+    const body = await readFunctionErrorBody(error);
+    if (body?.code === 'city_inactive') throw new Error(modalText.cityInactive);
+    if (body?.code === 'zone_inactive') throw new Error(modalText.zoneInactive);
+    throw new Error((await readFunctionErrorMessage(error)) ?? modalText.saveError);
   }
 }

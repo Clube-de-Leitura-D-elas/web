@@ -32,6 +32,7 @@ type TableBaseProps = {
   columns: TableColumn[];
   pageSize?: number;
   itemLabel?: string;
+  reloadKey?: string | number;
 };
 
 export type TableProps = TableBaseProps &
@@ -49,6 +50,7 @@ export type TableProps = TableBaseProps &
 type PageCache = {
   fetchPage?: TableFetchPage;
   pageSize: number;
+  reloadKey?: string | number;
   pages: Record<number, TableRow[]>;
   total: number | null;
   failedPage: number | null;
@@ -58,9 +60,14 @@ const DEFAULT_PAGE_SIZE = 6;
 const MAX_VISIBLE_PAGES = 3;
 const SKELETON_WIDTHS = ['70%', '45%', '60%', '35%', '55%'];
 
-const createCache = (fetchPage: TableFetchPage | undefined, pageSize: number): PageCache => ({
+const createCache = (
+  fetchPage: TableFetchPage | undefined,
+  pageSize: number,
+  reloadKey?: string | number,
+): PageCache => ({
   fetchPage,
   pageSize,
+  reloadKey,
   pages: {},
   total: null,
   failedPage: null,
@@ -78,13 +85,16 @@ export const Table = ({
   fetchPage,
   pageSize = DEFAULT_PAGE_SIZE,
   itemLabel = locale.table.defaultItemLabel,
+  reloadKey,
 }: TableProps) => {
   const [page, setPage] = useState(1);
-  const [cache, setCache] = useState(() => createCache(fetchPage, pageSize));
+  const [cache, setCache] = useState(() => createCache(fetchPage, pageSize, reloadKey));
 
   if (cache.fetchPage !== fetchPage || cache.pageSize !== pageSize) {
-    setCache(createCache(fetchPage, pageSize));
+    setCache(createCache(fetchPage, pageSize, reloadKey));
     setPage(1);
+  } else if (cache.reloadKey !== reloadKey) {
+    setCache({ ...createCache(fetchPage, pageSize, reloadKey), total: cache.total });
   }
 
   const isRemote = fetchPage !== undefined;
@@ -107,7 +117,9 @@ export const Table = ({
     if (!fetchPage || isCached || hasError) return;
 
     const isSameSource = (current: PageCache) =>
-      current.fetchPage === fetchPage && current.pageSize === pageSize;
+      current.fetchPage === fetchPage &&
+      current.pageSize === pageSize &&
+      current.reloadKey === reloadKey;
 
     fetchPage({ page: currentPage, pageSize })
       .then((result) =>
@@ -126,7 +138,7 @@ export const Table = ({
           isSameSource(current) ? { ...current, failedPage: currentPage } : current,
         ),
       );
-  }, [fetchPage, pageSize, currentPage, isCached, hasError]);
+  }, [fetchPage, pageSize, reloadKey, currentPage, isCached, hasError]);
 
   const clearError = () =>
     setCache((current) =>

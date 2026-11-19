@@ -11,6 +11,7 @@ import {
   updateGroupParticipant,
   updateGroupStatus,
 } from '../../services/groupService';
+import { GroupServiceError } from '../../services/groupErrors';
 import { pending, renderWithProviders } from '../../test/render';
 import type { GroupDetails as GroupDetailsData, GroupParticipantListItem } from '../../types/group';
 import { GroupDetails } from '.';
@@ -34,6 +35,8 @@ const group: GroupDetailsData = {
   description: 'Centro',
   city: 'Canoas',
   zone: null,
+  city_id: 'c1',
+  zone_id: null,
   is_active: true,
   active_participants_count: 2,
   coordinators: [
@@ -166,7 +169,7 @@ describe('GroupDetails', () => {
   });
 
   it('mostra a zona junto da cidade', async () => {
-    jest.mocked(getGroupDetails).mockResolvedValue({ ...group, zone: 'Zona Sul' });
+    jest.mocked(getGroupDetails).mockResolvedValue({ ...group, zone: 'Zona Sul', zone_id: 'z1' });
 
     renderPage();
 
@@ -456,6 +459,22 @@ describe('GroupDetails', () => {
         within(dialog).getByRole('button', { name: text.statusModal.closeConfirm }),
       ).toBeEnabled();
     });
+
+    it('explica que a cidade está desativada quando o grupo não reabre', async () => {
+      jest.mocked(getGroupDetails).mockResolvedValue({ ...group, is_active: false });
+      jest.mocked(updateGroupStatus).mockRejectedValue(new GroupServiceError('city_inactive'));
+      const { user } = renderPage();
+
+      await openStatusAction(user, text.header.reopenGroup);
+      const dialog = screen.getByRole('dialog', { name: text.statusModal.reopenTitle });
+      await user.click(
+        within(dialog).getByRole('button', { name: text.statusModal.reopenConfirm }),
+      );
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+        text.updateStatusCityInactive,
+      );
+    });
   });
 
   it('edita a localização do grupo pelo modal', async () => {
@@ -480,6 +499,75 @@ describe('GroupDetails', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(screen.getByRole('heading', { name: 'Grupo 07 — Porto Alegre' })).toBeInTheDocument();
     expect(screen.getByText('Porto Alegre')).toBeInTheDocument();
+  });
+
+  it('mantém a cidade do grupo pelo id quando outra cidade tem o mesmo nome', async () => {
+    jest.mocked(updateGroupLocation).mockResolvedValue();
+    jest.mocked(getGroupDetails).mockResolvedValue({
+      ...group,
+      city: 'Bom Jesus',
+      zone: 'Centro',
+      city_id: 'bj-sc',
+      zone_id: 'bj-sc-centro',
+    });
+    jest.mocked(getGroupCities).mockResolvedValue([
+      { id: 'bj-rs', name: 'Bom Jesus' },
+      { id: 'bj-sc', name: 'Bom Jesus', isActive: false },
+    ]);
+    jest.mocked(getGroupZones).mockResolvedValue([
+      { id: 'bj-rs-centro', name: 'Centro', cityId: 'bj-rs' },
+      { id: 'bj-sc-centro', name: 'Centro', cityId: 'bj-sc' },
+    ]);
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: text.header.editLocation }));
+    const dialog = screen.getByRole('dialog', { name: text.modal.title });
+    expect(within(dialog).getByRole('combobox', { name: new RegExp(text.modal.city) })).toHaveValue(
+      'Bom Jesus',
+    );
+    expect(within(dialog).getByRole('combobox', { name: new RegExp(text.modal.zone) })).toHaveValue(
+      'Centro',
+    );
+    await user.click(within(dialog).getByRole('button', { name: text.modal.save }));
+
+    expect(updateGroupLocation).toHaveBeenCalledWith('g1', {
+      description: 'Bom Jesus',
+      city_id: 'bj-sc',
+      zone_id: 'bj-sc-centro',
+    });
+  });
+
+  it('esconde cidades e zonas desativadas, menos as que o grupo já usa', async () => {
+    jest.mocked(getGroupDetails).mockResolvedValue({ ...group, zone: 'Zona Sul', zone_id: 'z1' });
+    jest.mocked(getGroupCities).mockResolvedValue([
+      { id: 'c1', name: 'Canoas', isActive: false },
+      { id: 'c2', name: 'Porto Alegre', isActive: true },
+      { id: 'c3', name: 'Gravataí', isActive: false },
+    ]);
+    jest.mocked(getGroupZones).mockResolvedValue([
+      { id: 'z1', name: 'Zona Sul', cityId: 'c1', isActive: false },
+      { id: 'z2', name: 'Zona Norte', cityId: 'c1', isActive: false },
+      { id: 'z3', name: 'Zona Leste', cityId: 'c1', isActive: true },
+    ]);
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: text.header.editLocation }));
+    const dialog = screen.getByRole('dialog', { name: text.modal.title });
+    const city = within(dialog).getByRole('combobox', { name: new RegExp(text.modal.city) });
+    const zone = within(dialog).getByRole('combobox', { name: new RegExp(text.modal.zone) });
+    expect(city).toHaveValue('Canoas');
+    expect(zone).toHaveValue('Zona Sul');
+
+    await user.clear(zone);
+    await user.type(zone, 'zona');
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      'Zona Sul',
+      'Zona Leste',
+    ]);
+
+    await user.clear(city);
+    await user.type(city, 'gravat');
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
   });
 
   it('mantém o modal aberto e mostra o erro quando a localização não salva', async () => {

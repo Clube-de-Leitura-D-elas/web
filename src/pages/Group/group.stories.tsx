@@ -26,6 +26,8 @@ const group: GroupDetailsData = {
   description: 'Quinta à noite',
   city: 'Porto Alegre',
   zone: 'Zona Sul',
+  city_id: 'poa',
+  zone_id: 'poa-sul',
   is_active: true,
   active_participants_count: 8,
   coordinators: [
