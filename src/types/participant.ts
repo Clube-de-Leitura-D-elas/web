@@ -11,8 +11,6 @@ export type Participant = {
   active: boolean;
   city: string | null;
   zone: string | null;
-  cityId: string | null;
-  zoneId: string | null;
   appRole: ParticipantAppRole;
   entryDate: string | null;
   photo: string | null;
@@ -50,7 +48,6 @@ export type ParticipantMeetingRecord = {
 export type ParticipantOption = {
   id: string;
   name: string;
-  isActive?: boolean;
 };
 
 /** Zona com a cidade a que pertence: "Zona Sul" existe em mais de uma cidade. */

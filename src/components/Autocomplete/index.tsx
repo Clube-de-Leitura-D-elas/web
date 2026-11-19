@@ -1,7 +1,6 @@
 import { useId, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
 import { locale } from '../../locales';
 import * as Styled from './styles';
-import { normalizeText } from '../../utils/text';
 
 export type AutocompleteOption = { value: string; label: string };
 
@@ -21,6 +20,13 @@ export type AutocompleteProps = {
   required?: boolean;
   maxSuggestions?: number;
 };
+
+const normalize = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('pt-BR')
+    .trim();
 
 export const Autocomplete = ({
   options,
@@ -49,13 +55,13 @@ export const Autocomplete = ({
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const text = query ?? selectedOption?.label ?? '';
-  const canSearch = normalizeText(text).length >= minCharacters;
+  const canSearch = normalize(text).length >= minCharacters;
 
   const matches = useMemo(() => {
     if (!canSearch) return [];
-    const normalizedQuery = normalizeText(text);
+    const normalizedQuery = normalize(text);
     return options
-      .filter((option) => normalizeText(option.label).includes(normalizedQuery))
+      .filter((option) => normalize(option.label).includes(normalizedQuery))
       .slice(0, maxSuggestions);
   }, [canSearch, maxSuggestions, options, text]);
 

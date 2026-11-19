@@ -10,7 +10,6 @@ import type {
   GroupOption,
   GroupZoneOption,
 } from '../../types/group';
-import { toSelectableOptions } from '../../utils/locationOptions';
 
 import * as Styled from './styles';
 
@@ -25,6 +24,12 @@ type GroupModalProps = {
   saving?: boolean;
   error?: string | null;
 };
+
+const findIdByName = (options: GroupOption[], name: string | null) =>
+  name ? (options.find((option) => option.name === name)?.id ?? null) : null;
+
+const toAutocompleteOptions = (options: GroupOption[]) =>
+  options.map(({ id, name }) => ({ value: id, label: name }));
 
 export const GroupModal = (props: GroupModalProps) =>
   props.isOpen ? <GroupModalContent {...props} /> : null;
@@ -45,23 +50,20 @@ const GroupModalContent = ({
   const [cityChoice, setCityChoice] = useState<string | null | undefined>(undefined);
   const [zoneChoice, setZoneChoice] = useState<string | null | undefined>(undefined);
 
-  const initialCityId = group.city_id;
+  const initialCityId = findIdByName(cities, group.city);
   const cityId = cityChoice === undefined ? initialCityId : cityChoice;
 
   // só as zonas da cidade escolhida: "Zona Sul" existe em mais de uma cidade
   const cityZones = useMemo(() => zones.filter((zone) => zone.cityId === cityId), [zones, cityId]);
-  const initialZoneId = group.zone_id;
   const zoneId =
-    zoneChoice !== undefined ? zoneChoice : cityId === initialCityId ? initialZoneId : null;
+    zoneChoice !== undefined
+      ? zoneChoice
+      : cityId === initialCityId
+        ? findIdByName(cityZones, group.zone)
+        : null;
 
-  const cityOptions = useMemo(
-    () => toSelectableOptions(cities, initialCityId),
-    [cities, initialCityId],
-  );
-  const zoneOptions = useMemo(
-    () => toSelectableOptions(cityZones, initialZoneId),
-    [cityZones, initialZoneId],
-  );
+  const cityOptions = useMemo(() => toAutocompleteOptions(cities), [cities]);
+  const zoneOptions = useMemo(() => toAutocompleteOptions(cityZones), [cityZones]);
 
   const handleCityChange = (value: string | null) => {
     setCityChoice(value);

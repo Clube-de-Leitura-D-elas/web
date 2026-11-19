@@ -11,7 +11,6 @@ import { GroupDetails } from './pages/Group';
 import { Groups } from './pages/Groups';
 import { Calendar } from './pages/Calendar';
 import { EventDetails } from './pages/Event';
-import { Settings } from './pages/Settings';
 
 export const App = () => (
   <Routes>
@@ -25,7 +24,6 @@ export const App = () => (
         <Route path="/grupos/:groupId" element={<GroupDetails />} />
         <Route path="/calendario" element={<Calendar />} />
         <Route path="/eventos/:eventId" element={<EventDetails />} />
-        <Route path="/configuracoes" element={<Settings />} />
       </Route>
     </Route>
 

@@ -1,5 +1,5 @@
 import { FunctionsHttpError } from '@supabase/functions-js';
-import { readFunctionErrorBody, readFunctionErrorMessage } from './functionError';
+import { readFunctionErrorMessage } from './functionError';
 
 const httpError = (body: () => Promise<unknown>) =>
   new FunctionsHttpError({ status: 400, json: body });
@@ -21,17 +21,6 @@ describe('readFunctionErrorMessage', () => {
     const error = httpError(() => Promise.reject(new Error('not json')));
 
     await expect(readFunctionErrorMessage(error)).resolves.toBeNull();
-  });
-
-  it('lê o corpo uma vez só, então dá para ler o código e depois a mensagem', async () => {
-    const json = jest.fn().mockResolvedValue({ error: 'city is inactive', code: 'city_inactive' });
-    const error = httpError(json);
-
-    await expect(readFunctionErrorBody(error)).resolves.toEqual(
-      expect.objectContaining({ code: 'city_inactive' }),
-    );
-    await expect(readFunctionErrorMessage(error)).resolves.toBe('city is inactive');
-    expect(json).toHaveBeenCalledTimes(1);
   });
 
   it('devolve null para erros que não vêm da function', async () => {

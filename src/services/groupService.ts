@@ -10,7 +10,7 @@ import type {
   UpdateGroupLocationInput,
 } from '../types/group';
 import type { Page } from '../types/participantList';
-import { readFunctionErrorBody, readFunctionErrorMessage } from './functionError';
+import { readFunctionErrorMessage } from './functionError';
 import { GroupServiceError } from './groupErrors';
 import { invokeGet } from './invokeGet';
 import { supabase } from './supabaseClient';
@@ -61,11 +61,7 @@ export const updateGroupStatus = async (groupId: string, isActive: boolean): Pro
     { body: { group_id: groupId, is_active: isActive } },
   );
 
-  if (error) {
-    const body = await readFunctionErrorBody(error);
-    if (body?.code === 'city_inactive') throw new GroupServiceError('city_inactive', error);
-    throw error;
-  }
+  if (error) throw error;
   if (!data) throw new Error('update-group-status-web returned no data');
 
   clearCalendarCache();
@@ -111,25 +107,17 @@ export async function createGroup(payload: CreateGroupPayload): Promise<CreateGr
 }
 
 export async function getGroupCities(): Promise<GroupOption[]> {
-  const { data, error } = await supabase.from('cities').select('id, name, is_active').order('name');
+  const { data, error } = await supabase.from('cities').select('id, name').order('name');
   if (error) throw error;
 
-  return (data ?? []).map(({ id, name, is_active }) => ({ id, name, isActive: is_active }));
+  return (data ?? []) as GroupOption[];
 }
 
 export async function getGroupZones(): Promise<GroupZoneOption[]> {
-  const { data, error } = await supabase
-    .from('zones')
-    .select('id, name, city_id, is_active')
-    .order('name');
+  const { data, error } = await supabase.from('zones').select('id, name, city_id').order('name');
   if (error) throw error;
 
-  return (data ?? []).map(({ id, name, city_id, is_active }) => ({
-    id,
-    name,
-    cityId: city_id,
-    isActive: is_active,
-  }));
+  return (data ?? []).map(({ id, name, city_id }) => ({ id, name, cityId: city_id }));
 }
 
 export async function updateGroupLocation(
@@ -147,11 +135,9 @@ export async function updateGroupLocation(
 
   if (error) {
     console.error('update-group-location-web error', error);
-    const modalText = locale.group_details.modal;
-    const body = await readFunctionErrorBody(error);
-    if (body?.code === 'city_inactive') throw new Error(modalText.cityInactive);
-    if (body?.code === 'zone_inactive') throw new Error(modalText.zoneInactive);
-    throw new Error((await readFunctionErrorMessage(error)) ?? modalText.modalError);
+    throw new Error(
+      (await readFunctionErrorMessage(error)) ?? locale.group_details.modal.modalError,
+    );
   }
 
   if (!data) {
