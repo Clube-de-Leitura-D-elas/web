@@ -501,6 +501,21 @@ describe('GroupDetails', () => {
     expect(screen.getByText('Porto Alegre')).toBeInTheDocument();
   });
 
+  it('abre sem cidade e bloqueia o salvar quando os detalhes não trazem os ids', async () => {
+    jest.mocked(getGroupDetails).mockResolvedValue({
+      ...group,
+      city_id: undefined,
+      zone_id: undefined,
+    } as unknown as GroupDetailsData);
+    const { user } = renderPage();
+
+    await user.click(await screen.findByRole('button', { name: text.header.editLocation }));
+    const dialog = screen.getByRole('dialog', { name: text.modal.title });
+
+    expect(within(dialog).getByText(text.modal.requiredHint)).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: text.modal.save })).toBeDisabled();
+  });
+
   it('mantém a cidade do grupo pelo id quando outra cidade tem o mesmo nome', async () => {
     jest.mocked(updateGroupLocation).mockResolvedValue();
     jest.mocked(getGroupDetails).mockResolvedValue({

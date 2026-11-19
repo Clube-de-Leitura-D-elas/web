@@ -118,21 +118,23 @@ const ParticipantModalContent = ({
       size="lg"
     >
       <Styled.ModalForm>
-        <Input
-          id="participant-name"
-          label={modalLocale.name}
-          placeholder={modalLocale.placeName}
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-        />
+        <Styled.FormRow>
+          <Input
+            id="participant-name"
+            label={modalLocale.name}
+            placeholder={modalLocale.placeName}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+          />
 
-        <Input
-          id="participant-email"
-          label={modalLocale.email}
-          placeholder={modalLocale.placeEmail}
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-        />
+          <Input
+            id="participant-email"
+            label={modalLocale.email}
+            placeholder={modalLocale.placeEmail}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </Styled.FormRow>
 
         <Styled.FormRow>
           <Input
