@@ -16,6 +16,16 @@ describe('Toast', () => {
     expect(onAction).toHaveBeenCalledTimes(1);
   });
 
+  it('continua visível quando renderizado dentro de um painel escondido', () => {
+    renderWithProviders(
+      <div hidden>
+        <Toast onDismiss={jest.fn()}>Cidade desativada</Toast>
+      </div>,
+    );
+
+    expect(screen.getByRole('status')).toBeVisible();
+  });
+
   it('não mostra botão sem ação', () => {
     renderWithProviders(<Toast onDismiss={jest.fn()}>Ana foi removida do grupo</Toast>);
 
