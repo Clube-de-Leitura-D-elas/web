@@ -41,9 +41,21 @@ beforeEach(() => {
   });
   jest.mocked(getParticipantsPage).mockResolvedValue({
     items: [
-      { id: 'p1', name: 'Ana Souza', status: 'active', group_users: [{ id: 'gu1' }] },
+      {
+        id: 'p1',
+        name: 'Ana Souza',
+        status: 'active',
+        group_users: [{ id: 'gu1' }],
+        recent_attendance: ['PRESENT', 'ABSENT', 'PRESENT'],
+      },
       { id: 'p2', name: 'Bia Lima', status: 'inactive', group_users: [] },
-      { id: 'p3', name: 'Dora Reis', status: 'awaiting_account', group_users: [] },
+      {
+        id: 'p3',
+        name: 'Dora Reis',
+        status: 'awaiting_account',
+        group_users: [],
+        recent_attendance: [],
+      },
     ],
     total: 3,
   });
@@ -137,6 +149,32 @@ describe('Participants', () => {
       groupId: '',
       order: 'name_asc',
     });
+  });
+
+  it('mostra a presença nos últimos encontros, da mais antiga para a mais nova', async () => {
+    renderWithProviders(<Participants />);
+
+    await screen.findByText('Ana Souza');
+    const row = screen.getByRole('row', { name: /Ana Souza/ });
+    const marks = within(row).getByRole('img', {
+      name: interpolate(text.table.attendanceAria, { present: 2, total: 3 }),
+    });
+    expect(Array.from(marks.children).map((mark) => mark.textContent)).toEqual([
+      text.table.attendancePresentShort,
+      text.table.attendanceAbsentShort,
+      text.table.attendancePresentShort,
+    ]);
+  });
+
+  it('mostra o traço para quem ainda não tem presença registrada', async () => {
+    renderWithProviders(<Participants />);
+
+    await screen.findByText('Ana Souza');
+    for (const name of [/Bia Lima/, /Dora Reis/]) {
+      const row = screen.getByRole('row', { name });
+      expect(within(row).queryByRole('img')).not.toBeInTheDocument();
+      expect(within(row).getByText(text.table.emptyValue)).toBeInTheDocument();
+    }
   });
 
   it('mostra quem aguarda criação de conta sem link para o perfil', async () => {

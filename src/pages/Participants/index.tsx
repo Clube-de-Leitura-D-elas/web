@@ -24,6 +24,7 @@ import {
 import { getParticipantFilterOptions } from '../../services/filterOptionsService';
 import type {
   ActiveGroupsSummary,
+  ParticipantAttendanceMark,
   ParticipantFilters,
   ParticipantListItem,
   ParticipantStatus,
@@ -109,6 +110,38 @@ export const Participants = () => {
         awaiting_account: locale.participants.table.statusAwaitingAccount,
       };
 
+      const renderAttendance = (received: ParticipantAttendanceMark[]) => {
+        const text = locale.participants.table;
+        // Só PRESENT/ABSENT viram marca: um valor inesperado não aparece como falta.
+        const marks = received.filter((mark) => mark === 'PRESENT' || mark === 'ABSENT');
+        if (marks.length === 0) {
+          return <Styled.AttendanceList>{text.emptyValue}</Styled.AttendanceList>;
+        }
+        // Mesmo padrão da tela de Grupo: o conjunto é uma imagem com o resumo no rótulo.
+        return (
+          <Styled.AttendanceList
+            role="img"
+            aria-label={interpolate(text.attendanceAria, {
+              present: marks.filter((mark) => mark === 'PRESENT').length,
+              total: marks.length,
+            })}
+          >
+            {marks.map((mark, index) => {
+              const present = mark === 'PRESENT';
+              return (
+                <Styled.AttendanceBadge
+                  key={index}
+                  title={present ? text.attendancePresent : text.attendanceAbsent}
+                  $type={present ? 'P' : 'F'}
+                >
+                  {present ? text.attendancePresentShort : text.attendanceAbsentShort}
+                </Styled.AttendanceBadge>
+              );
+            })}
+          </Styled.AttendanceList>
+        );
+      };
+
       const rows = items.map((p: ParticipantListItem) => {
         const groupCount = p.group_users?.length ?? 0;
         return {
@@ -120,9 +153,7 @@ export const Participants = () => {
                 : interpolate(locale.participants.table.groupsCount, { count: groupCount })}
             </Tag>
           ),
-          attendance: (
-            <Styled.AttendanceList>{locale.participants.table.emptyValue}</Styled.AttendanceList>
-          ),
+          attendance: renderAttendance(p.recent_attendance ?? []),
           status: (
             <Styled.StatusBadge $status={p.status}>{statusLabels[p.status]}</Styled.StatusBadge>
           ),

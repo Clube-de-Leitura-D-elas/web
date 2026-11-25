@@ -18,16 +18,35 @@ const REQUEST_DELAY = 300;
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const participants: ParticipantListItem[] = [
-  { id: 'p-01', name: 'Ana Beatriz Souza', status: 'active', group_users: [{ id: 'gu-01' }] },
+  {
+    id: 'p-01',
+    name: 'Ana Beatriz Souza',
+    status: 'active',
+    group_users: [{ id: 'gu-01' }],
+    recent_attendance: ['PRESENT', 'PRESENT', 'PRESENT'],
+  },
   {
     id: 'p-02',
     name: 'Carla Mendes',
     status: 'active',
     group_users: [{ id: 'gu-02' }, { id: 'gu-03' }],
+    recent_attendance: ['PRESENT', 'ABSENT', 'PRESENT'],
   },
   { id: 'p-03', name: 'Daniela Rocha', status: 'inactive', group_users: [] },
-  { id: 'p-04', name: 'Fernanda Lima', status: 'active', group_users: [{ id: 'gu-04' }] },
-  { id: 'p-05', name: 'Joseane Alves', status: 'active', group_users: [{ id: 'gu-05' }] },
+  {
+    id: 'p-04',
+    name: 'Fernanda Lima',
+    status: 'active',
+    group_users: [{ id: 'gu-04' }],
+    recent_attendance: ['ABSENT', 'ABSENT', 'ABSENT'],
+  },
+  {
+    id: 'p-05',
+    name: 'Joseane Alves',
+    status: 'active',
+    group_users: [{ id: 'gu-05' }],
+    recent_attendance: ['PRESENT'],
+  },
   { id: 'p-06', name: 'Luana Castro', status: 'inactive', group_users: [] },
   {
     id: 'p-07',

@@ -150,7 +150,7 @@ export const AttendanceBadge = styled.span<{ $type: 'P' | 'F' }>`
   font-weight: 600;
   background-color: ${({ $type }) =>
     $type === 'P' ? theme.surfaceBrandSoft : theme.surfaceSunken};
-  color: ${({ $type }) => ($type === 'P' ? theme.textBrand : theme.textMuted)};
+  color: ${({ $type }) => ($type === 'P' ? theme.textBrand : theme.text)};
   flex-shrink: 0;
 `;
 
