@@ -110,22 +110,28 @@ export const Participants = () => {
         awaiting_account: locale.participants.table.statusAwaitingAccount,
       };
 
-      const renderAttendance = (marks: ParticipantAttendanceMark[]) => {
+      const renderAttendance = (received: ParticipantAttendanceMark[]) => {
         const text = locale.participants.table;
+        // Só PRESENT/ABSENT viram marca: um valor inesperado não aparece como falta.
+        const marks = received.filter((mark) => mark === 'PRESENT' || mark === 'ABSENT');
         if (marks.length === 0) {
           return <Styled.AttendanceList>{text.emptyValue}</Styled.AttendanceList>;
         }
+        // Mesmo padrão da tela de Grupo: o conjunto é uma imagem com o resumo no rótulo.
         return (
-          <Styled.AttendanceList role="list" aria-label={text.attendanceListLabel}>
+          <Styled.AttendanceList
+            role="img"
+            aria-label={interpolate(text.attendanceAria, {
+              present: marks.filter((mark) => mark === 'PRESENT').length,
+              total: marks.length,
+            })}
+          >
             {marks.map((mark, index) => {
               const present = mark === 'PRESENT';
-              const label = present ? text.attendancePresent : text.attendanceAbsent;
               return (
                 <Styled.AttendanceBadge
                   key={index}
-                  role="listitem"
-                  aria-label={label}
-                  title={label}
+                  title={present ? text.attendancePresent : text.attendanceAbsent}
                   $type={present ? 'P' : 'F'}
                 >
                   {present ? text.attendancePresentShort : text.attendanceAbsentShort}

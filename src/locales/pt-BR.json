@@ -318,8 +318,8 @@
       "attendancePresentShort": "P",
       "attendanceAbsentShort": "F",
       "attendancePresent": "Presente",
-      "attendanceAbsent": "Faltou",
-      "attendanceListLabel": "Presença nos últimos encontros",
+      "attendanceAbsent": "Falta",
+      "attendanceAria": "{{present}} presenças em {{total}} encontros",
       "itemLabel": "participantes cadastradas",
       "actionsAriaLabel": "Ações da participante {{name}}",
       "columns": {
