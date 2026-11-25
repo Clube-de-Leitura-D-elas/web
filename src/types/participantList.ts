@@ -34,11 +34,15 @@ export type ParticipantFilterOptions = {
 
 export type ParticipantStatus = 'active' | 'inactive' | 'awaiting_account';
 
+export type ParticipantAttendanceMark = 'PRESENT' | 'ABSENT';
+
 export type ParticipantListItem = {
   id: string;
   name: string;
   status: ParticipantStatus;
   group_users: { id: string }[];
+  // Da mais antiga para a mais nova; ausente enquanto o backend não devolve o campo.
+  recent_attendance?: ParticipantAttendanceMark[];
 };
 
 export type PendingParticipantListItem = {

@@ -24,6 +24,7 @@ import {
 import { getParticipantFilterOptions } from '../../services/filterOptionsService';
 import type {
   ActiveGroupsSummary,
+  ParticipantAttendanceMark,
   ParticipantFilters,
   ParticipantListItem,
   ParticipantStatus,
@@ -109,6 +110,32 @@ export const Participants = () => {
         awaiting_account: locale.participants.table.statusAwaitingAccount,
       };
 
+      const renderAttendance = (marks: ParticipantAttendanceMark[]) => {
+        const text = locale.participants.table;
+        if (marks.length === 0) {
+          return <Styled.AttendanceList>{text.emptyValue}</Styled.AttendanceList>;
+        }
+        return (
+          <Styled.AttendanceList role="list" aria-label={text.attendanceListLabel}>
+            {marks.map((mark, index) => {
+              const present = mark === 'PRESENT';
+              const label = present ? text.attendancePresent : text.attendanceAbsent;
+              return (
+                <Styled.AttendanceBadge
+                  key={index}
+                  role="listitem"
+                  aria-label={label}
+                  title={label}
+                  $type={present ? 'P' : 'F'}
+                >
+                  {present ? text.attendancePresentShort : text.attendanceAbsentShort}
+                </Styled.AttendanceBadge>
+              );
+            })}
+          </Styled.AttendanceList>
+        );
+      };
+
       const rows = items.map((p: ParticipantListItem) => {
         const groupCount = p.group_users?.length ?? 0;
         return {
@@ -120,9 +147,7 @@ export const Participants = () => {
                 : interpolate(locale.participants.table.groupsCount, { count: groupCount })}
             </Tag>
           ),
-          attendance: (
-            <Styled.AttendanceList>{locale.participants.table.emptyValue}</Styled.AttendanceList>
-          ),
+          attendance: renderAttendance(p.recent_attendance ?? []),
           status: (
             <Styled.StatusBadge $status={p.status}>{statusLabels[p.status]}</Styled.StatusBadge>
           ),

@@ -315,6 +315,11 @@
       "statusAwaitingAccount": "Aguardando criação de conta",
       "empty": "Nenhum participante encontrado.",
       "emptyValue": "—",
+      "attendancePresentShort": "P",
+      "attendanceAbsentShort": "F",
+      "attendancePresent": "Presente",
+      "attendanceAbsent": "Faltou",
+      "attendanceListLabel": "Presença nos últimos encontros",
       "itemLabel": "participantes cadastradas",
       "actionsAriaLabel": "Ações da participante {{name}}",
       "columns": {

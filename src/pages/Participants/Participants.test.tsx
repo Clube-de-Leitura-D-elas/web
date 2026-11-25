@@ -41,7 +41,13 @@ beforeEach(() => {
   });
   jest.mocked(getParticipantsPage).mockResolvedValue({
     items: [
-      { id: 'p1', name: 'Ana Souza', status: 'active', group_users: [{ id: 'gu1' }] },
+      {
+        id: 'p1',
+        name: 'Ana Souza',
+        status: 'active',
+        group_users: [{ id: 'gu1' }],
+        recent_attendance: ['PRESENT', 'ABSENT', 'PRESENT'],
+      },
       { id: 'p2', name: 'Bia Lima', status: 'inactive', group_users: [] },
       { id: 'p3', name: 'Dora Reis', status: 'awaiting_account', group_users: [] },
     ],
@@ -137,6 +143,30 @@ describe('Participants', () => {
       groupId: '',
       order: 'name_asc',
     });
+  });
+
+  it('mostra a presença nos últimos encontros, da mais antiga para a mais nova', async () => {
+    renderWithProviders(<Participants />);
+
+    await screen.findByText('Ana Souza');
+    const row = screen.getByRole('row', { name: /Ana Souza/ });
+    const marks = within(
+      within(row).getByRole('list', { name: text.table.attendanceListLabel }),
+    ).getAllByRole('listitem');
+    expect(marks.map((mark) => mark.getAttribute('aria-label'))).toEqual([
+      text.table.attendancePresent,
+      text.table.attendanceAbsent,
+      text.table.attendancePresent,
+    ]);
+    expect(marks.map((mark) => mark.textContent)).toEqual([
+      text.table.attendancePresentShort,
+      text.table.attendanceAbsentShort,
+      text.table.attendancePresentShort,
+    ]);
+
+    const withoutHistory = screen.getByRole('row', { name: /Bia Lima/ });
+    expect(within(withoutHistory).queryByRole('list')).not.toBeInTheDocument();
+    expect(within(withoutHistory).getByText(text.table.emptyValue)).toBeInTheDocument();
   });
 
   it('mostra quem aguarda criação de conta sem link para o perfil', async () => {
