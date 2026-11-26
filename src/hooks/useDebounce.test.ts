@@ -16,6 +16,16 @@ describe('useDebounce', () => {
     expect(result.current).toBe('a');
   });
 
+  it('devolve o campo vazio na hora, sem esperar o atraso', () => {
+    const { result, rerender } = renderHook(({ value }) => useDebounce(value, 300), {
+      initialProps: { value: 'ana' },
+    });
+
+    rerender({ value: '' });
+
+    expect(result.current).toBe('');
+  });
+
   it('só atualiza depois do atraso', () => {
     const { result, rerender } = renderHook(({ value }) => useDebounce(value, 300), {
       initialProps: { value: 'a' },

@@ -13,5 +13,7 @@ export function useDebounce<T>(value: T, delay = 400): T {
     };
   }, [value, delay]);
 
-  return debouncedValue;
+  // Campo esvaziado (ex.: "Limpar filtros") vale na hora, para não sair uma busca com o
+  // texto antigo junto com os filtros já limpos.
+  return value === '' ? value : debouncedValue;
 }

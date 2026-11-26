@@ -200,3 +200,66 @@ describe('Table com linhas clicáveis', () => {
     expect(screen.getByTestId('location')).toHaveTextContent('/participantes/p1');
   });
 });
+
+describe('Table com seletor de itens por página', () => {
+  const pageSizeSelect = () => screen.getByRole('combobox', { name: locale.table.pageSizeLabel });
+
+  it('começa com 10 por página e oferece 5, 10, 20 e 50', () => {
+    renderWithProviders(<Table columns={columns} rows={makeRows(30)} />);
+
+    expect(bodyRows()).toHaveLength(10);
+    expect(pageSizeSelect()).toHaveValue('10');
+    expect(
+      within(pageSizeSelect())
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual(['5', '10', '20', '50']);
+  });
+
+  it('inclui o tamanho inicial da tela nas opções', () => {
+    renderWithProviders(<Table columns={columns} rows={makeRows(30)} pageSize={6} />);
+
+    expect(pageSizeSelect()).toHaveValue('6');
+    expect(
+      within(pageSizeSelect())
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual(['5', '6', '10', '20', '50']);
+  });
+
+  it('troca a quantidade por página e volta para a primeira página', async () => {
+    const { user } = renderWithProviders(<Table columns={columns} rows={makeRows(30)} />);
+
+    await user.click(pageButton(2));
+    await user.selectOptions(pageSizeSelect(), '20');
+
+    expect(bodyRows()).toHaveLength(20);
+    expect(screen.getByText(summary(1, 20, 30))).toBeInTheDocument();
+    expect(pageButton(1)).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('mantém o tamanho escolhido quando a tela recarrega os dados', async () => {
+    const fetchPage = remoteSource(makeRows(60));
+    const { user, rerender } = renderWithProviders(
+      <Table columns={columns} fetchPage={fetchPage} reloadKey={1} />,
+    );
+
+    await waitFor(() => expect(bodyRows()).toHaveLength(10));
+    await user.selectOptions(pageSizeSelect(), '20');
+    rerender(<Table columns={columns} fetchPage={fetchPage} reloadKey={2} />);
+
+    expect(pageSizeSelect()).toHaveValue('20');
+    await waitFor(() => expect(fetchPage).toHaveBeenLastCalledWith({ page: 1, pageSize: 20 }));
+  });
+
+  it('busca de novo no servidor com o novo tamanho', async () => {
+    const fetchPage = remoteSource(makeRows(60));
+    const { user } = renderWithProviders(<Table columns={columns} fetchPage={fetchPage} />);
+
+    await waitFor(() => expect(bodyRows()).toHaveLength(10));
+    await user.selectOptions(pageSizeSelect(), '50');
+
+    await waitFor(() => expect(bodyRows()).toHaveLength(50));
+    expect(fetchPage).toHaveBeenLastCalledWith({ page: 1, pageSize: 50 });
+  });
+});

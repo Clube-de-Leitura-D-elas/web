@@ -21,7 +21,7 @@ jest.mock('../../services/filterOptionsService', () => ({
 }));
 
 const text = locale.participants;
-const firstPage = { page: 1, pageSize: 6 };
+const firstPage = { page: 1, pageSize: 10 };
 
 beforeEach(() => {
   jest.mocked(getParticipantFilterOptions).mockResolvedValue({
@@ -217,6 +217,38 @@ describe('Participants', () => {
         expect.objectContaining({ cityId: 'c1', groupId: 'g1' }),
       ),
     );
+  });
+
+  it('limpa a busca e os filtros de uma vez', async () => {
+    const { user } = renderWithProviders(<Participants />);
+    await screen.findByText('Ana Souza');
+    const clear = screen.getByRole('button', { name: text.filters.clear });
+    expect(clear).toBeDisabled();
+
+    await user.type(screen.getByLabelText(text.filters.searchPlaceholder), 'ana');
+    await user.click(screen.getByRole('button', { name: text.filters.cityAll }));
+    await user.click(screen.getByRole('option', { name: 'Canoas' }));
+    await waitFor(() =>
+      expect(getParticipantsPage).toHaveBeenLastCalledWith(
+        firstPage,
+        expect.objectContaining({ search: 'ana', cityId: 'c1' }),
+      ),
+    );
+    const callsBeforeClear = jest.mocked(getParticipantsPage).mock.calls.length;
+    await user.click(clear);
+
+    expect(screen.getByLabelText(text.filters.searchPlaceholder)).toHaveValue('');
+    expect(screen.getByRole('button', { name: text.filters.cityAll })).toBeInTheDocument();
+    expect(clear).toBeDisabled();
+    await waitFor(() =>
+      expect(getParticipantsPage).toHaveBeenLastCalledWith(
+        firstPage,
+        expect.objectContaining({ search: '', cityId: '', groupId: '' }),
+      ),
+    );
+    const callsAfterClear = jest.mocked(getParticipantsPage).mock.calls.slice(callsBeforeClear);
+    expect(callsAfterClear.every(([, filters]) => filters.search === '')).toBe(true);
+    expect(screen.getByRole('button', { name: text.filters.sortNameAsc })).toBeInTheDocument();
   });
 
   it('inverte a ordenação', async () => {

@@ -245,7 +245,14 @@ const meta = {
       description:
         '`({ page, pageSize }) => Promise<{ rows, total }>`. Busca a página no backend. Use `rows` ou `fetchPage`.',
     },
-    pageSize: { control: { type: 'number', min: 1 }, description: 'Linhas por página. Padrão: 6.' },
+    pageSize: {
+      control: { type: 'number', min: 1 },
+      description: 'Linhas por página no início; a usuária troca no seletor do rodapé. Padrão: 10.',
+    },
+    pageSizeOptions: {
+      control: 'object',
+      description: 'Opções do seletor de itens por página. Padrão: `[5, 10, 20, 50]`.',
+    },
     itemLabel: { control: 'text', description: 'Nome dos itens no resumo do rodapé.' },
   },
   args: { columns: simpleColumns, rows: simpleRows },
@@ -313,4 +320,12 @@ export const Loading: Story = {
 
 export const ServerError: Story = {
   args: { rows: undefined, fetchPage: fetchWithError },
+};
+
+export const PageSizeOptions: Story = {
+  args: {
+    rows: [...simpleRows, ...simpleRows, ...simpleRows],
+    pageSize: 3,
+    pageSizeOptions: [3, 6, 12],
+  },
 };

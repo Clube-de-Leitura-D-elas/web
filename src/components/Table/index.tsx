@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ReactNode } from 'react';
 import { interpolate, locale } from '../../locales';
 import { Button } from '../Button';
 import * as Styled from './styles';
@@ -30,7 +30,9 @@ export type TableFetchPage = (request: TablePageRequest) => Promise<TablePage>;
 
 type TableBaseProps = {
   columns: TableColumn[];
+  /** Quantidade inicial por página; a usuária pode trocar no seletor do rodapé. */
   pageSize?: number;
+  pageSizeOptions?: number[];
   itemLabel?: string;
   reloadKey?: string | number;
 };
@@ -56,7 +58,8 @@ type PageCache = {
   failedPage: number | null;
 };
 
-const DEFAULT_PAGE_SIZE = 6;
+const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 const MAX_VISIBLE_PAGES = 3;
 const SKELETON_WIDTHS = ['70%', '45%', '60%', '35%', '55%'];
 
@@ -83,11 +86,22 @@ export const Table = ({
   columns,
   rows,
   fetchPage,
-  pageSize = DEFAULT_PAGE_SIZE,
+  pageSize: initialPageSize = DEFAULT_PAGE_SIZE,
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   itemLabel = locale.table.defaultItemLabel,
   reloadKey,
 }: TableProps) => {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(initialPageSize);
+  const [lastInitialPageSize, setLastInitialPageSize] = useState(initialPageSize);
+
+  if (lastInitialPageSize !== initialPageSize) {
+    setLastInitialPageSize(initialPageSize);
+    setPageSize(initialPageSize);
+  }
+
+  const sizeOptions = [...new Set([...pageSizeOptions, initialPageSize])].sort((a, b) => a - b);
+  const pageSizeSelectId = useId();
   const [cache, setCache] = useState(() => createCache(fetchPage, pageSize, reloadKey));
 
   if (cache.fetchPage !== fetchPage || cache.pageSize !== pageSize) {
@@ -253,36 +267,54 @@ export const Table = ({
         <Styled.Summary aria-live="polite">
           {isTotalKnown ? summary : <Skeleton width="10rem" />}
         </Styled.Summary>
-        <Styled.Pagination aria-label={locale.table.paginationLabel}>
-          <Styled.PageButton
-            type="button"
-            aria-label={locale.table.previousPage}
-            disabled={currentPage === 1}
-            onClick={() => goToPage(currentPage - 1)}
-          >
-            <span aria-hidden="true">‹</span>
-          </Styled.PageButton>
-          {getVisiblePages(currentPage, totalPages).map((pageNumber) => (
-            <Styled.PageButton
-              key={pageNumber}
-              type="button"
-              aria-label={interpolate(locale.table.goToPage, { page: pageNumber })}
-              aria-current={pageNumber === currentPage ? 'page' : undefined}
-              $active={pageNumber === currentPage}
-              onClick={() => goToPage(pageNumber)}
+        <Styled.Controls>
+          <Styled.PageSize>
+            <Styled.PageSizeLabel htmlFor={pageSizeSelectId}>
+              {locale.table.pageSizeLabel}
+            </Styled.PageSizeLabel>
+            <Styled.PageSizeSelect
+              id={pageSizeSelectId}
+              value={pageSize}
+              onChange={(event) => setPageSize(Number(event.target.value))}
             >
-              {pageNumber}
+              {sizeOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </Styled.PageSizeSelect>
+          </Styled.PageSize>
+          <Styled.Pagination aria-label={locale.table.paginationLabel}>
+            <Styled.PageButton
+              type="button"
+              aria-label={locale.table.previousPage}
+              disabled={currentPage === 1}
+              onClick={() => goToPage(currentPage - 1)}
+            >
+              <span aria-hidden="true">‹</span>
             </Styled.PageButton>
-          ))}
-          <Styled.PageButton
-            type="button"
-            aria-label={locale.table.nextPage}
-            disabled={currentPage === totalPages}
-            onClick={() => goToPage(currentPage + 1)}
-          >
-            <span aria-hidden="true">›</span>
-          </Styled.PageButton>
-        </Styled.Pagination>
+            {getVisiblePages(currentPage, totalPages).map((pageNumber) => (
+              <Styled.PageButton
+                key={pageNumber}
+                type="button"
+                aria-label={interpolate(locale.table.goToPage, { page: pageNumber })}
+                aria-current={pageNumber === currentPage ? 'page' : undefined}
+                $active={pageNumber === currentPage}
+                onClick={() => goToPage(pageNumber)}
+              >
+                {pageNumber}
+              </Styled.PageButton>
+            ))}
+            <Styled.PageButton
+              type="button"
+              aria-label={locale.table.nextPage}
+              disabled={currentPage === totalPages}
+              onClick={() => goToPage(currentPage + 1)}
+            >
+              <span aria-hidden="true">›</span>
+            </Styled.PageButton>
+          </Styled.Pagination>
+        </Styled.Controls>
       </Styled.Footer>
     </Styled.Container>
   );
