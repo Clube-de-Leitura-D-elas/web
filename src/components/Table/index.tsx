@@ -50,6 +50,7 @@ export type TableProps = TableBaseProps &
   );
 
 type PageCache = {
+  id: number;
   fetchPage?: TableFetchPage;
   pageSize: number;
   reloadKey?: string | number;
@@ -58,6 +59,7 @@ type PageCache = {
   failedPage: number | null;
 };
 
+let nextCacheId = 0;
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 const MAX_VISIBLE_PAGES = 3;
@@ -68,6 +70,7 @@ const createCache = (
   pageSize: number,
   reloadKey?: string | number,
 ): PageCache => ({
+  id: nextCacheId++,
   fetchPage,
   pageSize,
   reloadKey,
@@ -130,10 +133,10 @@ export const Table = ({
   useEffect(() => {
     if (!fetchPage || isCached || hasError) return;
 
-    const isSameSource = (current: PageCache) =>
-      current.fetchPage === fetchPage &&
-      current.pageSize === pageSize &&
-      current.reloadKey === reloadKey;
+    // Cada troca de tamanho ou recarga cria um cache novo; resposta de um cache anterior
+    // (ex.: 10 -> 20 -> 10) é descartada mesmo que fetchPage e pageSize coincidam.
+    const cacheId = cache.id;
+    const isSameSource = (current: PageCache) => current.id === cacheId;
 
     fetchPage({ page: currentPage, pageSize })
       .then((result) =>
@@ -152,7 +155,7 @@ export const Table = ({
           isSameSource(current) ? { ...current, failedPage: currentPage } : current,
         ),
       );
-  }, [fetchPage, pageSize, reloadKey, currentPage, isCached, hasError]);
+  }, [fetchPage, pageSize, cache.id, currentPage, isCached, hasError]);
 
   const clearError = () =>
     setCache((current) =>

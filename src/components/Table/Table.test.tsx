@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import { interpolate, locale } from '../../locales';
 import { pending, renderWithProviders } from '../../test/render';
 import { Table, type TableFetchPage, type TableRow } from '.';
@@ -246,10 +246,37 @@ describe('Table com seletor de itens por página', () => {
 
     await waitFor(() => expect(bodyRows()).toHaveLength(10));
     await user.selectOptions(pageSizeSelect(), '20');
+    await waitFor(() => expect(bodyRows()).toHaveLength(20));
+    const callsBeforeReload = fetchPage.mock.calls.length;
     rerender(<Table columns={columns} fetchPage={fetchPage} reloadKey={2} />);
 
     expect(pageSizeSelect()).toHaveValue('20');
-    await waitFor(() => expect(fetchPage).toHaveBeenLastCalledWith({ page: 1, pageSize: 20 }));
+    await waitFor(() => expect(fetchPage.mock.calls.length).toBeGreaterThan(callsBeforeReload));
+    expect(fetchPage).toHaveBeenLastCalledWith({ page: 1, pageSize: 20 });
+  });
+
+  it('descarta a resposta de um tamanho anterior que chega atrasada', async () => {
+    const rows = makeRows(60);
+    const slow: Array<() => void> = [];
+    const fetchPage = jest.fn<ReturnType<TableFetchPage>, Parameters<TableFetchPage>>(
+      ({ page, pageSize }) =>
+        new Promise((resolve, reject) => {
+          if (fetchPage.mock.calls.length === 1) {
+            slow.push(() => reject(new Error('lenta')));
+            return;
+          }
+          resolve({ rows: rows.slice((page - 1) * pageSize, page * pageSize), total: 60 });
+        }),
+    );
+    const { user } = renderWithProviders(<Table columns={columns} fetchPage={fetchPage} />);
+
+    await user.selectOptions(pageSizeSelect(), '20');
+    await user.selectOptions(pageSizeSelect(), '10');
+    await waitFor(() => expect(bodyRows()).toHaveLength(10));
+    await act(async () => slow.forEach((fail) => fail()));
+
+    expect(bodyRows()).toHaveLength(10);
+    expect(screen.queryByText(locale.table.error)).not.toBeInTheDocument();
   });
 
   it('busca de novo no servidor com o novo tamanho', async () => {
