@@ -43,6 +43,16 @@ export const Participants = () => {
   const [cityId, setCityId] = useState('');
   const [groupId, setGroupId] = useState('');
   const [order, setOrder] = useState<ParticipantOrder>('name_asc');
+  // O Dropdown guarda a opção escolhida por dentro; trocar a key é o que o volta ao placeholder.
+  const [filtersResetKey, setFiltersResetKey] = useState(0);
+  const hasFilters = search !== '' || cityId !== '' || groupId !== '';
+
+  const clearFilters = () => {
+    setSearch('');
+    setCityId('');
+    setGroupId('');
+    setFiltersResetKey((current) => current + 1);
+  };
 
   // Debounce para evitar excesso de requisições ao digitar
   const debouncedSearch = useDebounce(search, 400);
@@ -256,10 +266,9 @@ export const Participants = () => {
         children: (
           <Styled.TableContainer>
             <Table
-              key={participantsReloadKey}
+              reloadKey={participantsReloadKey}
               columns={participantColumns}
               fetchPage={fetchParticipants}
-              pageSize={6}
               itemLabel={locale.participants.table.itemLabel}
             />
           </Styled.TableContainer>
@@ -271,10 +280,9 @@ export const Participants = () => {
         children: (
           <Styled.TableContainer>
             <Table
-              key={requestsReloadKey}
+              reloadKey={requestsReloadKey}
               columns={pendingColumns}
               fetchPage={fetchPendingParticipants}
-              pageSize={6}
               itemLabel={locale.participants.requests.itemLabel}
             />
           </Styled.TableContainer>
@@ -317,12 +325,14 @@ export const Participants = () => {
           onChange={(e) => setSearch(e.target.value)}
         />
         <Dropdown
+          key={`city-${filtersResetKey}`}
           placeholder={locale.participants.filters.cityAll}
           options={cityOptions}
           onSelect={(val) => setCityId(val)}
           disabled={activeTab === 'requests'}
         />
         <Dropdown
+          key={`group-${filtersResetKey}`}
           placeholder={locale.participants.filters.groupAll}
           options={groupOptions}
           onSelect={(val) => setGroupId(val)}
@@ -334,6 +344,9 @@ export const Participants = () => {
             ? locale.participants.filters.sortNameAsc
             : locale.participants.filters.sortNameDesc}
         </Styled.SortButton>
+        <Button variant="secondary" size="md" disabled={!hasFilters} onClick={clearFilters}>
+          {locale.participants.filters.clear}
+        </Button>
       </Styled.FiltersBar>
 
       <Tabs

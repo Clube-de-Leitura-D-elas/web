@@ -12,7 +12,7 @@ jest.mock('../../services/groupFormService', () => ({ getGroupFormOptions: jest.
 jest.mock('../../services/groupService', () => ({ createGroup: jest.fn() }));
 
 const text = locale.groups;
-const firstPage = { page: 1, pageSize: 6 };
+const firstPage = { page: 1, pageSize: 10 };
 
 const response: GroupGridResponse = {
   items: [
@@ -102,6 +102,28 @@ describe('Groups', () => {
       expect(getGroupGrid).toHaveBeenLastCalledWith(
         firstPage,
         expect.objectContaining({ cityId: 'c2' }),
+      ),
+    );
+  });
+
+  it('limpa a busca e o filtro de cidade de uma vez', async () => {
+    const { user } = renderWithProviders(<Groups />);
+    await screen.findByRole('link', { name: /Grupo 07/ });
+    const clear = screen.getByRole('button', { name: text.filters.clear });
+    expect(clear).toBeDisabled();
+
+    await user.type(screen.getByLabelText(text.filters.searchPlaceholder), 'sul');
+    await user.click(screen.getByRole('button', { name: text.filters.cityAll }));
+    await user.click(screen.getByRole('option', { name: 'Recife' }));
+    await user.click(clear);
+
+    expect(screen.getByLabelText(text.filters.searchPlaceholder)).toHaveValue('');
+    expect(screen.getByRole('button', { name: text.filters.cityAll })).toBeInTheDocument();
+    expect(clear).toBeDisabled();
+    await waitFor(() =>
+      expect(getGroupGrid).toHaveBeenLastCalledWith(
+        firstPage,
+        expect.objectContaining({ search: '', cityId: '' }),
       ),
     );
   });

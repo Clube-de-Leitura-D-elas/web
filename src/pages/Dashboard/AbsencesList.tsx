@@ -92,7 +92,7 @@ export const AbsencesList = () => {
     >
       {status === 'ready' ? (
         <Styled.AbsencesTable>
-          <Table columns={columns} rows={rows} itemLabel={text.itemLabel} />
+          <Table columns={columns} rows={rows} pageSize={6} itemLabel={text.itemLabel} />
         </Styled.AbsencesTable>
       ) : (
         <DataState

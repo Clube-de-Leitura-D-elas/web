@@ -575,14 +575,15 @@ describe('GroupDetails', () => {
 
     await user.clear(zone);
     await user.type(zone, 'zona');
-    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
-      'Zona Sul',
-      'Zona Leste',
-    ]);
+    expect(
+      within(within(dialog).getByRole('listbox'))
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual(['Zona Sul', 'Zona Leste']);
 
     await user.clear(city);
     await user.type(city, 'gravat');
-    expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole('option')).not.toBeInTheDocument();
   });
 
   it('mantém o modal aberto e mostra o erro quando a localização não salva', async () => {

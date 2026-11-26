@@ -183,6 +183,44 @@ export const Summary = styled.p`
   `}
 `;
 
+export const Controls = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+`;
+
+export const PageSize = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const PageSizeLabel = styled.label`
+  ${({ theme }) => css`
+    color: ${theme.textMuted};
+    font-size: 0.75rem;
+  `}
+`;
+
+export const PageSizeSelect = styled.select`
+  ${({ theme }) => css`
+    height: 2rem;
+    padding: 0 0.5rem;
+    border-radius: 0.5rem;
+    border: 0.0625rem solid ${theme.border};
+    background-color: ${theme.surface};
+    color: ${theme.textMuted};
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover {
+      border-color: ${theme.borderStrong};
+    }
+  `}
+`;
+
 export const Pagination = styled.nav`
   display: flex;
   gap: 0.5rem;

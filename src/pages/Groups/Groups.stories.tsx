@@ -233,6 +233,10 @@ function GroupsStory() {
           onSelect={setOrder}
         />
 
+        <Button variant="secondary" size="md" disabled>
+          {locale.groups.filters.clear}
+        </Button>
+
         <Button
           variant="primary"
           size="md"
@@ -244,12 +248,7 @@ function GroupsStory() {
       </Styled.FiltersBar>
 
       <Styled.TableContainer>
-        <Table
-          columns={groupColumns}
-          rows={rows}
-          pageSize={6}
-          itemLabel={locale.groups.table.itemLabel}
-        />
+        <Table columns={groupColumns} rows={rows} itemLabel={locale.groups.table.itemLabel} />
       </Styled.TableContainer>
 
       <NewGroupModal

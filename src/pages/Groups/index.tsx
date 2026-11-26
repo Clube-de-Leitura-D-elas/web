@@ -34,6 +34,15 @@ export const Groups = () => {
   const [search, setSearch] = useState('');
   const [cityId, setCityId] = useState('');
   const [order, setOrder] = useState<GroupOrder>('name_asc');
+  // O Dropdown guarda a opção escolhida por dentro; trocar a key é o que o volta ao placeholder.
+  const [filtersResetKey, setFiltersResetKey] = useState(0);
+  const hasFilters = search !== '' || cityId !== '';
+
+  const clearFilters = () => {
+    setSearch('');
+    setCityId('');
+    setFiltersResetKey((current) => current + 1);
+  };
   const [isNewGroupOpen, setIsNewGroupOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -202,6 +211,7 @@ export const Groups = () => {
         />
 
         <Dropdown
+          key={`city-${filtersResetKey}`}
           placeholder={locale.groups.filters.cityAll}
           options={cityOptions}
           onSelect={(value) => setCityId(value)}
@@ -226,6 +236,10 @@ export const Groups = () => {
           onSelect={(value) => setOrder(value as GroupOrder)}
         />
 
+        <Button variant="secondary" size="md" disabled={!hasFilters} onClick={clearFilters}>
+          {locale.groups.filters.clear}
+        </Button>
+
         <Button
           variant="primary"
           size="md"
@@ -239,10 +253,9 @@ export const Groups = () => {
       {/* Tabela */}
       <Styled.TableContainer>
         <Table
-          key={refreshKey}
+          reloadKey={refreshKey}
           columns={groupColumns}
           fetchPage={fetchGroups}
-          pageSize={6}
           itemLabel={locale.groups.table.itemLabel}
         />
       </Styled.TableContainer>

@@ -16,6 +16,29 @@ describe('useDebounce', () => {
     expect(result.current).toBe('a');
   });
 
+  it('devolve o campo vazio na hora, sem esperar o atraso', () => {
+    const { result, rerender } = renderHook(({ value }) => useDebounce(value, 300), {
+      initialProps: { value: 'ana' },
+    });
+
+    rerender({ value: '' });
+
+    expect(result.current).toBe('');
+  });
+
+  it('não volta para o texto antigo ao digitar logo depois de esvaziar', () => {
+    const { result, rerender } = renderHook(({ value }) => useDebounce(value, 300), {
+      initialProps: { value: 'ana' },
+    });
+
+    rerender({ value: '' });
+    rerender({ value: 'b' });
+
+    expect(result.current).toBe('');
+    act(() => jest.advanceTimersByTime(300));
+    expect(result.current).toBe('b');
+  });
+
   it('só atualiza depois do atraso', () => {
     const { result, rerender } = renderHook(({ value }) => useDebounce(value, 300), {
       initialProps: { value: 'a' },

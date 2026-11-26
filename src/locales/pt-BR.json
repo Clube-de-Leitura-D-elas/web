@@ -72,6 +72,7 @@
     "error": "Não foi possível carregar os registros.",
     "retry": "Tentar novamente",
     "paginationLabel": "Paginação da tabela",
+    "pageSizeLabel": "Itens por página",
     "previousPage": "Página anterior",
     "nextPage": "Próxima página",
     "goToPage": "Ir para a página {{page}}"
@@ -304,7 +305,8 @@
       "groupAll": "Grupo: todos",
       "groupOption": "Grupo {{number}} - {{description}}",
       "sortNameAsc": "Nome (A–Z)",
-      "sortNameDesc": "Nome (Z–A)"
+      "sortNameDesc": "Nome (Z–A)",
+      "clear": "Limpar filtros"
     },
     "table": {
       "coordinator": "Coordenadora",
@@ -358,7 +360,8 @@
       "searchPlaceholder": "Buscar por nome ou cidade",
       "cityAll": "Cidade: todas",
       "sortNameAsc": "Ordenar: Nome (A–Z)",
-      "sortNameDesc": "Ordenar: Nome (Z–A)"
+      "sortNameDesc": "Ordenar: Nome (Z–A)",
+      "clear": "Limpar filtros"
     },
     "newGroup": "Novo grupo",
     "newGroupModal": {
@@ -901,7 +904,8 @@
         "ufOption": "Estado: {{uf}}",
         "statusAll": "Status: todas",
         "statusActive": "Status: ativas",
-        "statusInactive": "Status: inativas"
+        "statusInactive": "Status: inativas",
+        "clear": "Limpar filtros"
       },
       "newCity": "Nova cidade",
       "table": {

@@ -192,6 +192,29 @@ describe('Settings', () => {
     );
   });
 
+  it('limpa a busca e os filtros de uma vez', async () => {
+    const { user } = renderWithProviders(<Settings />);
+    await screen.findByText('Porto Alegre');
+    const clear = screen.getByRole('button', { name: text.filters.clear });
+    expect(clear).toBeDisabled();
+
+    await user.click(screen.getByRole('button', { name: text.filters.ufAll }));
+    await user.click(screen.getByRole('option', { name: 'Estado: PR' }));
+    await user.click(screen.getByRole('button', { name: text.filters.statusAll }));
+    await user.click(screen.getByRole('option', { name: text.filters.statusInactive }));
+    await user.click(clear);
+
+    expect(screen.getByRole('button', { name: text.filters.ufAll })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: text.filters.statusAll })).toBeInTheDocument();
+    expect(clear).toBeDisabled();
+    await waitFor(() =>
+      expect(getCityGrid).toHaveBeenLastCalledWith(
+        firstPage,
+        expect.objectContaining({ uf: '', status: 'all' }),
+      ),
+    );
+  });
+
   it('busca por cidade ou região depois que a usuária para de digitar', async () => {
     const { user } = renderWithProviders(<Settings />);
     await screen.findByText('Porto Alegre');

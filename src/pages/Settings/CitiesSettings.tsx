@@ -41,6 +41,16 @@ export const CitiesSettings = () => {
   const [search, setSearch] = useState('');
   const [uf, setUf] = useState('');
   const [status, setStatus] = useState<CityStatusFilter>('all');
+  // O Dropdown guarda a opção escolhida por dentro; trocar a key é o que o volta ao placeholder.
+  const [filtersResetKey, setFiltersResetKey] = useState(0);
+  const hasFilters = search !== '' || uf !== '' || status !== 'all';
+
+  const clearFilters = () => {
+    setSearch('');
+    setUf('');
+    setStatus('all');
+    setFiltersResetKey((current) => current + 1);
+  };
   const debouncedSearch = useDebounce(search, 400);
 
   const [ufs, setUfs] = useState<string[]>([]);
@@ -253,13 +263,23 @@ export const CitiesSettings = () => {
           onChange={(event) => setSearch(event.target.value)}
         />
 
-        <Dropdown placeholder={text.filters.ufAll} options={ufOptions} onSelect={setUf} />
+        <Dropdown
+          key={`uf-${filtersResetKey}`}
+          placeholder={text.filters.ufAll}
+          options={ufOptions}
+          onSelect={setUf}
+        />
 
         <Dropdown
+          key={`status-${filtersResetKey}`}
           placeholder={text.filters.statusAll}
           options={statusOptions}
           onSelect={(value) => setStatus(value as CityStatusFilter)}
         />
+
+        <Button variant="secondary" size="md" disabled={!hasFilters} onClick={clearFilters}>
+          {text.filters.clear}
+        </Button>
       </Styled.FiltersBar>
 
       <Styled.TableContainer>
